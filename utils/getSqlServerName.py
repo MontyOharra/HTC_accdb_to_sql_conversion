@@ -33,7 +33,7 @@ def get_local_sql_server_instances():
 
     return instances
 
-def getSqlServerName(instance_name):
+def getAllSqlServerNames(instance_name):
     hostname = socket.gethostname()
     
     if instance_name == "MSSQLSERVER":
@@ -43,7 +43,7 @@ def getSqlServerName(instance_name):
     
     return server_name
 
-def getUserSqlServerName():
+def getSqlServerName():
     # Get SQL Server instances
     sql_instances = get_local_sql_server_instances()
     if not sql_instances:
@@ -52,11 +52,26 @@ def getUserSqlServerName():
         # Attempt to connect to each instance
     if len(sql_instances) == 1:
         instance = sql_instances[0]
-        return getSqlServerName(instance)
+        return getAllSqlServerNames(instance)
     else:
         print("There are more than one sql servers on this machine. Please choose the server you would like to target:")
         for index, instance in enumerate(sql_instances):
-            print(f"{getSqlServerName(instance)} [{index}]" )
+            print(f"{getAllSqlServerNames(instance)} [{index}]" )
         instanceNum = int(input("Type the number next to the server instance you would like to select"))
-        return (getSqlServerName(instance[instanceNum]))
+        return (getAllSqlServerNames(instance[instanceNum]))
     
+def checkIfDatabaseExists(sqlCursor, databaseName):
+    check_db_query = """
+    SELECT 1 FROM sys.databases WHERE name = ?
+    """
+    sqlCursor.execute(check_db_query, (databaseName,))
+    return sqlCursor.fetchone() is not None
+
+def createDatabase(sqlCursor, databaseName):
+    create_db_query = f"CREATE DATABASE [{databaseName}]"
+    try:
+        sqlCursor.execute(create_db_query)
+        print(f"Database '{databaseName}' created successfully.")
+    except pyodbc.Error as ex:
+        print(f"Failed to create database '{databaseName}': {ex}")
+        exit(1)
