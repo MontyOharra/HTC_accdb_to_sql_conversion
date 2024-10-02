@@ -1,4 +1,4 @@
-from tables.address import createAddressTable, insertAddressData
+from tables.sql.access.address import createAddressTable, insertAddressData
 from utils.sqlHelpers import getSqlServerName
 from utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase
 

@@ -1,8 +1,6 @@
-from typing import Union
+from utils.connection import Connection
 
-from utils.table import Table
-
-tableFields = '''
+addressFields = '''
   [id] INTEGER PRIMARY KEY IDENTITY(1, 1),
   [address_line_1] NVARCHAR(255) NOT NULL,
   [address_line_2] NVARCHAR(50),
@@ -14,13 +12,31 @@ tableFields = '''
   [is_international] BIT NOT NULL DEFAULT (0)
 '''
 
-addressTable : Union[Table, None] = None
+addressIndexes = {
+  'ix_city': {
+    'tableName': 'address',
+    'indexType': 'nonclustered',
+    'indexField': 'city_id'
+  }
+}
 
-def createAddressTable(dbConnections):
-  global addressTable
-  addressTable = Table("address", dbConnections)
-  addressTable.createTable(tableFields=tableFields)
-  addressTable.commit()
+addressForeignKeys = [
+  {
+    'fromTableField': ''
+  }
+]
+
+def createAddressTable(conn : Connection):
+  conn.sqlCreateTable('address', addressFields)
+  conn.commit()
+
+def addAddressIndexes(conn : Connection):
+  for indexName, details in addressIndexes.items():
+    conn.sqlAddIndex(details['tableName'], details['indexType'], details['indexField'], indexName)
+
+def addAddressForeignKeys(conn : Connection):
+  for foreignKey in addressForeignKeys:
+    conn.sqlAddForeignKey('address', foreignKey['fromTableField'], foreignKey['toTableName'], foreignKey['totableField'])
 
 def insertAddressData():
   global addressTable

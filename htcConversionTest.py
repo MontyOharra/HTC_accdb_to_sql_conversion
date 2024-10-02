@@ -1,14 +1,23 @@
-from tables.address import createAddressTable, insertAddressData
+from tables.sql.access.address import createAddressTable, insertAddressData, addAddressIndexes
 from utils.sqlHelpers import getSqlServerName
 from utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase
+from utils.connection import Connection
 
-def createSqlServerTables(dbConnections):
+def createSqlServerTables(conn : Connection):
     
-    createAddressTable(dbConnections)
+    createAddressTable(conn)
     
-def insertDataIntoTables():
+def addTableIndexes(conn : Connection):
     
-    insertAddressData()
+    addAddressIndexes(conn)    
+    
+def addTableForeignKeys(conn : Connection):
+    
+    pass
+    
+def insertDataIntoTables(conn : Connection):
+    
+   pass
 
 def main():
     # Check to see if sql Server is set up on the machine
@@ -28,8 +37,12 @@ def main():
         'htcAll' : htcAllConn
     }
 
-    createSqlServerTables(dbConnections)
-    insertDataIntoTables()
+    conn = Connection(dbConnections)
+    
+    createSqlServerTables(conn)
+    addTableIndexes(conn)
+    addTableForeignKeys(conn)
+    insertDataIntoTables(conn)
     
 if __name__ == "__main__":
     main()
