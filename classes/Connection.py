@@ -1,6 +1,10 @@
 from typing import Dict, Any, List, Optional
 from pyodbc import Connection, Cursor
 
+from ..types.Field import Field
+from ..types.ForeignKey import ForeignKey
+from ..types.Index import Index
+
 import traceback
 
 class Connection:
@@ -23,11 +27,12 @@ class Connection:
     except Exception as err:
       self.handleError(str(err))
 
-  def sqlCreateTable(self, tableName: str, tableFields: str) -> None:
+  def sqlCreateTable(self, tableName: str, tableFields: List[Field]) -> None:
     self.currentProcess = "creatingSqlTable"
     try:
-      self.sqlDrop(tableName=tableName)
-      createSql: str = f"CREATE TABLE [{tableName}] ({tableFields})"
+      self.sqlDrop(tableName)
+      tableFieldsString = ', '.join([f'[{field.fieldName}] {field.fieldDetails}' for field in tableFields])
+      createSql: str = f"CREATE TABLE [{tableName}] ({tableFieldsString})"
       self.sqlCursor.execute(createSql)
     except Exception as err:
       self.handleError(str(err))

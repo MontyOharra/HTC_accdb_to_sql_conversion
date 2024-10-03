@@ -1,16 +1,15 @@
-from tables.sql.access.address import createAddressTable, insertAddressData, addAddressIndexes
+from tables.sql.address import createAddressTable
+
 from utils.sqlHelpers import getSqlServerName
 from utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase
-from utils.connection import Connection
+
+from classes.Connection import Connection
 
 def createSqlServerTables(conn : Connection):
     
     createAddressTable(conn)
-    
-def addTableIndexes(conn : Connection):
-    
-    addAddressIndexes(conn)    
-    
+
+
 def addTableForeignKeys(conn : Connection):
     
     pass

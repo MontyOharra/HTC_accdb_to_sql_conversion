@@ -1,4 +1,4 @@
-from utils.connection import Connection
+from classes.Connection import Connection
 
 cityFields = '''
   [id] INTEGER UNIQUE PRIMARY KEY NOT NULL IDENTITY(1, 1),

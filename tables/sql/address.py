@@ -1,16 +1,23 @@
-from utils.connection import Connection
+from ...classes.Connection import Connection
+from ...classes.sqlTable import SqlTable
 
-addressFields = '''
-  [id] INTEGER PRIMARY KEY IDENTITY(1, 1),
-  [address_line_1] NVARCHAR(255) NOT NULL,
-  [address_line_2] NVARCHAR(50),
-  [city_id] INTEGER NOT NULL,
-  [postal_code_id] INTEGER NOT NULL,
-  [region_id] INTEGER NOT NULL,
-  [is_carrier] BIT NOT NULL DEFAULT (0),
-  [is_local] BIT NOT NULL DEFAULT (0),
-  [is_international] BIT NOT NULL DEFAULT (0)
-'''
+from ...types.Field import Field
+from ...types.ForeignKey import ForeignKey
+from ...types.Index import Index
+
+from typing import List
+
+addressFields: List[Field] = [
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY IDENTITY(1, 1)"),
+    Field(fieldName="address_line_1", fieldDetails="NVARCHAR(255) NOT NULL"),
+    Field(fieldName="address_line_2", fieldDetails="NVARCHAR(50)"),
+    Field(fieldName="city_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="postal_code_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="region_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="is_carrier", fieldDetails="BIT NOT NULL DEFAULT (0)"),
+    Field(fieldName="is_local", fieldDetails="BIT NOT NULL DEFAULT (0)"),
+    Field(fieldName="is_international", fieldDetails="BIT NOT NULL DEFAULT (0)")
+]
 
 addressIndexes = {
   'ix_city': {
@@ -20,38 +27,5 @@ addressIndexes = {
   }
 }
 
-addressForeignKeys = [
-  {
-    'fromTableField': ''
-  }
-]
-
-def createAddressTable(conn : Connection):
-  conn.sqlCreateTable('address', addressFields)
-  conn.commit()
-
-def addAddressIndexes(conn : Connection):
-  for indexName, details in addressIndexes.items():
-    conn.sqlAddIndex(details['tableName'], details['indexType'], details['indexField'], indexName)
-
-def addAddressForeignKeys(conn : Connection):
-  for foreignKey in addressForeignKeys:
-    conn.sqlAddForeignKey('address', foreignKey['fromTableField'], foreignKey['toTableName'], foreignKey['totableField'])
-
-def insertAddressData():
-  global addressTable
-  branchInfo = addressTable.getAccessTable("htcAll", "branch")
-  for row in branchInfo:
-    print(row.country)
-    
-    addressTable.insertRow({
-      'address_line_1' : row.address_line_1,
-      'city_id': 1,
-      'postal_code_id' : 1,
-      'region_id' : 1,
-      'is_carrier' : 1,
-      'is_local': 0,
-      'is_international': 0
-      })
-
-  addressTable.commit()
+def createAddressTable(conn):
+  return SqlTable('address', conn, addressFields, addressIndexes)
