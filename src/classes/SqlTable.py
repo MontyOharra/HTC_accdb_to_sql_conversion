@@ -20,12 +20,13 @@ class SqlTable:
     self.indexes = indexes
     self.foreignKeys = foreignKeys
 
-    conn.sqlCreateTable(tableName, fields)
-    conn.commit()
+  def createTable(self):
+    self.conn.sqlCreateTable(self.tableName, self.fields)
+    self.conn.commit()
 
   def addIndexes(self):
     for index in self.indexes:
-      self.conn.sqlAddIndex(self.tableName, index.indexType, index.indexField, index.indexName, index.isUnique)
+      self.conn.sqlAddIndex(self.tableName, index.indexType, index.indexFields, index.indexName, index.isUnique)
 
   def addForeignKeys(self):
     for key in self.foreignKeys:

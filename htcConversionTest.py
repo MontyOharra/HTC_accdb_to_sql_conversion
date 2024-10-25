@@ -1,18 +1,20 @@
-from tables.sql.address import createAddressTable
+from src.tables.sql.address import createAddressTable
 
-from utils.sqlHelpers import getSqlServerName
-from utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase
+from src.utils.sqlHelpers import getSqlServerName
+from src.utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase
 
-from classes.Connection import Connection
+from src.imports import *
+
+sqlTables : Dict[str, SqlTable] = {}
 
 def createSqlServerTables(conn : Connection):
+    global sqlTables
     
-    createAddressTable(conn)
+    sqlTables['addressTable'] = createAddressTable(conn)
 
 
 def addTableForeignKeys(conn : Connection):
-    
-    pass
+    return
     
 def insertDataIntoTables(conn : Connection):
     
@@ -39,7 +41,7 @@ def main():
     conn = Connection(dbConnections)
     
     createSqlServerTables(conn)
-    addTableIndexes(conn)
+    
     addTableForeignKeys(conn)
     insertDataIntoTables(conn)
     

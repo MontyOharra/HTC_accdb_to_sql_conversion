@@ -65,21 +65,25 @@ class Connection:
         }
       )
       
-  def sqlAddIndex(self, tableName : str, indexType: str, indexField: str, indexName: str, isUnique: bool = False) -> None:
+  def sqlAddIndex(self, tableName : str, indexType: str, indexFields: str | List[str], indexName: str, isUnique: bool = False) -> None:
     self.currentProcess = "addingSqlIndex"
     try:
       validIndexTypes: List[str] = ["clustered", "nonclustered"]
       if indexType not in validIndexTypes:
         raise Exception(f"Index not of valid type ({validIndexTypes}).")
       uniqueClause: str = "UNIQUE " if isUnique else ""
-      addIndexSql: str = f"CREATE {uniqueClause}{indexType.upper()} INDEX [{indexName}] ON [{tableName}] ([{indexField}])"
+      if type(indexFields) == str:
+        indexFieldClause = f'[indexFields]'
+      elif type(indexFields) == List:
+        indexFieldClause = ', '.join(f'[{indexField}]' for indexField in indexFields)
+      addIndexSql: str = f"CREATE {uniqueClause}{indexType.upper()} INDEX [{indexName}] ON [{tableName}] ({indexFieldClause})"
       self.sqlCursor.execute(addIndexSql)
     except Exception as err:
       self.handleError(
         info={
           "tableName" : tableName,
           "indexType": indexType, 
-          "indexField": indexField, 
+          "indexFields": indexFields, 
           "indexName": indexName, 
           "isUnique": isUnique
         }
@@ -111,6 +115,24 @@ class Connection:
          'tableName' : tableName,
          'selectColumns' : selectColumns,
          'whereClause' : whereClause
+        }
+      )
+      
+  def getLastIdCreated(self, tableName : str, idField : str = 'id') -> int:
+    self.currentProcess = 'gettingIdFromFieldValue'
+    try:
+      selectSql = f"SELECT IDENT_CURRENT({tableName})"
+      self.sqlCursor.execute(selectSql)
+      rows = self.sqlCursor.fetchall()
+      if idField == 'id':
+        return rows[0]['id']
+      else:
+        return rows[0][idField]
+    except Exception as err:
+      self.handleError(
+        info={
+          'tableName': tableName,
+          'idField': idField
         }
       )
       
