@@ -21,3 +21,33 @@ def createregionTable(conn):
     regionTable.addIndexes()
     
     return regionTable
+
+def insertRegion(
+    conn : Connection,
+    countryId: int,
+    name : str = None,
+    isoCode : str = None,
+) :
+    if name:
+        data = {
+            'region_name': name,
+            'iso_code': subdivisions_countries.get(name=name)['code'],
+            'country_id': countryId
+        }
+    elif isoCode:
+        data = {
+            'region_name': subdivisions_countries.get(code=isoCode)['name'],
+            'iso_code': isoCode,
+            'country_id': countryId
+        }
+    else:
+        data = {
+            'region_name': 'Texas',
+            'iso_code': 'TX',
+            'country_id': 1
+        }
+        
+    conn.sqlInsertRow(
+        'region',
+        data
+    )

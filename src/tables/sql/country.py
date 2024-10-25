@@ -17,3 +17,39 @@ def createCountryTable(conn):
     countryTable.addIndexes()
     
     return countryTable
+
+def insertCountry(
+    conn : Connection,
+    name : str = None,
+    isoCode2 : str = None,
+    isoCode3 : str = None
+) :
+    if name:
+        data = {
+            'iso_code_2': countries.get(name=name)['alpha_2'],
+            'iso_code_3': countries.get(name=name)['alpha_3'],
+            'country_name': name
+        }
+    elif isoCode2:
+        data = {
+            'iso_code_2': isoCode2,
+            'iso_code_3': countries.get(alpha_2=isoCode2)['alpha_3'],
+            'country_name': countries.get(alpha_2=isoCode2)['name']
+        }
+    elif isoCode3:
+        data = {
+            'iso_code_2': countries.get(alpha_3=isoCode3)['alpha_2'],
+            'iso_code_3': isoCode3,
+            'country_name': countries.get(alpha_3=isoCode3)['name']
+        }
+    else:
+        data = {
+            'iso_code_2': 'US',
+            'iso_code_3': 'USA',
+            'country_name': 'United States'
+        }
+        
+    conn.sqlInsertRow(
+        'country',
+        data
+    )
