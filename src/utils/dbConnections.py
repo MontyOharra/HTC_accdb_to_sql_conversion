@@ -11,7 +11,7 @@ def connectToAccessDatabase(accessDbPath):
     accessConn = pyodbc.connect(accessConnStr)
     return accessConn
 
-def connectToSqlDatabase(sqlDriver, sqlServerName, sqlDatabaseName):
+def connectToSqlDatabase(sqlDriver, sqlServerName, sqlDatabaseName, resetDatabase=False):
     # Connection to SQL Server database
     initialSqlServerConnString = (
         f'DRIVER={sqlDriver};'
@@ -24,12 +24,20 @@ def connectToSqlDatabase(sqlDriver, sqlServerName, sqlDatabaseName):
 
     databaseExists = checkIfDatabaseExists(initialSqlConn.cursor(), sqlDatabaseName)
     if (not databaseExists):
-        createNewDatabase = input(f"The database name {sqlDatabaseName} does not exist within the SQL Server. Would you like to create a database with that name: [y/n]")
-        if (createNewDatabase):
+        createNewDatabase = input(f"The database name {sqlDatabaseName} does not exist within the SQL Server. Would you like to create a database with that name: [y/n]").lower()
+        if (createNewDatabase == 'y'):
           initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
         else:
             print('[ABORTING CONVERSION PROCESS]')
             return None
+    else:
+        if not (resetDatabase):
+            resetDatabase = input(f"Would you like to reset this database by deleting it and recreating it? [y/n]: ").lower()
+        else:
+            resetDatabase = 'y'
+        if (resetDatabase == 'y'):
+          initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
+          initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
 
     sqlServerConnString = (
         f'DRIVER={sqlDriver};'

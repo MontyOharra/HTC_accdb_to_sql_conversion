@@ -1,5 +1,5 @@
 from typing import Dict, List
-from classes.Connection import Connection
+from .Connection import Connection
 
 from ..types.Index import Index
 from ..types.ForeignKey import ForeignKey
@@ -23,6 +23,8 @@ class SqlTable:
   def createTable(self):
     self.conn.sqlCreateTable(self.tableName, self.fields)
     self.conn.commit()
+    
+    print(f'Successfully created [{self.tableName}] table.')
 
   def addIndexes(self):
     for index in self.indexes:

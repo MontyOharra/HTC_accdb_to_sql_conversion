@@ -1,53 +1,80 @@
 from ...imports import *
 
+from isocodes import subdivisions_countries
+
+from .country import addCountry
+
+def regionGet(**kwargs: str):
+    try:
+        key: str = next(iter(kwargs))
+        return [
+            element
+            for element in subdivisions_countries.data
+            if key in element and kwargs[key].lower() == element[key].lower()
+        ]
+    except IndexError:
+        return {}
+    
 regionFields: List[Field] = [
-    Field('id,' 'INTEGER PRIMARY KEY IDENTITY(1, 1)'),
-    Field('region_name', 'NVARCHAR(63) NOT NULL'),
-    Field('iso_code', 'NVARCHAR(2) NOT NULL'),
-    Field('country_id', 'INTEGER NOT NULL' )
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
+    Field(fieldName="country_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="iso_code", fieldDetails="NVARCHAR(6) NOT NULL"),
+    Field(fieldName="region_name", fieldDetails="NVARCHAR(63) NOT NULL"),
 ]
 
 regionIndexes: List[Index] = [
-    Index('ix_region_name', 'region_name', 'nonclustered', isUnique=True)
 ]
 
 regionForeignKeys: List[ForeignKey] = [
-    ForeignKey('region', 'country_id', 'country')
+    ForeignKey('region', 'country_id', 'country', 'id'),
 ]
 
-def createregionTable(conn):
-    regionTable = SqlTable('region', conn, regionFields, regionIndexes)
+def createRegionTable(conn):
+    regionTable = SqlTable('region', conn, regionFields, regionIndexes, regionForeignKeys)
     regionTable.createTable()
     regionTable.addIndexes()
-    
+
     return regionTable
 
-def insertRegion(
+
+def addRegion(
     conn : Connection,
-    countryId: int,
-    name : str = None,
-    isoCode : str = None,
-) :
-    if name:
+    regionDetails : Dict[str, str],
+    countryDetails : Dict[str, str]
+) -> int : 
+    if not regionDetails or not countryDetails:
+        return 0
+    
+    countryId = addCountry(conn, countryDetails=countryDetails)
+    countryIsoCode = conn.sqlGetInfo('country', 'iso_code_2', f"[id] = '{countryId}'")[0].iso_code_2
+    
+    if 'regionName' in regionDetails:
+        regionName = regionDetails['regionName'].lower()
+        regionRow = conn.sqlGetInfo('region', 'id', f"[region_name] = '{regionName}' AND [country_id] = {countryId}")
+        if regionRow:
+            return regionRow[0].id
+        
+        for region in regionGet(name=regionName):
+            if region['code'][0:1].lower() == countryIsoCode:
+                correctRegion = region
+                break
         data = {
-            'region_name': name,
-            'iso_code': subdivisions_countries.get(name=name)['code'],
-            'country_id': countryId
-        }
-    elif isoCode:
+            'region_name' : regionName,
+            'iso_code' : correctRegion[3:].lower(),
+            'country_id' : countryId
+        } 
+    elif 'isoCode' in regionDetails:
+        isoCode = regionDetails['isoCode'].lower()
+        regionRow = conn.sqlGetInfo('region', 'id', f"[iso_code] = '{isoCode}' AND [country_id] = '{countryId}'")
+        if regionRow:
+            return regionRow[0].id
         data = {
-            'region_name': subdivisions_countries.get(code=isoCode)['name'],
-            'iso_code': isoCode,
-            'country_id': countryId
-        }
-    else:
-        data = {
-            'region_name': 'Texas',
-            'iso_code': 'TX',
-            'country_id': 1
+            'region_name': regionGet(code=f'{countryIsoCode}-{isoCode}'.upper())[0]['name'].lower(),
+            'iso_code' : isoCode,
+            'country_id' : countryId
         }
         
-    conn.sqlInsertRow(
-        'region',
-        data
-    )
+    conn.sqlInsertRow('region', data)    
+    conn.commit()
+    
+    return conn.sqlGetLastIdCreated('region')

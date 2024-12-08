@@ -1,4 +1,4 @@
-from src.tables.sql.address import createAddressTable
+from src.tables.sql.oldaddress import createAddressTable
 
 from src.utils.sqlHelpers import getSqlServerName
 from src.utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase

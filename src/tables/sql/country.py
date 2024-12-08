@@ -1,55 +1,88 @@
 from ...imports import *
 
+from isocodes import countries
+
+def countryGet(**kwargs: str):
+    try:
+        key: str = next(iter(kwargs))
+        res = [
+            element
+            for element in countries.data
+            if key in element and kwargs[key].lower() == element[key].lower()
+        ]
+        print(res)
+        return res
+        
+    except IndexError:
+        return {}
+    
 countryFields: List[Field] = [
-    Field('id,' 'INTEGER PRIMARY KEY IDENTITY(1, 1)'),
-    Field('country_name', 'NVARCHAR(63) NOT NULL'),
-    Field('iso_code_2', 'NVARCHAR(2) NOT NULL'),
-    Field('iso_code_3', 'NVARCHAR(2) NOT NULL' )
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
+    Field(fieldName="country_name", fieldDetails="NVARCHAR(63) UNIQUE NOT NULL"),
+    Field(fieldName="iso_code_2", fieldDetails="NVARCHAR(2) UNIQUE NOT NULL"),
+    Field(fieldName="iso_code_3", fieldDetails="NVARCHAR(3) UNIQUE NOT NULL"),
 ]
 
 countryIndexes: List[Index] = [
-    Index('ix_country_name', 'country_name', 'nonclustered', isUnique=True)
+]
+
+countryForeignKeys: List[ForeignKey] = [
 ]
 
 def createCountryTable(conn):
-    countryTable = SqlTable('country', conn, countryFields, countryIndexes)
+    countryTable = SqlTable('country', conn, countryFields, countryIndexes, countryForeignKeys)
     countryTable.createTable()
     countryTable.addIndexes()
-    
+
     return countryTable
 
-def insertCountry(
+def addCountry(
     conn : Connection,
-    name : str = None,
-    isoCode2 : str = None,
-    isoCode3 : str = None
-) :
-    if name:
+    countryDetails : Dict[str, str]
+) -> int:    
+    if not countryDetails:
+        return 0
+    if 'countryName' in countryDetails:
+        countryName = countryDetails['countryName'].lower()
+        countryRow = conn.sqlGetInfo('country', 'id', f"[country_name] = '{countryName}'")
+        if countryRow:
+            return countryRow[0].id
         data = {
-            'iso_code_2': countries.get(name=name)['alpha_2'],
-            'iso_code_3': countries.get(name=name)['alpha_3'],
-            'country_name': name
+            'iso_code_2': countryGet(name=countryName)[0]['alpha_2'].lower(),
+            'iso_code_3': countryGet(name=countryName)[0]['alpha_3'].lower(),
+            'country_name': countryName
         }
-    elif isoCode2:
+    elif 'isoCode2' in countryDetails:
+        isoCode2 = countryDetails['isoCode2'].lower()
+        countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_2] = '{isoCode2}'")
+        if countryRow:
+            return countryRow[0].id
         data = {
             'iso_code_2': isoCode2,
-            'iso_code_3': countries.get(alpha_2=isoCode2)['alpha_3'],
-            'country_name': countries.get(alpha_2=isoCode2)['name']
+            'iso_code_3': countryGet(alpha_2=isoCode2)[0]['alpha_3'].lower(),
+            'country_name': countryGet(alpha_2=isoCode2)[0]['name'].lower()
         }
-    elif isoCode3:
+    elif 'isoCode3' in countryDetails:
+        isoCode3 = countryDetails['isoCode3'].lower()
+        countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_3] = '{isoCode3}'")
+        if countryRow:
+            return countryRow[0].id
         data = {
-            'iso_code_2': countries.get(alpha_3=isoCode3)['alpha_2'],
+            'iso_code_2': countryGet(alpha_3=isoCode3)[0]['alpha_2'].lower(),
             'iso_code_3': isoCode3,
-            'country_name': countries.get(alpha_3=isoCode3)['name']
+            'country_name': countryGet(alpha_3=isoCode3)[0]['name'].lower()
         }
-    else:
+    elif 'default' in countryDetails:
+        countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_2] = 'us'")
+        if countryRow:
+            return countryRow[0].id
         data = {
-            'iso_code_2': 'US',
-            'iso_code_3': 'USA',
-            'country_name': 'United States'
+            'iso_code_2': 'us',
+            'iso_code_3': 'usa',
+            'country_name': 'united states'
         }
         
-    conn.sqlInsertRow(
-        'country',
-        data
-    )
+    conn.sqlInsertRow('country', data)
+    conn.commit()
+    
+    return conn.sqlGetLastIdCreated('country')
