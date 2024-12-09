@@ -31,7 +31,14 @@ def addPhone(
     if areaCode == '' or phoneNumber == '':
         return 0
     
-    phoneRow = conn.sqlGetInfo('phone', 'id', f"[country_code] = '{countryCode}' AND [area_code] = '{areaCode}' AND [phone_number] = '{phoneNumber}' AND [phone_extension] = '{phoneExtension}'")
+    phoneRow = conn.sqlGetInfo('phone', 'id',
+        whereDetails={
+            'country_code' : countryCode,
+            'area_code' : areaCode,
+            'phone_number' : phoneNumber,
+            'phone_extension' : phoneExtension
+        }
+    )
     if phoneRow:
         return phoneRow[0].id
     data = {

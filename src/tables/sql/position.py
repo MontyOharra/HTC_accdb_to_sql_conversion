@@ -29,7 +29,16 @@ def addPosition(
     isActive : bool,
     branchId : int,
 ) -> int:
-    positionRow = conn.sqlGetInfo('position', 'id', f"[position_name] = '{positionName}' AND [security_level] = '{securityLevel}' AND [is_active] = '{isActive}' AND [branch_id] = '{branchId}'")
+    positionRow = conn.sqlGetInfo(
+        'position',
+        'id',
+        whereDetails={
+            'position_name' : positionName,
+            'security_level' : securityLevel,
+            'is_active' : isActive,
+            'branch_id' : branchId
+        }
+    )
     if positionRow:
         return positionRow[0].id
     data = {

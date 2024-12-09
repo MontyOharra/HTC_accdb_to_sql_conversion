@@ -48,7 +48,16 @@ def addAddress(
         
     cityId, postalCodeId = addCityPostalCode(conn, cityName, postalCode, regionDetails=regionDetails, countryDetails=countryDetails)
     
-    addressRow = conn.sqlGetInfo('address', 'id',  f"[address_line_1] = '{addressLine1}' AND [address_line_2] = '{addressLine2}' AND [city_id] = '{cityId}' AND [postal_code_id] = '{postalCodeId}'")
+    addressRow = conn.sqlGetInfo(
+        'address',
+        'id',
+        whereDetails={
+            'address_line_1': addressLine1,
+            'address_line_2': addressLine2,
+            'city_id': cityId,
+            'postal_code_id': postalCodeId
+        }
+    )
     if addressRow:
         return addressRow[0].id
     

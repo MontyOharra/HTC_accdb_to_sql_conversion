@@ -74,7 +74,36 @@ def addUser(
     isSecurityCoordinator : bool,
     isTsaTrainer : bool,
 ) -> int:
-    userRow = conn.sqlGetInfo('user', 'id', "[username] = 'username' AND [email] = 'email' AND [password_hash] = 'passwordHash' AND [password_salt] = 'passwordSalt' AND [name_prefix] = 'namePrefix' AND [first_name] = 'firstName' AND [last_name] = 'lastName' AND [name_suffix] = 'nameSuffix' AND [address_id] = 'addressId' AND [branch_id] = 'branchId' AND [commission_rate] = 'commissionRate' AND [date_hired] = 'dateHired' AND [date_terminated] = 'dateTerminated' AND [phone_main_id] = 'phoneMainId' AND [phone_home_id] = 'phoneHomeId' AND [phone_mobile_id] = 'phoneMobileId' AND [position_id] = 'positionId' AND [tsa_number] = 'tsaNumber' AND [tsa_type] = 'tsaType' AND [tsa_taken] = 'tsaTaken' AND [is_active] = 'isActive' AND [is_default_doc_owner] = 'isDefaultDocOwner' AND [is_security_coordinator] = 'isSecurityCoordinator' AND [is_tsa_trainer] = 'isTsaTrainer'")
+    userRow = conn.sqlGetInfo(
+        'user',
+        'id',
+        whereDetails    ={
+            'username': username,
+            'email': email,
+            'password_hash': passwordHash,
+            'password_salt': passwordSalt,
+            'name_prefix': namePrefix,
+            'first_name': firstName,
+            'last_name': lastName,
+            'name_suffix': nameSuffix,
+            'address_id': addressId,
+            'branch_id': branchId,
+            'commission_rate': commissionRate,
+            'date_hired': dateHired,
+            'date_terminated': dateTerminated,
+            'phone_main_id': phoneMainId,
+            'phone_home_id': phoneHomeId,
+            'phone_mobile_id': phoneMobileId,
+            'position_id': positionId,
+            'tsa_number': tsaNumber,
+            'tsa_type': tsaType,
+            'tsa_taken': tsaTaken,
+            'is_active': isActive,
+            'is_default_doc_owner': isDefaultDocOwner,
+            'is_security_coordinator': isSecurityCoordinator,
+            'is_tsa_trainer': isTsaTrainer
+        }
+    )
     if userRow:
         return userRow[0].id
     data = {

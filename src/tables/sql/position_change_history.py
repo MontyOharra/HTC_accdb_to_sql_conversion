@@ -30,7 +30,16 @@ def addPositionChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    positionChangeHistoryRow = conn.sqlGetInfo('position_change_history', 'id', f"[position_id] = '{positionId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
+    positionChangeHistoryRow = conn.sqlGetInfo(
+    'position_change_history',
+    'id',
+    whereDetails={
+        'position_id': positionId,
+        'user_id': userId,
+        'date_changed': dateChanged,
+        'changes': changes
+    }
+)
     if positionChangeHistoryRow:
         return positionChangeHistoryRow[0].id
     data = {

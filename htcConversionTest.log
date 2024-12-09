@@ -1,1 +1,24 @@
-C:\Python312\python.exe: Relative module names not supported
+Successfully created [country] table.
+Successfully created [region] table.
+Successfully created [address] table.
+Successfully created [city] table.
+Successfully created [postal_code] table.
+Successfully created [city_region] table.
+Successfully created [city_postal_code] table.
+Successfully created [postal_code_region] table.
+Successfully created [company] table.
+Successfully created [phone] table.
+Successfully created [fax] table.
+Successfully created [user] table.
+Successfully created [position] table.
+Successfully created [order_type] table.
+Successfully created [certification_test] table.
+Successfully created [archive_history] table.
+Successfully created [holiday] table.
+Successfully created [overnight_maintenance_history] table.
+Successfully created [branch] table.
+Successfully created [company_change_history] table.
+Successfully created [branch_change_history] table.
+Successfully created [aci_data] table.
+Completed HTC000_G010_T010 Company Info Conversion.
+Completed HTC000_G025_T010 Positions Conversion.

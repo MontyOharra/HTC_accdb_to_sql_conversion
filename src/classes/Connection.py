@@ -110,27 +110,52 @@ class Connection:
   def sqlGetInfo(
     self,
     tableName: str,
-    selectColumns: List[str] | str | None = None,
-    whereDict : Dict[str, any] = None
+    selectDetails : List[str | Dict[str, str]] | str | None = None,
+    whereDetails : Dict[str, any] | str | None = None
   ) -> List[Any]:
     self.currentProcess = 'gettingSqlInfo'
+    
+    # Create column selection string
+    selectColumnsClause : str
+    if type(selectDetails) ==  list: # Columns can be a single string, or a dictionary, with the key being the column name and value being its alias
+      selectColumnsClause = ', '.join([column if type(column) == str else f"{list(column.keys())[0]} AS {list(column.values())[0]}" for column in selectDetails])
+    elif type(selectDetails) == str: # If column is single string
+      selectColumnsClause = selectDetails
+    else: # Otherwise select all columns
+      selectColumnsClause = '*'
+    
+    if type(whereDetails) == Dict:  
+      whereArgs = []
+      for tableField, fieldValue in whereDetails.items():
+        if fieldValue == None: # If value is None, check if NULL in SQL
+          whereArgs.append(f"[{tableField}] IS NULL")
+        elif type(fieldValue) == str: # If string type, double up any single quotations within the string for escaping
+          fieldValue = ''.join(["''" if x == "'" else x for x in fieldValue])
+          whereArgs.append(f"[{tableField}] = ''")
+        elif type(fieldValue) == int or type(fieldValue) == float: # IF numeric type, do not include quotations
+          whereArgs.append(f"[{tableField}] = {fieldValue}")
+        elif type(fieldValue) == bool: # If boolean type, convert to 1/0 instead of true/false
+          if fieldValue == True:
+            whereArgs.append(f"[{tableField}] = 1")
+          else:
+            whereArgs.append(f"[{tableField}] = 0")
+        else: # In all unchecked cases, check equality with single quotations around value
+          whereArgs.append(f"[{tableField}] = '{fieldValue}'")
+        whereClause = ' AND '.join(whereArgs)
+        
+    elif type(whereDetails) == str:
+      whereClause = whereDetails
+    else:
+      whereClause = ''
+    
+    selectSql: str = f"SELECT {selectColumnsClause} FROM {f'[{tableName}]' if len(tableName.split(' ')) == 1 else tableName} {f'WHERE {whereClause}' if whereClause else ''}"
     try:
-      if type(selectColumns) ==  list:
-        if selectColumns:
-          selectColumns: str = ', '.join(selectColumns)
-        else:
-          selectColumns: str = '*'
-      whereClause = ' AND '.join([f"{tableField} = {fieldValue}" for tableField, fieldValue in whereDict.items()])
-      whereClause = ''.join(["''" if x == "'" else x for x in whereClause])
-      selectSql: str = f"SELECT {selectColumns} FROM {f'[{tableName}]' if len(tableName.split(' ')) == 1 else tableName} {f'WHERE {whereClause}' if whereClause else ''}"
       self.sqlCursor.execute(selectSql)
       return self.sqlCursor.fetchall()
     except Exception as err:
       self.handleError(
         info={
           'tableName' : tableName,
-          'selectRows' : selectColumns,
-          'whereClause' : whereClause,
           'sqlStatement' : selectSql
         }
       )

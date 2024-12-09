@@ -27,8 +27,15 @@ def addFax(
     areaCode : str,
     faxNumber : str,
     faxExtension : str,
-) -> int:
-    faxRow = conn.sqlGetInfo('fax', 'id', f"[country_code] = '{countryCode}' AND [area_code] = '{areaCode}' AND [fax_number] = '{faxNumber}' AND [fax_extension] = '{faxExtension}'")
+) -> int:        
+    faxRow = conn.sqlGetInfo('fax', 'id',
+        whereDetails={
+            'country_code' : countryCode,
+            'area_code' : areaCode,
+            'fax_number' : faxNumber,
+            'fax_extensino' : faxNumber
+        }
+    )
     if faxRow:
         return faxRow[0].id
     data = {

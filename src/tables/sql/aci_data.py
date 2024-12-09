@@ -52,7 +52,27 @@ def addAciData(
     branchId : int,
     isActive : bool,
 ) -> int:
-    aciDataRow = conn.sqlGetInfo('aci_data', 'id', f"[city_id] = '{cityId}' AND [postal_code_id] = '{postalCodeId}' AND [airport_code] = '{airportCode}' AND [carrier] = '{carrier}' AND [area] = '{area}' AND [rate_min] = '{rateMin}' AND [rate_100] = '{rate100}' AND [rate_1000] = '{rate1000}' AND [rate_2000] = '{rate2000}' AND [rate_5000] = '{rate5000}' AND [date_created] = '{dateCreated}' AND [created_by] = '{createdBy}' AND [branch_id] = '{branchId}' AND [is_active] = '{isActive}'")
+    
+    aciDataRow = conn.sqlGetInfo(
+        'aci_data',
+        'id',
+        whereDetails={
+            'city_id': cityId,
+            'postal_code_id': postalCodeId,
+            'airport_code': airportCode,
+            'carrier': carrier,
+            'area': area,
+            'rate_min': rateMin,
+            'rate_100': rate100,
+            'rate_1000': rate1000,
+            'rate_2000': rate2000,
+            'rate_5000': rate5000,
+            'date_created': dateCreated,
+            'created_by': createdBy,
+            'branch_id': branchId,
+            'is_active': isActive
+        }
+    )       
     if aciDataRow:
         return aciDataRow[0].id
     data = {

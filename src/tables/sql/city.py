@@ -29,7 +29,7 @@ def addCityPostalCode(
 ) -> Tuple[int] :
     
     if not cityName or not postalCode or not regionDetails or not countryDetails:
-        return 0
+        return (0, 0)
     
     cityName = cityName.lower()
     postalCode = postalCode.lower()
