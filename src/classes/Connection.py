@@ -124,6 +124,7 @@ class Connection:
     else: # Otherwise select all columns
       selectColumnsClause = '*'
     
+    # Create where clause
     if type(whereDetails) == Dict:  
       whereArgs = []
       for tableField, fieldValue in whereDetails.items():
