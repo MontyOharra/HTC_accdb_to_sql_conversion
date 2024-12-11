@@ -30,7 +30,7 @@ def convert_HTC000_G010_T010_Company_Info(conn : Connection):
             cityName=row.CoMailCity,
             postalCode=correctPostalCode(row.CoMailZip),
             regionDetails={'isoCode' : row.CoMailState},
-            countryDetails={}
+            countryDetails={'default': ''}
         )
         
         addCompany(
@@ -51,5 +51,5 @@ def convert_HTC000_G010_T010_Company_Info(conn : Connection):
             notes=row.CoNotes
         )
         
-    print('Completed HTC000_G010_T010 Company Info Conversion.')
+    print('Completed [HTC000_G010_T010 Company Info] Conversion.')
         

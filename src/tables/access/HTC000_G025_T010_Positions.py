@@ -12,4 +12,4 @@ def convert_HTC000_G025_T010_Positions(conn : Connection):
             isActive=row.Posn_Status,
             branchId=row.Posn_BrID
         )
-    print('Completed HTC000_G025_T010 Positions Conversion.')
+    print('Completed [HTC000_G025_T010 Positions] Conversion.')

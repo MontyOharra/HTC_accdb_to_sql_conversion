@@ -4,18 +4,18 @@ userFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
     Field(fieldName="username", fieldDetails="NVARCHAR(63) UNIQUE NOT NULL"),
     Field(fieldName="email", fieldDetails="NVARCHAR(255) NOT NULL"),
-    Field(fieldName="password_hash", fieldDetails="NVARCHAR(255) NOT NULL"),
-    Field(fieldName="password_salt", fieldDetails="NVARCHAR(32) NOT NULL"),
+    Field(fieldName="password_hash", fieldDetails="NVARCHAR(255)"),
+    Field(fieldName="password_salt", fieldDetails="NVARCHAR(32)"),
     Field(fieldName="name_prefix", fieldDetails="NVARCHAR(6)"),
-    Field(fieldName="first_name", fieldDetails="NVARCHAR(31) NOT NULL"),
-    Field(fieldName="last_name", fieldDetails="NVARCHAR(31) NOT NULL"),
+    Field(fieldName="first_name", fieldDetails="NVARCHAR(31)"),
+    Field(fieldName="last_name", fieldDetails="NVARCHAR(31)"),
     Field(fieldName="name_suffix", fieldDetails="NVARCHAR(6)"),
-    Field(fieldName="address_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="address_id", fieldDetails="INTEGER"),
     Field(fieldName="branch_id", fieldDetails="INTEGER NOT NULL"),
     Field(fieldName="commission_rate", fieldDetails="MONEY NOT NULL"),
     Field(fieldName="date_hired", fieldDetails="DATETIME2"),
     Field(fieldName="date_terminated", fieldDetails="DATETIME2"),
-    Field(fieldName="phone_main_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="phone_main_id", fieldDetails="INTEGER"),
     Field(fieldName="phone_home_id", fieldDetails="INTEGER"),
     Field(fieldName="phone_mobile_id", fieldDetails="INTEGER"),
     Field(fieldName="position_id", fieldDetails="INTEGER NOT NULL"),
@@ -140,12 +140,12 @@ def addUser(
 
 def getUserIdFromUsername(conn : Connection, username : str | None) -> int:
     if username == None:
-        return 0
+        return None
     if username.strip() == "":
-        return 0
+        return None
     
     userRow = conn.sqlGetInfo('user', 'id', f"[username] = '{username}'")
     if not userRow:
-        return 0
+        return None
     
     return userRow[0].id

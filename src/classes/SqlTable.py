@@ -21,10 +21,12 @@ class SqlTable:
     self.foreignKeys = foreignKeys
 
   def createTable(self):
-    self.conn.sqlCreateTable(self.tableName, self.fields)
-    self.conn.commit()
+    try:
+      self.conn.sqlCreateTable(self.tableName, self.fields)
     
-    print(f'Successfully created [{self.tableName}] table.')
+      print(f'Successfully created [{self.tableName}] table.')
+    except Exception as err:
+      print(f'Error creating [{self.tableName}] table.')
 
   def addIndexes(self):
     for index in self.indexes:
@@ -32,6 +34,10 @@ class SqlTable:
 
   def addForeignKeys(self):
     for key in self.foreignKeys:
-      self.conn.sqlAddForeignKey(self.tableName, key.fromTableField, key.toTableName, key.toTableField)
+      try:
+        self.conn.sqlAddForeignKey(self.tableName, key.fromTableField, key.toTableName, key.toTableField)
+        print(f'Successfullly added foreign key to [{self.tableName}] on field [{key.fromTableField}].')
+      except Exception as err:
+        print(f'Error adding foreign key to [{self.tableName}].')
 
 

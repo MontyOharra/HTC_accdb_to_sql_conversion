@@ -15,7 +15,7 @@ def convert_HTC300_G000_T020_Branch_Info(conn : Connection):
             row.BrCity,
             row.BrZip,
             {'isoCode' : row.BrStOrProv},
-            {}
+            {'default' : ''}
         )
         phoneId = addPhone(
             conn,

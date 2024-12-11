@@ -1,74 +1,73 @@
-from src.tables.sql.country import createCountryTable
-from src.tables.sql.address import createAddressTable
-from src.tables.sql.postal_code import createPostalCodeTable
-from src.tables.sql.city import createCityTable
-from src.tables.sql.region import createRegionTable
-from src.tables.sql.city_region import createCityRegionTable
-from src.tables.sql.city_postal_code import createCityPostalCodeTable
-from src.tables.sql.postal_code_region import createPostalCodeRegionTable
-from src.tables.sql.company import createCompanyTable
-from src.tables.sql.phone import createPhoneTable
-from src.tables.sql.fax import createFaxTable
-from src.tables.sql.user import createUserTable
-from src.tables.sql.position import createPositionTable
-from src.tables.sql.order_type import createOrderTypeTable
-from src.tables.sql.certification_test import createCertificationTestTable
-from src.tables.sql.archive_history import createArchiveHistoryTable
-from src.tables.sql.holiday import createHolidayTable
-from src.tables.sql.overnight_maintenance_history import createOvernightMaintenanceHistoryTable
-from src.tables.sql.branch import createBranchTable
-from src.tables.sql.company_change_history import createCompanyChangeHistoryTable
-from src.tables.sql.branch_change_history import createBranchChangeHistoryTable
-from src.tables.sql.aci_data import createAciDataTable
-
-from src.tables.access.HTC000_G010_T010_Company_Info import convert_HTC000_G010_T010_Company_Info
-from src.tables.access.HTC000_G025_T010_Positions import convert_HTC000_G025_T010_Positions
-from src.tables.access.HTC000_G090_T010_Staff import convert_HTC000_G090_T010_Staff
-from src.tables.access.HTC010_G000_T000_OrderType_Values import convert_HTC010_G000_T000_OrderType_Values
-from src.tables.access.HTC010_G000_T000_US_Zip_Codes import convert_HTC010_G000_T000_US_Zip_Codes
-from src.tables.access.HTC010_G100_T010_CertificationTestCatalog import convert_HTC010_G100_T010_CertificationTestCatalog
-from src.tables.access.HTC300_G000_T000_Archive_Update_History import convert_HTC300_G000_T000_Archive_Update_History
-from src.tables.access.HTC300_G000_T000_Holidays import convert_HTC300_G000_T000_Holidays
-from src.tables.access.HTC300_G000_T000_Over_Night_Update_History import convert_HTC300_G000_T000_Over_Night_Update_History
-from src.tables.access.HTC300_G000_T020_Branch_Info import convert_HTC300_G000_T020_Branch_Info
-from src.tables.access.HTC300_G000_T030_Co_Info_Chg_History import convert_HTC300_G000_T030_Co_Info_Chg_History
-from src.tables.access.HTC300_G010_T010_DFW_ACI_Data import convert_HTC300_G010_T010_DFW_ACI_Data
+from src.tables.tableImports import *
 
 from src.utils.sqlHelpers import getSqlServerName
 from src.utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase
 
 from src.imports import *
 
-sqlTables : Dict[str, SqlTable] = {}
+sqlTables : List[SqlTable] = []
 
 def createSqlServerTables(conn : Connection):
     global sqlTables
     
-    sqlTables['country'] = createCountryTable(conn)
-    sqlTables['region'] = createRegionTable(conn)
-    sqlTables['address'] = createAddressTable(conn)
-    sqlTables['city'] = createCityTable(conn)
-    sqlTables['postal_code'] = createPostalCodeTable(conn)
-    sqlTables['city_region'] = createCityRegionTable(conn)
-    sqlTables['city_postal_code'] = createCityPostalCodeTable(conn)
-    sqlTables['postal_code_region'] = createPostalCodeRegionTable(conn)
-    sqlTables['company'] = createCompanyTable(conn)
-    sqlTables['phone'] = createPhoneTable(conn)
-    sqlTables['fax'] = createFaxTable(conn)
-    sqlTables['user'] = createUserTable(conn)
-    sqlTables['position'] = createPositionTable(conn)
-    sqlTables['order_type'] = createOrderTypeTable(conn)
-    sqlTables['certification_test'] = createCertificationTestTable(conn)
-    sqlTables['archive_history'] = createArchiveHistoryTable(conn)
-    sqlTables['holiday'] = createHolidayTable(conn)
-    sqlTables['overnight_maintenance_history'] = createOvernightMaintenanceHistoryTable(conn)
-    sqlTables['branch'] = createBranchTable(conn)
-    sqlTables['company_change_history'] = createCompanyChangeHistoryTable(conn)
-    sqlTables['branch_change_history'] = createBranchChangeHistoryTable(conn)
-    sqlTables['aci_data'] = createAciDataTable(conn)
-    
+    sqlTables.append(createAciDataTable(conn))
+    sqlTables.append(createAciDataChangeHistoryTable(conn))
+    sqlTables.append(createAddressTable(conn))
+    sqlTables.append(createAddressChangeHistoryTable(conn))
+    sqlTables.append(createAgentTable(conn))
+    sqlTables.append(createAgentCertificationTestTable(conn))
+    sqlTables.append(createAgentChangeHistoryTable(conn))
+    sqlTables.append(createArchiveErrorLogTable(conn))
+    sqlTables.append(createArchiveHistoryTable(conn))
+    sqlTables.append(createAssessorialTable(conn))
+    sqlTables.append(createAssessorialChangeHistoryTable(conn))
+    sqlTables.append(createBranchTable(conn))
+    sqlTables.append(createBranchChangeHistoryTable(conn))
+    sqlTables.append(createCertificationTestTable(conn))
+    sqlTables.append(createCertificationTestChangeHistoryTable(conn))
+    sqlTables.append(createCertificationTestTrainerChangeHistoryTable(conn))
+    sqlTables.append(createCertificationTestTrainerTable(conn))
+    sqlTables.append(createCityPostalCodeTable(conn))
+    sqlTables.append(createCityRegionTable(conn))
+    sqlTables.append(createCityTable(conn))
+    sqlTables.append(createCompanyTable(conn))
+    sqlTables.append(createCompanyChangeHistoryTable(conn))
+    sqlTables.append(createCountryTable(conn))
+    sqlTables.append(createCustomerTable(conn))
+    sqlTables.append(createCustomerChangeHistoryTable(conn))
+    sqlTables.append(createCustomerDefaultAssessorialTable(conn))
+    sqlTables.append(createFaxTable(conn))
+    sqlTables.append(createHolidayTable(conn))
+    sqlTables.append(createLocationTable(conn))
+    sqlTables.append(createLocationChangeHistoryTable(conn))
+    sqlTables.append(createLocationDefaultAssessorialTable(conn))
+    sqlTables.append(createOrderAssessorialTable(conn))
+    sqlTables.append(createOrderAttachmentTable(conn))
+    sqlTables.append(createOrderChangeHistoryTable(conn))
+    sqlTables.append(createOrderDimTable(conn))
+    sqlTables.append(createOrderDriverTable(conn))
+    sqlTables.append(createOrderStatusTable(conn))
+    sqlTables.append(createOrderStatusChangeHistoryTable(conn))
+    sqlTables.append(createOrderTypeTable(conn))
+    sqlTables.append(createOrderTable(conn))
+    sqlTables.append(createOvernightMaintenanceHistoryTable(conn))
+    sqlTables.append(createPhoneTable(conn))
+    sqlTables.append(createPositionTable(conn))
+    sqlTables.append(createPositionChangeHistoryTable(conn))
+    sqlTables.append(createPostalCodeTable(conn))
+    sqlTables.append(createPostalCodeRegionTable(conn))
+    sqlTables.append(createRateAreaTable(conn))
+    sqlTables.append(createRateChangeHistoryTable(conn))
+    sqlTables.append(createRateTable(conn))
+    sqlTables.append(createRegionTable(conn))
+    sqlTables.append(createSpecialChangeHistoryTable(conn))
+    sqlTables.append(createSpecialTable(conn))
+    sqlTables.append(createUserTable(conn))
+    sqlTables.append(createUserChangeHistoryTable(conn))
+
 def addTableForeignKeys(conn : Connection):
-    return
+    for table in sqlTables:
+        table.addForeignKeys()
     
 def insertDataIntoTables(conn : Connection):
     convert_HTC000_G010_T010_Company_Info(conn)
@@ -82,6 +81,25 @@ def insertDataIntoTables(conn : Connection):
     convert_HTC300_G000_T000_Over_Night_Update_History(conn)
     convert_HTC300_G000_T020_Branch_Info(conn)
     convert_HTC300_G010_T010_DFW_ACI_Data(conn)
+    convert_HTC300_G010_T030_ACI_Update_History(conn)
+    convert_HTC300_G020_T010_Status_Values(conn)
+    convert_HTC300_G020_T030_Status_Update_History(conn)
+    # convert_HTC300_G025_T025_Positions_Change_History(conn)
+    # convert_HTC300_G030_T010_Customers(conn)
+    # convert_HTC300_G030_T030_Customer_Update_History(conn)
+    # convert_HTC300_G040_T030_Orders_Update_History(conn)
+    # convert_HTC300_G060_T010_Addresses(conn)
+    # convert_HTC300_G060_T030_Addresses_Update_History(conn)
+    # convert_HTC300_G070_T010_Rates(conn)
+    # convert_HTC300_G070_T030_Rates_Update_History(conn)
+    # convert_HTC300_G080_T010_Agents(conn)
+    # convert_HTC300_G080_T020_Agent_Certifications(conn)
+    # convert_HTC300_G080_T030_Agents_Change_History(conn)
+    # convert_HTC300_G090_T030_Staff_Chg_History(conn)
+    # convert_HTC300_G100_T020_Certification_Trainers(conn)
+    # convert_HTC300_G100_T021_Certifaction_Trainer_Change_History(conn)
+    # convert_HTC300_G100_T030_CertificationTestCatalogChgHistory(conn)
+    # convert_HTC400_G900_T010_Archive_Event_Log(conn)
    
 def main():
     # Check to see if sql Server is set up on the machine
@@ -114,8 +132,8 @@ def main():
     conn = Connection(dbConnections)
     
     createSqlServerTables(conn)
-    addTableForeignKeys(conn)
     insertDataIntoTables(conn)
+    addTableForeignKeys(conn)
 
 def regionGet(**kwargs: str):
     try:

@@ -57,7 +57,29 @@ def addBranch(
     notes : str,
     isActive : bool,
 ) -> int:
-    branchRow = conn.sqlGetInfo('branch', 'id', f"[branch_name] = '{branchName}' AND [company_id] = '{companyId}' AND [address_id] = '{addressId}' AND [airport_code] = '{airportCode}' AND [email] = '{email}' AND [phone_id] = '{phoneId}' AND [fax_id] = '{faxId}' AND [cartage_agent_type] = '{cartageAgentType}' AND [fuel_service_charge] = '{fuelServiceCharge}' AND [transfer_rate] = '{transferRate}' AND [international_air_dim_divisor] = {internationalAirDimDivisor} AND [domestic_air_dim_divisor] = {domesticAirDimDivisor} AND [truck_dim_divisor] = {truckDimDivisor} AND [aci_low] = '{aciLow}' AND [aci_high] = '{aciHigh}' AND [notes] LIKE '{notes}' AND [is_active] = '{isActive}'")
+    branchRow = conn.sqlGetInfo(
+      'branch',
+      'id',
+      whereDetails={
+          'branch_name': branchName,
+          'company_id': companyId,
+          'address_id': addressId,
+          'airport_code': airportCode,
+          'email': email,
+          'phone_id': phoneId,
+          'fax_id': faxId,
+          'cartage_agent_type': cartageAgentType,
+          'fuel_service_charge': fuelServiceCharge,
+          'transfer_rate': transferRate,
+          'international_air_dim_divisor': internationalAirDimDivisor,
+          'domestic_air_dim_divisor': domesticAirDimDivisor,
+          'truck_dim_divisor': truckDimDivisor,
+          'aci_low': aciLow,
+          'aci_high': aciHigh,
+          'notes': notes,
+          'is_active': isActive
+      }
+    )
     if branchRow:
         return branchRow[0].id
     data = {

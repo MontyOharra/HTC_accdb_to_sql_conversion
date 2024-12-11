@@ -33,7 +33,7 @@ def addFax(
             'country_code' : countryCode,
             'area_code' : areaCode,
             'fax_number' : faxNumber,
-            'fax_extensino' : faxNumber
+            'fax_extension' : faxNumber
         }
     )
     if faxRow:

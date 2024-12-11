@@ -4,7 +4,7 @@ aciDataFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
     Field(fieldName="city_id", fieldDetails="INTEGER NOT NULL"),
     Field(fieldName="postal_code_id", fieldDetails="INTEGER NOT NULL"),
-    Field(fieldName="airport_code", fieldDetails="NVARCHAR(5) NOT NULL"),
+    Field(fieldName="airport_code", fieldDetails="NVARCHAR(5)"),
     Field(fieldName="carrier", fieldDetails="NVARCHAR(50) DEFAULT ''"),
     Field(fieldName="area", fieldDetails="NVARCHAR(1) NOT NULL"),
     Field(fieldName="rate_min", fieldDetails="MONEY"),

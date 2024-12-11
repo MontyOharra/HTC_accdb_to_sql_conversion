@@ -10,7 +10,6 @@ def countryGet(**kwargs: str):
             for element in countries.data
             if key in element and kwargs[key].lower() == element[key].lower()
         ]
-        print(res)
         return res
         
     except IndexError:

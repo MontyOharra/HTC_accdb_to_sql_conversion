@@ -29,7 +29,7 @@ def addPhone(
     phoneExtension : str,
 ) -> int:
     if areaCode == '' or phoneNumber == '':
-        return 0
+        return None
     
     phoneRow = conn.sqlGetInfo('phone', 'id',
         whereDetails={

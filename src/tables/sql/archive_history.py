@@ -104,7 +104,54 @@ def addArchiveHistory(
     removedOrderHistory : int,
     removedOrderHawbs : int,
 ) -> int:
-    archiveHistoryRow = conn.sqlGetInfo('archive_history', 'id', f"[date_archived] = '{dateArchived}' AND [open_orders] = '{openOrders}' AND [open_order_assessorials] = '{openOrderAssessorials}' AND [open_order_dimensions] = '{openOrderDimensions}' AND [open_order_drivers] = '{openOrderDrivers}' AND [open_order_attachments] = '{openOrderAttachments}' AND [invoiced_orders] = '{invoicedOrders}' AND [invoiced_order_assessorials] = '{invoicedOrderAssessorials}' AND [invoiced_order_dimensions] = '{invoicedOrderDimensions}' AND [invoiced_order_drivers] = '{invoicedOrderDrivers}' AND [invoiced_order_attachments] = '{invoicedOrderAttachments}' AND [remaining_orders] = '{remainingOrders}' AND [remaining_order_assessorials] = '{remainingOrderAssessorials}' AND [remaining_order_dimensions] = '{remainingOrderDimensions}' AND [remaining_order_drivers] = '{remainingOrderDrivers}' AND [remaining_order_attachments] = '{remainingOrderAttachments}' AND [dock_orders] = '{dockOrders}' AND [dock_order_assessorials] = '{dockOrderAssessorials}' AND [dock_order_dimensions] = '{dockOrderDimensions}' AND [dock_order_drivers] = '{dockOrderDrivers}' AND [dock_order_attachments] = '{dockOrderAttachments}' AND [service_orders] = '{serviceOrders}' AND [service_order_assessorials] = '{serviceOrderAssessorials}' AND [service_order_dimensions] = '{serviceOrderDimensions}' AND [service_order_drivers] = '{serviceOrderDrivers}' AND [service_order_attachments] = '{serviceOrderAttachments}' AND [active_order_history] = '{activeOrderHistory}' AND [active_order_hawbs] = '{activeOrderHawbs}' AND [archived_orders] = '{archivedOrders}' AND [archived_order_assessorials] = '{archivedOrderAssessorials}' AND [archived_order_dimensions] = '{archivedOrderDimensions}' AND [archived_order_drivers] = '{archivedOrderDrivers}' AND [archived_order_attachments] = '{archivedOrderAttachments}' AND [archived_order_history] = '{archivedOrderHistory}' AND [archived_order_hawbs] = '{archivedOrderHawbs}' AND [removed_orders] = '{removedOrders}' AND [removed_order_assessorials] = '{removedOrderAssessorials}' AND [removed_order_dimensions] = '{removedOrderDimensions}' AND [removed_order_drivers] = '{removedOrderDrivers}' AND [removed_order_attachments] = '{removedOrderAttachments}' AND [removed_order_history] = '{removedOrderHistory}' AND [removed_order_hawbs] = '{removedOrderHawbs}'")
+    archiveHistoryRow = conn.sqlGetInfo(
+      'archive_history',
+      'id', 
+      whereDetails={
+          'date_archived': dateArchived,
+          'open_orders': openOrders,
+          'open_order_assessorials': openOrderAssessorials,
+          'open_order_dimensions': openOrderDimensions,
+          'open_order_drivers': openOrderDrivers,
+          'open_order_attachments': openOrderAttachments,
+          'invoiced_orders': invoicedOrders,
+          'invoiced_order_assessorials': invoicedOrderAssessorials,
+          'invoiced_order_dimensions': invoicedOrderDimensions,
+          'invoiced_order_drivers': invoicedOrderDrivers,
+          'invoiced_order_attachments': invoicedOrderAttachments,
+          'remaining_orders': remainingOrders,
+          'remaining_order_assessorials': remainingOrderAssessorials,
+          'remaining_order_dimensions': remainingOrderDimensions,
+          'remaining_order_drivers': remainingOrderDrivers,
+          'remaining_order_attachments': remainingOrderAttachments,
+          'dock_orders': dockOrders,
+          'dock_order_assessorials': dockOrderAssessorials,
+          'dock_order_dimensions': dockOrderDimensions,
+          'dock_order_drivers': dockOrderDrivers,
+          'dock_order_attachments': dockOrderAttachments,
+          'service_orders': serviceOrders,
+          'service_order_assessorials': serviceOrderAssessorials,
+          'service_order_dimensions': serviceOrderDimensions,
+          'service_order_drivers': serviceOrderDrivers,
+          'service_order_attachments': serviceOrderAttachments,
+          'active_order_history': activeOrderHistory,
+          'active_order_hawbs': activeOrderHawbs,
+          'archived_orders': archivedOrders,
+          'archived_order_assessorials': archivedOrderAssessorials,
+          'archived_order_dimensions': archivedOrderDimensions,
+          'archived_order_drivers': archivedOrderDrivers,
+          'archived_order_attachments': archivedOrderAttachments,
+          'archived_order_history': archivedOrderHistory,
+          'archived_order_hawbs': archivedOrderHawbs,
+          'removed_orders': removedOrders,
+          'removed_order_assessorials': removedOrderAssessorials,
+          'removed_order_dimensions': removedOrderDimensions,
+          'removed_order_drivers': removedOrderDrivers,
+          'removed_order_attachments': removedOrderAttachments,
+          'removed_order_history': removedOrderHistory,
+          'removed_order_hawbs': removedOrderHawbs
+      }
+    )
     if archiveHistoryRow:
         return archiveHistoryRow[0].id
     data = {

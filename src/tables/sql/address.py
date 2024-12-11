@@ -37,8 +37,9 @@ def addAddress(
     regionDetails : Dict[str, any],
     countryDetails : Dict[str, any]
 ):
+
     if not addressLine1 or not cityName or not postalCode or not regionDetails or not countryDetails:
-        return 0
+        return None
     
     addressLine1 = addressLine1.lower()
     if type(addressLine2) == str:

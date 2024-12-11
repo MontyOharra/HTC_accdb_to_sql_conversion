@@ -24,12 +24,20 @@ def addHoliday(
     holidayName : str,
     holidayDate : str,
 ) -> int:
-    holidayRow = conn.sqlGetInfo('holiday', 'id', f"[holiday_name] = '{''.join(["''" if x == "'" else x for x in holidayName])}' AND [holiday_date] = '{holidayDate}'")
+    holidayRow = conn.sqlGetInfo(
+        'holiday',
+        'id',
+        whereDetails={
+            'holiday_name': ''.join(["''" if x == "'" else x for x in holidayName]),
+            'holiday_date': holidayDate
+        }
+    )
     if holidayRow:
         return holidayRow[0].id
+
     data = {
-        'holiday_name' : holidayName,
-        'holiday_date' : holidayDate,
+        'holiday_name': holidayName,
+        'holiday_date': holidayDate,
     }
     conn.sqlInsertRow('holiday', data)
     conn.commit()

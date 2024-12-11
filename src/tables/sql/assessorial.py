@@ -6,7 +6,7 @@ assessorialFields: List[Field] = [
     Field(fieldName="old_id", fieldDetails="INTEGER"),
     Field(fieldName="assessorial_name", fieldDetails="NVARCHAR(31) NOT NULL"),
     Field(fieldName="min_charge", fieldDetails="MONEY NOT NULL"),
-    Field(fieldName="basis_type", fieldDetails="nvarchar(255) NOT NULL CHECK ([basis_type] IN ('fixed', 'weight', 'prompt')) NOT NULL"),
+    Field(fieldName="basis_type", fieldDetails="nvarchar(255) NOT NULL CHECK ([basis_type] IN ('fixed', 'weight', 'prompt'))"),
     Field(fieldName="basis_portion", fieldDetails="FLOAT NOT NULL"),
     Field(fieldName="basis_rate", fieldDetails="MONEY"),
     Field(fieldName="user_prompt", fieldDetails="NVARCHAR(127)"),

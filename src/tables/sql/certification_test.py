@@ -27,13 +27,22 @@ def addCertificationTest(
     certificationTestTrainerId : int,
     isActive : bool,
 ) -> int:
-    certificationTestRow = conn.sqlGetInfo('certification_test', 'id', f"[certification_name] = '{certificationName}' AND [certification_test_trainer_id] = '{certificationTestTrainerId}' AND [is_active] = '{isActive}'")
+    certificationTestRow = conn.sqlGetInfo(
+        'certification_test',
+        'id',
+        whereDetails={
+            'certification_name': certificationName,
+            'certification_test_trainer_id': certificationTestTrainerId,
+            'is_active': isActive
+        }
+    )
     if certificationTestRow:
         return certificationTestRow[0].id
+
     data = {
-        'certification_name' : certificationName,
-        'certification_test_trainer_id' : certificationTestTrainerId,
-        'is_active' : isActive,
+        'certification_name': certificationName,
+        'certification_test_trainer_id': certificationTestTrainerId,
+        'is_active': isActive,
     }
     conn.sqlInsertRow('certification_test', data)
     conn.commit()
