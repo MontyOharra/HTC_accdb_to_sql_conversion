@@ -58,7 +58,7 @@ class Connection:
         if value.strip() == "":
           fieldValues.append("NULL")
         else:
-          fieldValues.append(f"'{''.join([f"'{x}'" if x == '\'' else x for x in value])}'".strip())
+          fieldValues.append(f"'{''.join(["''" if x == "'" else x for x in value])}'".strip())
       elif type(value) == int or type(value) == float:
         fieldValues.append(value)
       elif type(value) == bool:
@@ -180,7 +180,8 @@ class Connection:
       self.handleError(
         info={
           'sqlStatement' : selectSql,
-          'tableName' : tableName
+          'tableName' : tableName,
+          'whereDetails': whereDetails,
         }
       )
    
@@ -254,6 +255,8 @@ class Connection:
       errorMessage += f'            From field: [{info['fromTableField']}], Target table: [{info['toTableName']}], Target table field: [{info['toTableField']}]'
     elif self.currentProcess == f"gettingSqlInfo":
       errorMessage = f'Error getting info from [{info['tableName']}].\n    Details:\n'
+      for fieldName, fieldValue in info['whereDetails'].items():
+        errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
     elif self.currentProcess == 'gettingSqlLastIdCreated':
       errorMessage = f'Error getting last id created in [{info['tableName']}].\n'
     elif self.currentProcess == "gettingAccessTable":

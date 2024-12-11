@@ -3,8 +3,11 @@ from ...imports import *
 from ..sql.archive_history import addArchiveHistory
 
 def convert_HTC300_G000_T000_Archive_Update_History(conn : Connection):
-    archive_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G000_T000 Archive Update History')
-    for row in archive_historyInfo:
+    tableName = 'HTC300_G000_T000 Archive Update History'
+    archive_historyInfo = conn.accessGetTableInfo('htc300', tableName)
+    for i, row in enumerate(archive_historyInfo, start=1):
+        sys.stdout.write(f"\rConverting [{tableName}] Table: Currently converting row ({i}/{len(archive_historyInfo)})\033[K")
+        sys.stdout.flush()
         addArchiveHistory(
             conn,
             dateArchived=row.ArcCnt_Date,
@@ -50,4 +53,5 @@ def convert_HTC300_G000_T000_Archive_Update_History(conn : Connection):
             removedOrderHistory=int(row.ArcCnt_RmvdHist) if row.ArcCnt_RmvdHist != None else 0 ,
             removedOrderHawbs=int(row.ArcCnt_RmvdHAWB) if row.ArcCnt_RmvdHAWB != None else 0 ,
         )
-    print('Completed [HTC300_G000_T000 Archive Update History] Conversion.')
+    sys.stdout.write(f"\rCompleted [{tableName}] Conversion.\033[K\n")
+    sys.stdout.flush()

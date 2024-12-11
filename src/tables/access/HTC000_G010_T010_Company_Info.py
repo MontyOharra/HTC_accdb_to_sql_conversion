@@ -6,8 +6,11 @@ from ..sql.phone import addPhone
 from ..sql.fax import addFax
 
 def convert_HTC000_G010_T010_Company_Info(conn : Connection):
-    companyInfo = conn.accessGetTableInfo('htc000', 'HTC000_G010_T010 Company Info')
-    for row in companyInfo:
+    tableName = 'HTC000_G010_T010 Company Info'
+    companyInfo = conn.accessGetTableInfo('htc000', tableName)
+    for i, row in enumerate(companyInfo, start=1):
+        sys.stdout.write(f"\rConverting [{tableName}] Table: Currently converting row ({i}/{len(companyInfo)})\033[K")
+        sys.stdout.flush()
         phoneId = addPhone(
             conn,
             countryCode='1',
@@ -51,5 +54,6 @@ def convert_HTC000_G010_T010_Company_Info(conn : Connection):
             notes=row.CoNotes
         )
         
-    print('Completed [HTC000_G010_T010 Company Info] Conversion.')
+    sys.stdout.write(f"\rCompleted [{tableName}] Conversion.\033[K\n")
+    sys.stdout.flush()
         

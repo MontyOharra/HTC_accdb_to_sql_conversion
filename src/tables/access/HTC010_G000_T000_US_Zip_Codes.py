@@ -5,8 +5,11 @@ from ..sql.region import addRegion
 from ..sql.country import addCountry
 
 def convert_HTC010_G000_T000_US_Zip_Codes(conn : Connection):
-    zipCodeInfo = conn.accessGetTableInfo('htc010', 'HTC010_G000_T000 US Zip Codes')
-    for row in zipCodeInfo:
+    tableName = 'HTC010_G000_T000 US Zip Codes'
+    zipCodeInfo = conn.accessGetTableInfo('htc010', tableName)
+    for i, row in enumerate(zipCodeInfo, start=1):
+        sys.stdout.write(f"\rConverting [{tableName}] Table: Currently converting row ({i}/{len(zipCodeInfo)})\033[K")
+        sys.stdout.flush()
         if row.ZipCodeType == 'MILITARY':
             continue
         if row.State in [
@@ -14,21 +17,20 @@ def convert_HTC010_G000_T000_US_Zip_Codes(conn : Connection):
             'NT', 'NS', 'NU', 'ON', 'PE',
             'QC', 'SK', 'YT'
         ]:
-            countryId = addCountry(
-                conn,
-                countryName='Canada'
-            )
+          addCityPostalCode(
+              conn,
+              cityName=row.City,
+              postalCode=row.Zipcode,
+              regionDetails={'isoCode' : row.State},
+              countryDetails={'countryName' : 'Canada'}
+          )
         else:
-            countryId = 1
-        regionId = addRegion(
-            conn,
-            countryId=countryId,
-            isoCode=row.State
-        )
-        addCityPostalCode(
-            conn,
-            cityName=row.City,
-            postalCode=row.Zipcode,
-            regionId=regionId
-        )
-    print('Completed [HTC010_G000_T000 US Zip Codes] Conversion.')
+          addCityPostalCode(
+              conn,
+              cityName=row.City,
+              postalCode=row.Zipcode,
+              regionDetails={'isoCode' : row.State},
+              countryDetails={'default' : ''}
+          )
+    sys.stdout.write(f"\rCompleted [{tableName}] Conversion.\033[K\n")
+    sys.stdout.flush()

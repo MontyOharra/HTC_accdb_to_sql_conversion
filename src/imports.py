@@ -12,3 +12,5 @@ from .utils.dataConversions import *
 from isocodes import countries, subdivisions_countries
 
 from .tables.sql.user import getUserIdFromUsername
+
+import sys

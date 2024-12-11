@@ -6,7 +6,7 @@ aciDataFields: List[Field] = [
     Field(fieldName="postal_code_id", fieldDetails="INTEGER NOT NULL"),
     Field(fieldName="airport_code", fieldDetails="NVARCHAR(5)"),
     Field(fieldName="carrier", fieldDetails="NVARCHAR(50) DEFAULT ''"),
-    Field(fieldName="area", fieldDetails="NVARCHAR(1) NOT NULL"),
+    Field(fieldName="area", fieldDetails="NVARCHAR(1)"),
     Field(fieldName="rate_min", fieldDetails="MONEY"),
     Field(fieldName="rate_100", fieldDetails="MONEY"),
     Field(fieldName="rate_1000", fieldDetails="MONEY"),

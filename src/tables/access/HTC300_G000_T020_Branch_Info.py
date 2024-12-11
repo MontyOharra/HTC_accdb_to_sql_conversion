@@ -6,8 +6,11 @@ from ..sql.fax import addFax
 from ..sql.branch import addBranch
 
 def convert_HTC300_G000_T020_Branch_Info(conn : Connection):
-    branchInfo = conn.accessGetTableInfo('htc300', 'HTC300_G000_T020 Branch Info')
-    for row in branchInfo:
+    tableName = 'HTC300_G000_T020 Branch Info'
+    branchInfo = conn.accessGetTableInfo('htc300', tableName)
+    for i, row in enumerate(branchInfo, start=1):
+        sys.stdout.write(f"\rConverting [{tableName}] Table: Currently converting row ({i}/{len(branchInfo)})\033[K")
+        sys.stdout.flush()
         addressId = addAddress(
             conn,
             row.BrAddrLn1,
@@ -52,4 +55,5 @@ def convert_HTC300_G000_T020_Branch_Info(conn : Connection):
             domesticAirDimDivisor=row.BrDimFNatlAir,
             truckDimDivisor=row.BrDimfTruck,
         )
-    print('Completed [HTC300_G000_T020 Branch Info] Conversion.')
+    sys.stdout.write(f"\rCompleted [{tableName}] Conversion.\033[K\n")
+    sys.stdout.flush()

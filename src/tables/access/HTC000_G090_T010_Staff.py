@@ -5,8 +5,11 @@ from ..sql.address import addAddress
 from ..sql.phone import addPhone
 
 def convert_HTC000_G090_T010_Staff(conn : Connection):
-    userInfo = conn.accessGetTableInfo('htc000', 'HTC000_G090_T010 Staff')
-    for row in userInfo:
+    tableName = 'HTC000_G090_T010 Staff'
+    userInfo = conn.accessGetTableInfo('htc000', tableName)
+    for i, row in enumerate(userInfo, start=1):
+        sys.stdout.write(f"\rConverting [{tableName}] Table: Currently converting row ({i}/{len(userInfo)})\033[K")
+        sys.stdout.flush()
         phoneMainId = addPhone(
             conn,
             '1',
@@ -65,4 +68,5 @@ def convert_HTC000_G090_T010_Staff(conn : Connection):
             isDefaultDocOwner=row.Staff_DefaultDocOwner,
             isActive=row.Staff_Active
         )
-    print('Completed [HTC000_G090_T010 Staff] Conversion.')
+    sys.stdout.write(f"\rCompleted [{tableName}] Conversion.\033[K\n")
+    sys.stdout.flush()

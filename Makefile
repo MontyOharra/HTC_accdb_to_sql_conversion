@@ -8,7 +8,7 @@ AUTOPEP8 := autopep8
 
 
 test: htcConversionTest.py
-	$(PYTHON) -m htcConversionTest > htcConversionTest.log
+	$(PYTHON) -u -m htcConversionTest | tee htcConversionTest.log
 	cat htcConversionTest.log
 
 clean: htcConversionTest.py htcConversionFull.py

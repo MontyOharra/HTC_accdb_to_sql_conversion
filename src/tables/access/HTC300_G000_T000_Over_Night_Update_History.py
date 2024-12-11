@@ -3,8 +3,11 @@ from ...imports import *
 from ..sql.overnight_maintenance_history import addOvernightMaintenanceHistory
 
 def convert_HTC300_G000_T000_Over_Night_Update_History(conn : Connection):
-    overnight_maintenance_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G000_T000 Over Night Update History')
-    for row in overnight_maintenance_historyInfo:
+    tableName = 'HTC300_G000_T000 Over Night Update History'
+    overnight_maintenance_historyInfo = conn.accessGetTableInfo('htc300', tableName)
+    for i, row in enumerate(overnight_maintenance_historyInfo, start=1):
+        sys.stdout.write(f"\rConverting [{tableName}] Table: Currently converting row ({i}/{len(overnight_maintenance_historyInfo)})\033[K")
+        sys.stdout.flush()
         userId = getUserIdFromUsername(conn, row.ONUser)
         
         addOvernightMaintenanceHistory(
@@ -42,4 +45,5 @@ def convert_HTC300_G000_T000_Over_Night_Update_History(conn : Connection):
             remainingOrderDriversOut=int(row.ONRemDVOut),
             remainingOrderAttachmentsOut=int(row.ONRemAtOut),
         )
-    print('Completed [HTC300_G000_T000 Over Night Update History] Conversion.')
+    sys.stdout.write(f"\rCompleted [{tableName}] Conversion.\033[K\n")
+    sys.stdout.flush()

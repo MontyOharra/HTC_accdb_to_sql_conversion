@@ -1,3 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import os
+
 from src.tables.tableImports import *
 
 from src.utils.sqlHelpers import getSqlServerName
@@ -69,7 +72,53 @@ def addTableForeignKeys(conn : Connection):
     for table in sqlTables:
         table.addForeignKeys()
     
-def insertDataIntoTables(conn : Connection):
+def insertDataIntoTables(conn : Connection, max_threads: int = None):
+    tasks = [
+      convert_HTC000_G010_T010_Company_Info,
+      convert_HTC000_G025_T010_Positions,
+      convert_HTC000_G090_T010_Staff,
+      convert_HTC010_G000_T000_OrderType_Values,
+      convert_HTC010_G000_T000_US_Zip_Codes,
+      convert_HTC010_G100_T010_CertificationTestCatalog,
+      convert_HTC300_G000_T000_Archive_Update_History,
+      convert_HTC300_G000_T000_Holidays,
+      convert_HTC300_G000_T000_Over_Night_Update_History,
+      convert_HTC300_G000_T020_Branch_Info,
+      convert_HTC300_G010_T010_DFW_ACI_Data,
+      convert_HTC300_G010_T030_ACI_Update_History,
+      convert_HTC300_G020_T010_Status_Values,
+      convert_HTC300_G020_T030_Status_Update_History,
+      # convert_HTC300_G025_T025_Positions_Change_History,
+      # convert_HTC300_G030_T010_Customers,
+      # convert_HTC300_G030_T030_Customer_Update_History,
+      # convert_HTC300_G040_T030_Orders_Update_History,
+      # convert_HTC300_G060_T010_Addresses,
+      # convert_HTC300_G060_T030_Addresses_Update_History,
+      # convert_HTC300_G070_T010_Rates,
+      # convert_HTC300_G070_T030_Rates_Update_History,
+      # convert_HTC300_G080_T010_Agents,
+      # convert_HTC300_G080_T020_Agent_Certifications,
+      # convert_HTC300_G080_T030_Agents_Change_History,
+      # convert_HTC300_G090_T030_Staff_Chg_History,
+      # convert_HTC300_G100_T020_Certification_Trainers,
+      # convert_HTC300_G100_T021_Certifaction_Trainer_Change_History,
+      # convert_HTC300_G100_T030_CertificationTestCatalogChgHistory,
+      # convert_HTC400_G900_T010_Archive_Event_Log,
+    ]
+    max_threads = max_threads or os.cpu_count()
+    print(f"Starting data conversion with {max_threads} threads...")
+    
+    with ThreadPoolExecutor(max_threads) as executor:
+        future_to_task = {
+            executor.submit(task(conn), task, conn): task for task in tasks
+        }
+        for future in as_completed(future_to_task):
+            task = future_to_task[future]
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Task {task.__name__} generated an exception: {e}")
+    '''
     convert_HTC000_G010_T010_Company_Info(conn)
     convert_HTC000_G025_T010_Positions(conn)
     convert_HTC000_G090_T010_Staff(conn)
@@ -100,7 +149,7 @@ def insertDataIntoTables(conn : Connection):
     # convert_HTC300_G100_T021_Certifaction_Trainer_Change_History(conn)
     # convert_HTC300_G100_T030_CertificationTestCatalogChgHistory(conn)
     # convert_HTC400_G900_T010_Archive_Event_Log(conn)
-   
+    '''
 def main():
     # Check to see if sql Server is set up on the machine
     sqlServerName = getSqlServerName()
