@@ -68,6 +68,7 @@ def createOrderTable(conn):
 
 def addOrder(
     conn : Connection,
+    orderId : int,
     branchId : int,
     orderTypeId : int,
     customerId : int,
@@ -152,7 +153,7 @@ def addOrder(
         'is_auto_assessorials' : isAutoAssessorials,
         'is_weight_charge_calculated' : isWeightChargeCalculated,
     }
-    conn.sqlInsertRow('order', data)
+    conn.sqlInsertRow('order', data, insertId=orderId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('order')
