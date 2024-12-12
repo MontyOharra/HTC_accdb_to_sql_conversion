@@ -1,0 +1,2 @@
+isocodes==2024.2.2
+pyodbc==5.2.0

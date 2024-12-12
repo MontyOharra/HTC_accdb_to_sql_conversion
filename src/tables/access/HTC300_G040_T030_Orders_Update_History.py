@@ -1,7 +1,12 @@
 from ...imports import *
 
-def convert_HTC300_G040_T030_Orders_Update_History(conn : Connection):
-    order_change_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G040_T030 Orders Update History')
-    for row in order_change_historyInfo:
-        pass
-    print('Completed [HTC300_G040_T030 Orders Update History] Conversion.')
+from ..sql.order_change_history import addOrderChangeHistory
+
+def convert_HTC300_G040_T030_Orders_Update_History(conn : Connection, row):
+    addOrderChangeHistory(
+        conn,
+        dateChanged=row.STAT_UpdtDate,
+        orderStatusId=row.STAT_Seq,
+        userId=getUserIdFromUsername(conn, row.STAT_UpdtLID), 
+        changes=row.STAT_Changes if not row.STAT_Changes.strip() == '' else 'N/A'
+    )

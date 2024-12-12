@@ -34,6 +34,7 @@ def createCustomerTable(conn):
 
 def addCustomer(
     conn : Connection,
+    customerId : int,
     branchId : int,
     customerName : str,
     addressId : int,
@@ -62,7 +63,7 @@ def addCustomer(
         'is_active' : isActive,
         'notes' : notes,
     }
-    conn.sqlInsertRow('customer', data)
+    conn.sqlInsertRow('customer', data, insertId=customerId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('customer')
