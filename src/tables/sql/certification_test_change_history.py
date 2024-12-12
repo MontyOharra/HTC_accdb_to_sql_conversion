@@ -3,7 +3,7 @@ from ...imports import *
 certificationTestChangeHistoryFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
     Field(fieldName="certification_test_id", fieldDetails="INTEGER NOT NULL"),
-    Field(fieldName="user_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="user_id", fieldDetails="INTEGER"),
     Field(fieldName="date_changed", fieldDetails="DATETIME2 NOT NULL"),
     Field(fieldName="changes", fieldDetails="NTEXT NOT NULL"),
 ]

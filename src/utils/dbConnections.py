@@ -1,50 +1,58 @@
 import pyodbc
 
-from .sqlHelpers import checkIfDatabaseExists
+from ..imports import Connection
+
 
 def connectToAccessDatabase(accessDbPath):
-    accessConnStr = (
-        r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
-        rf'DBQ={accessDbPath};'
-    )
-    
-    accessConn = pyodbc.connect(accessConnStr)
-    return accessConn
+    try:
+        accessConnStr = (
+            r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+            rf'DBQ={accessDbPath};'
+        )
+        
+        accessConn = pyodbc.connect(accessConnStr)
+        return accessConn
+    except pyodbc.Error as e:
+        print(f"Access Connection Error: {e}")
+        raise
 
-def connectToSqlDatabase(sqlDriver, sqlServerName, sqlDatabaseName, resetDatabase=False):
+def connectToSqlDatabase(sqlDriver, sqlServerName, sqlDatabaseName):
     # Connection to SQL Server database
-    initialSqlServerConnString = (
-        f'DRIVER={sqlDriver};'
-        f'SERVER={sqlServerName};'
-        f'DATABASE=master;'
-        'Trusted_Connection=yes;'
-    )
-    initialSqlConn = pyodbc.connect(initialSqlServerConnString)
-    initialSqlConn.autocommit = True
+    try:
+        sqlServerConnString = (
+            f'DRIVER={sqlDriver};'
+            f'SERVER={sqlServerName};'
+            f'DATABASE={sqlDatabaseName};'
+            'Trusted_Connection=yes;'
+        )
+        return pyodbc.connect(sqlServerConnString)
 
-    databaseExists = checkIfDatabaseExists(initialSqlConn.cursor(), sqlDatabaseName)
-    if (not databaseExists):
-        createNewDatabase = input(f"The database name {sqlDatabaseName} does not exist within the SQL Server. Would you like to create a database with that name: [y/n]").lower()
-        if (createNewDatabase == 'y'):
-          initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
-        else:
-            print('[ABORTING CONVERSION PROCESS]')
-            return None
-    else:
-        if not (resetDatabase):
-            resetDatabase = input(f"Would you like to reset this database by deleting it and recreating it? [y/n]: ").lower()
-        else:
-            resetDatabase = 'y'
-        if (resetDatabase == 'y'):
-          initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
-          initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
+    except pyodbc.Error as e:
+        print(f"SQL Connection Error: {e}")
+        raise
+      
+def getConnection(htcAllPath, sqlDriver, sqlServerName, sqlDatabaseName):
+    try:
+        sqlConn = connectToSqlDatabase(sqlDriver, sqlServerName, sqlDatabaseName)
 
-    sqlServerConnString = (
-        f'DRIVER={sqlDriver};'
-        f'SERVER={sqlServerName};'
-        f'DATABASE={sqlDatabaseName};'
-        'Trusted_Connection=yes;'
-    )
+        htc000Conn = connectToAccessDatabase(htcAllPath + 'HTC000_Data_Staff.accdb')
+        htc010Conn = connectToAccessDatabase(htcAllPath + 'HTC010_Static_data.accdb')
+        htc300Conn = connectToAccessDatabase(htcAllPath + 'HTC300_Data-01-01.accdb')
+        htc320Conn = connectToAccessDatabase(htcAllPath + 'HTC320_TSA_Data-01-01.accdb')
+        htc350Conn = connectToAccessDatabase(htcAllPath + 'HTC350D ETO Parameters.accdb')
+        htc400Conn = connectToAccessDatabase(htcAllPath + 'HTC400_Order Archives.accdb')
 
-    sqlConn = pyodbc.connect(sqlServerConnString)
-    return sqlConn
+        dbConnections = {
+            'sqlServer': sqlConn,
+            'htc000': htc000Conn,
+            'htc010': htc010Conn,
+            'htc300': htc300Conn,
+            'htc320': htc320Conn,
+            'htc350': htc350Conn,
+            'htc400': htc400Conn
+        }
+        return Connection(dbConnections)
+
+    except Exception as e:
+        print(f"Error creating connections: {e}")
+        raise

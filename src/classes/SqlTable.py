@@ -28,6 +28,9 @@ class SqlTable:
     except Exception as err:
       print(f'Error creating [{self.tableName}] table.')
 
+  def openNewConnection(self, conn):
+    self.conn = conn
+
   def addIndexes(self):
     for index in self.indexes:
       self.conn.sqlAddIndex(self.tableName, index.indexType, index.indexFields, index.indexName, index.isUnique)

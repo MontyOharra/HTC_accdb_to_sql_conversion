@@ -24,6 +24,7 @@ def createPositionTable(conn):
 
 def addPosition(
     conn : Connection,
+    positionId : int,
     positionName : str,
     securityLevel : int,
     isActive : bool,
@@ -47,7 +48,7 @@ def addPosition(
         'is_active' : isActive,
         'branch_id' : branchId,
     }
-    conn.sqlInsertRow('position', data)
+    conn.sqlInsertRow('position', data, insertId=positionId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('position')

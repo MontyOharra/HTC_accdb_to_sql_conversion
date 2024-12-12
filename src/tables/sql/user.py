@@ -49,6 +49,7 @@ def createUserTable(conn):
 
 def addUser(
     conn : Connection,
+    userId : int,
     username : str,
     email : str,
     passwordHash : str,
@@ -132,7 +133,7 @@ def addUser(
         'is_security_coordinator' : isSecurityCoordinator,
         'is_tsa_trainer' : isTsaTrainer,
     }
-    conn.sqlInsertRow('user', data)
+    conn.sqlInsertRow('user', data, insertId=userId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('user')

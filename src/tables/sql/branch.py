@@ -39,6 +39,7 @@ def createBranchTable(conn):
 
 def addBranch(
     conn : Connection,
+    branchId : int,
     branchName : str,
     companyId : int,
     addressId : int,
@@ -101,7 +102,7 @@ def addBranch(
         'notes' : notes,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('branch', data)
+    conn.sqlInsertRow('branch', data, insertId=branchId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('branch')

@@ -1,199 +1,279 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import Lock
+import sys
 import os
+import pyodbc
 
 from src.tables.tableImports import *
-
-from src.utils.sqlHelpers import getSqlServerName
-from src.utils.dbConnections import connectToAccessDatabase, connectToSqlDatabase
-
 from src.imports import *
 
-sqlTables : List[SqlTable] = []
+from src.utils.sqlHelpers import checkIfDatabaseExists, getSqlServerName
+from src.utils.dbConnections import getConnection
 
-def createSqlServerTables(conn : Connection):
+createSqlServerTableTasks = [
+    createAciDataTable,
+    createAciDataChangeHistoryTable,
+    createAddressTable,
+    createAddressChangeHistoryTable,
+    createAgentTable,
+    createAgentCertificationTestTable,
+    createAgentChangeHistoryTable,
+    createArchiveErrorLogTable,
+    createArchiveHistoryTable,
+    createAssessorialTable,
+    createAssessorialChangeHistoryTable,
+    createBranchTable,
+    createBranchChangeHistoryTable,
+    createCertificationTestTable,
+    createCertificationTestChangeHistoryTable,
+    createCertificationTestTrainerChangeHistoryTable,
+    createCertificationTestTrainerTable,
+    createCityPostalCodeTable,
+    createCityRegionTable,
+    createCityTable,
+    createCompanyTable,
+    createCompanyChangeHistoryTable,
+    createCountryTable,
+    createCustomerTable,
+    createCustomerChangeHistoryTable,
+    createCustomerDefaultAssessorialTable,
+    createFaxTable,
+    createHolidayTable,
+    createLocationTable,
+    createLocationChangeHistoryTable,
+    createLocationDefaultAssessorialTable,
+    createOrderAssessorialTable,
+    createOrderAttachmentTable,
+    createOrderChangeHistoryTable,
+    createOrderDimTable,
+    createOrderDriverTable,
+    createOrderStatusTable,
+    createOrderStatusChangeHistoryTable,
+    createOrderTypeTable,
+    createOrderTable,
+    createOvernightMaintenanceHistoryTable,
+    createPhoneTable,
+    createPositionTable,
+    createPositionChangeHistoryTable,
+    createPostalCodeTable,
+    createPostalCodeRegionTable,
+    createRateAreaTable,
+    createRateChangeHistoryTable,
+    createRateTable,
+    createRegionTable,
+    createSpecialChangeHistoryTable,
+    createSpecialTable,
+    createUserTable,
+    createUserChangeHistoryTable,    
+]
+
+tableConversionTasks = [
+      ('HTC000_G010_T010 Company Info', convert_HTC000_G010_T010_Company_Info),
+      ('HTC000_G025_T010 Positions', convert_HTC000_G025_T010_Positions),
+      ('HTC000_G090_T010 Staff', convert_HTC000_G090_T010_Staff),
+      ('HTC010_G000_T000 OrderType Values', convert_HTC010_G000_T000_OrderType_Values),
+      # ('HTC010_G000_T000 US Zip Codes', convert_HTC010_G000_T000_US_Zip_Codes),
+      ('HTC010_G100_T010 CertificationTestCatalog', convert_HTC010_G100_T010_CertificationTestCatalog),
+      ('HTC300_G000_T000 Archive Update History', convert_HTC300_G000_T000_Archive_Update_History),
+      ('HTC300_G000_T000 Holidays', convert_HTC300_G000_T000_Holidays),
+      ('HTC300_G000_T000 Over Night Update History', convert_HTC300_G000_T000_Over_Night_Update_History),
+      ('HTC300_G000_T020 Branch Info', convert_HTC300_G000_T020_Branch_Info),
+      ('HTC300_G010_T010 DFW_ACI_Data', convert_HTC300_G010_T010_DFW_ACI_Data),
+      ('HTC300_G010_T030 ACI Update History', convert_HTC300_G010_T030_ACI_Update_History),
+      # ('HTC300_G020_T010 Status Values', convert_HTC300_G020_T010_Status_Values),
+      # ('HTC300_G020_T030 Status Update History', convert_HTC300_G020_T030_Status_Update_History),
+      # ('HTC300_G025_T025 Positions Change History', convert_HTC300_G025_T025_Positions_Change_History),
+      # ('HTC300_G030_T010 Customers', convert_HTC300_G030_T010_Customers),
+      # ('HTC300_G030_T030 Customer Update History', convert_HTC300_G030_T030_Customer_Update_History), 
+      # ('HTC300_G040_T030 Orders_Update_History', convert_HTC300_G040_T030_Orders_Update_History),
+      # ('HTC300_G060_T010 Addresses', convert_HTC300_G060_T010_Addresses),
+      # ('HTC300_G060_T030 Addresses_Update_History', convert_HTC300_G060_T030_Addresses_Update_History),
+      # ('HTC300_G070_T010 Rates', convert_HTC300_G070_T010_Rates),
+      # ('HTC300_G070_T030 Rates_Update_History', convert_HTC300_G070_T030_Rates_Update_History),
+      # ('HTC300_G080_T010 Agents', convert_HTC300_G080_T010_Agents),
+      # ('HTC300_G080_T020 Agent_Certifications', convert_HTC300_G080_T020_Agent_Certifications),
+      # ('HTC300_G080_T030 Agents_Change_History', convert_HTC300_G080_T030_Agents_Change_History),
+      # ('HTC300_G090_T030 Staff_Chg_History', convert_HTC300_G090_T030_Staff_Chg_History),
+      # ('HTC300_G100_T020 Certification_Trainers', convert_HTC300_G100_T020_Certification_Trainers),
+      # ('HTC300_G100_T021 Certifaction_Trainer_Change_History', convert_HTC300_G100_T021_Certifaction_Trainer_Change_History),
+      # ('HTC300_G100_T030 CertificationTestCatalogChgHistory', convert_HTC300_G100_T030_CertificationTestCatalogChgHistory),
+      # ('HTC400_G900_T010 Archive_Event_Log', convert_HTC400_G900_T010_Archive_Event_Log),
+]
+
+sqlTables = []
+sqlTables_lock = Lock()
+
+
+def batch(data, batch_size):
+    """Splits data into smaller batches."""
+    for i in range(0, len(data), batch_size):
+        yield data[i:i + batch_size]
+
+
+def getRows(connFactory, tableName):
+      localConn = connFactory()
+      rows = localConn.accessGetTableInfo(tableName[0:6].lower(), tableName)
+      localConn.close()
+      return rows
+    
+    
+def addToSqlTables(connFactory, createSqlServerTableTask):
     global sqlTables
-    
-    sqlTables.append(createAciDataTable(conn))
-    sqlTables.append(createAciDataChangeHistoryTable(conn))
-    sqlTables.append(createAddressTable(conn))
-    sqlTables.append(createAddressChangeHistoryTable(conn))
-    sqlTables.append(createAgentTable(conn))
-    sqlTables.append(createAgentCertificationTestTable(conn))
-    sqlTables.append(createAgentChangeHistoryTable(conn))
-    sqlTables.append(createArchiveErrorLogTable(conn))
-    sqlTables.append(createArchiveHistoryTable(conn))
-    sqlTables.append(createAssessorialTable(conn))
-    sqlTables.append(createAssessorialChangeHistoryTable(conn))
-    sqlTables.append(createBranchTable(conn))
-    sqlTables.append(createBranchChangeHistoryTable(conn))
-    sqlTables.append(createCertificationTestTable(conn))
-    sqlTables.append(createCertificationTestChangeHistoryTable(conn))
-    sqlTables.append(createCertificationTestTrainerChangeHistoryTable(conn))
-    sqlTables.append(createCertificationTestTrainerTable(conn))
-    sqlTables.append(createCityPostalCodeTable(conn))
-    sqlTables.append(createCityRegionTable(conn))
-    sqlTables.append(createCityTable(conn))
-    sqlTables.append(createCompanyTable(conn))
-    sqlTables.append(createCompanyChangeHistoryTable(conn))
-    sqlTables.append(createCountryTable(conn))
-    sqlTables.append(createCustomerTable(conn))
-    sqlTables.append(createCustomerChangeHistoryTable(conn))
-    sqlTables.append(createCustomerDefaultAssessorialTable(conn))
-    sqlTables.append(createFaxTable(conn))
-    sqlTables.append(createHolidayTable(conn))
-    sqlTables.append(createLocationTable(conn))
-    sqlTables.append(createLocationChangeHistoryTable(conn))
-    sqlTables.append(createLocationDefaultAssessorialTable(conn))
-    sqlTables.append(createOrderAssessorialTable(conn))
-    sqlTables.append(createOrderAttachmentTable(conn))
-    sqlTables.append(createOrderChangeHistoryTable(conn))
-    sqlTables.append(createOrderDimTable(conn))
-    sqlTables.append(createOrderDriverTable(conn))
-    sqlTables.append(createOrderStatusTable(conn))
-    sqlTables.append(createOrderStatusChangeHistoryTable(conn))
-    sqlTables.append(createOrderTypeTable(conn))
-    sqlTables.append(createOrderTable(conn))
-    sqlTables.append(createOvernightMaintenanceHistoryTable(conn))
-    sqlTables.append(createPhoneTable(conn))
-    sqlTables.append(createPositionTable(conn))
-    sqlTables.append(createPositionChangeHistoryTable(conn))
-    sqlTables.append(createPostalCodeTable(conn))
-    sqlTables.append(createPostalCodeRegionTable(conn))
-    sqlTables.append(createRateAreaTable(conn))
-    sqlTables.append(createRateChangeHistoryTable(conn))
-    sqlTables.append(createRateTable(conn))
-    sqlTables.append(createRegionTable(conn))
-    sqlTables.append(createSpecialChangeHistoryTable(conn))
-    sqlTables.append(createSpecialTable(conn))
-    sqlTables.append(createUserTable(conn))
-    sqlTables.append(createUserChangeHistoryTable(conn))
+    try:
+        localConn = connFactory()
+        result = createSqlServerTableTask(localConn)
+        with sqlTables_lock:
+            sqlTables.append(result)
+        localConn.close()
+    except Exception as e:
+        print(f"Error in task {createSqlServerTableTask.__name__}: {e}")
+        
+def createSqlServerTables(connFactory, maxThreads):
+    futures_to_task = {}
+    with ThreadPoolExecutor(maxThreads) as executor:
+        for createSqlServerTableTask in createSqlServerTableTasks:
+            future = executor.submit(
+                addToSqlTables,
+                connFactory,
+                createSqlServerTableTask
+            )
+            futures_to_task[future] = createSqlServerTableTask
 
-def addTableForeignKeys(conn : Connection):
-    for table in sqlTables:
-        table.addForeignKeys()
+        for future in as_completed(futures_to_task):
+            task = futures_to_task[future]
+            try:
+                # Add a timeout to detect hanging tasks
+                future.result(timeout=30)  # Adjust timeout as needed
+            except TimeoutError:
+                print(f"Task {task.__name__} timed out.")
+            except Exception as e:
+                print(f"Task {task.__name__} generated an exception: {e}")
+
     
-def insertDataIntoTables(conn : Connection, max_threads: int = None):
-    tasks = [
-      convert_HTC000_G010_T010_Company_Info,
-      convert_HTC000_G025_T010_Positions,
-      convert_HTC000_G090_T010_Staff,
-      convert_HTC010_G000_T000_OrderType_Values,
-      convert_HTC010_G000_T000_US_Zip_Codes,
-      convert_HTC010_G100_T010_CertificationTestCatalog,
-      convert_HTC300_G000_T000_Archive_Update_History,
-      convert_HTC300_G000_T000_Holidays,
-      convert_HTC300_G000_T000_Over_Night_Update_History,
-      convert_HTC300_G000_T020_Branch_Info,
-      convert_HTC300_G010_T010_DFW_ACI_Data,
-      convert_HTC300_G010_T030_ACI_Update_History,
-      convert_HTC300_G020_T010_Status_Values,
-      convert_HTC300_G020_T030_Status_Update_History,
-      # convert_HTC300_G025_T025_Positions_Change_History,
-      # convert_HTC300_G030_T010_Customers,
-      # convert_HTC300_G030_T030_Customer_Update_History,
-      # convert_HTC300_G040_T030_Orders_Update_History,
-      # convert_HTC300_G060_T010_Addresses,
-      # convert_HTC300_G060_T030_Addresses_Update_History,
-      # convert_HTC300_G070_T010_Rates,
-      # convert_HTC300_G070_T030_Rates_Update_History,
-      # convert_HTC300_G080_T010_Agents,
-      # convert_HTC300_G080_T020_Agent_Certifications,
-      # convert_HTC300_G080_T030_Agents_Change_History,
-      # convert_HTC300_G090_T030_Staff_Chg_History,
-      # convert_HTC300_G100_T020_Certification_Trainers,
-      # convert_HTC300_G100_T021_Certifaction_Trainer_Change_History,
-      # convert_HTC300_G100_T030_CertificationTestCatalogChgHistory,
-      # convert_HTC400_G900_T010_Archive_Event_Log,
-    ]
-    max_threads = max_threads or os.cpu_count()
-    print(f"Starting data conversion with {max_threads} threads...")
-    
-    with ThreadPoolExecutor(max_threads) as executor:
-        future_to_task = {
-            executor.submit(task(conn), task, conn): task for task in tasks
-        }
-        for future in as_completed(future_to_task):
-            task = future_to_task[future]
+def convertAccessTable(connFactory, tableName, rows, rowConversion):
+    """
+    Converts rows for a specific table in a thread.
+    """
+    localConn = connFactory()  # Create a thread-specific connection
+    totalRows = len(rows)
+    for i, row in enumerate(rows, start=1):
+        sys.stdout.write(f"\rConverting [{tableName}] Table: Current progress is ({round(100*i/totalRows, 1)}%)\033[K") 
+        sys.stdout.flush()
+
+        # Process the row (placeholder logic)
+        rowConversion(localConn, row)  # Replace with your row-processing logic
+
+    sys.stdout.write(f"\rCompleted [{tableName}] Conversion.\033[K\n")
+    sys.stdout.flush()
+    localConn.close()
+
+def convertAccessTables(connFactory, maxThreads, batchSize=100):
+    """
+    Distributes the workload across threads and converts data in parallel.
+    """
+
+    with ThreadPoolExecutor(maxThreads) as executor:
+        futures = [
+            executor.submit(
+                convertAccessTable, 
+                connFactory, tableName, getRows(connFactory, tableName), tableConversionDefinition
+            )
+            for tableName, tableConversionDefinition in tableConversionTasks
+        ]
+
+        for future in as_completed(futures):
             try:
                 future.result()
             except Exception as e:
-                print(f"Task {task.__name__} generated an exception: {e}")
-    '''
-    convert_HTC000_G010_T010_Company_Info(conn)
-    convert_HTC000_G025_T010_Positions(conn)
-    convert_HTC000_G090_T010_Staff(conn)
-    convert_HTC010_G000_T000_OrderType_Values(conn)
-    # convert_HTC010_G000_T000_US_Zip_Codes(conn)
-    convert_HTC010_G100_T010_CertificationTestCatalog(conn)
-    convert_HTC300_G000_T000_Archive_Update_History(conn)
-    convert_HTC300_G000_T000_Holidays(conn)
-    convert_HTC300_G000_T000_Over_Night_Update_History(conn)
-    convert_HTC300_G000_T020_Branch_Info(conn)
-    convert_HTC300_G010_T010_DFW_ACI_Data(conn)
-    convert_HTC300_G010_T030_ACI_Update_History(conn)
-    convert_HTC300_G020_T010_Status_Values(conn)
-    convert_HTC300_G020_T030_Status_Update_History(conn)
-    # convert_HTC300_G025_T025_Positions_Change_History(conn)
-    # convert_HTC300_G030_T010_Customers(conn)
-    # convert_HTC300_G030_T030_Customer_Update_History(conn)
-    # convert_HTC300_G040_T030_Orders_Update_History(conn)
-    # convert_HTC300_G060_T010_Addresses(conn)
-    # convert_HTC300_G060_T030_Addresses_Update_History(conn)
-    # convert_HTC300_G070_T010_Rates(conn)
-    # convert_HTC300_G070_T030_Rates_Update_History(conn)
-    # convert_HTC300_G080_T010_Agents(conn)
-    # convert_HTC300_G080_T020_Agent_Certifications(conn)
-    # convert_HTC300_G080_T030_Agents_Change_History(conn)
-    # convert_HTC300_G090_T030_Staff_Chg_History(conn)
-    # convert_HTC300_G100_T020_Certification_Trainers(conn)
-    # convert_HTC300_G100_T021_Certifaction_Trainer_Change_History(conn)
-    # convert_HTC300_G100_T030_CertificationTestCatalogChgHistory(conn)
-    # convert_HTC400_G900_T010_Archive_Event_Log(conn)
-    '''
+                print(f"Task Generated an exception: {e}")
+
+
+def addForeignKeysToSqlTable(connFactory, sqlTable : SqlTable):
+    localConn = connFactory()
+    sqlTable.openNewConnection(localConn)
+    sqlTable.addForeignKeys()
+    localConn.close()
+
+def addForeignKeysToSqlTables(connFactory, maxThreads):
+    with ThreadPoolExecutor(maxThreads) as executor:
+        futures = [
+            executor.submit(
+                addForeignKeysToSqlTable,
+                connFactory,
+                sqlTable
+            )
+            for sqlTable in sqlTables
+        ]
+        
+        for future in as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Task Generated an exception: {e}")
+
 def main():
-    # Check to see if sql Server is set up on the machine
-    sqlServerName = getSqlServerName()
-    if not sqlServerName:
-        return
-    
+    # Variables defined here for testing purposes
+    # Allow user input in main file
     htcAllPath = r'C:/HTC_Apps/'
     sqlDriver = r'ODBC Driver 17 for SQL Server'
     sqlDatabaseName = r'HTC_testing'
     
-    
-    sqlConn = connectToSqlDatabase(sqlDriver, sqlServerName, sqlDatabaseName, resetDatabase=True)
-    htc000Conn = connectToAccessDatabase(htcAllPath + 'HTC000_Data_Staff.accdb')
-    htc010Conn = connectToAccessDatabase(htcAllPath + 'HTC010_Static_data.accdb')
-    htc300Conn = connectToAccessDatabase(htcAllPath + 'HTC300_Data-01-01.accdb')
-    htc320Conn = connectToAccessDatabase(htcAllPath + 'HTC320_TSA_Data-01-01.accdb')
-    htc350Conn = connectToAccessDatabase(htcAllPath + 'HTC350D ETO Parameters.accdb')
-    htc400Conn = connectToAccessDatabase(htcAllPath + 'HTC400_Order Archives.accdb')
-    dbConnections = {
-        'sqlServer' : sqlConn,
-        'htc000' : htc000Conn,
-        'htc010' : htc010Conn,
-        'htc300' : htc300Conn,
-        'htc320' : htc320Conn,
-        'htc350' : htc350Conn,
-        'htc400' : htc400Conn
-    }
-
-    conn = Connection(dbConnections)
-    
-    createSqlServerTables(conn)
-    insertDataIntoTables(conn)
-    addTableForeignKeys(conn)
-
-def regionGet(**kwargs: str):
+    sqlServerName = getSqlServerName()
+    if not sqlServerName:
+        raise ValueError("SQL Server name not found.")
+      
+    # Setup initial server connection for database creation and reset
+    initialSqlServerConnString = (
+        f'DRIVER={sqlDriver};'
+        f'SERVER={sqlServerName};'
+        f'DATABASE=master;'
+        'Trusted_Connection=yes;'
+    )
     try:
-        key: str = next(iter(kwargs))
-        return [
-            element
-            for element in subdivisions_countries.data
-            if key in element and kwargs[key].lower() == element[key].lower()
-        ]
-    except IndexError:
-        return {}
+      initialSqlConn = pyodbc.connect(initialSqlServerConnString)
+    except pyodbc.Error as e:
+        print(f"There was an error connecting to the SQL Server: {e}")
+        return
+      
+    initialSqlConn.autocommit = True
+    
+    # Create database if it does not exist already
+    databaseExists = checkIfDatabaseExists(initialSqlConn.cursor(), sqlDatabaseName)
+    if not databaseExists:
+        try:
+            initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
+            print(f"The database {sqlDatabaseName} does not exist. Creating it...")
+        except pyodbc.Error as e:
+            print(f"There was an creating the database: {e}")
+            return
+        
+    # Variable defined here for testing purposes
+    # Allow user input in main file
+    resetSqlDatabase = True
+    if resetSqlDatabase:
+      try:
+          initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
+          initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
+          print(f"The database {sqlDatabaseName} exists. Resetting it...")
+      except pyodbc.Error as e:
+          print(f"There was an error resetting the database: {e}")
+          return
+        
+    # Passdown method to create connections to all HTC databases
+    def connFactory():
+        return getConnection(
+            htcAllPath=htcAllPath,
+            sqlDriver=sqlDriver,
+            sqlServerName=sqlServerName,
+            sqlDatabaseName=sqlDatabaseName
+        )
+      
+    maxThreads = 8
+    sys.stdout.write(f"Starting data conversion with {maxThreads} threads...\n")
+    
+    createSqlServerTables(connFactory, maxThreads)
+    convertAccessTables(connFactory, maxThreads)
+    # addForeignKeysToSqlTables(connFactory, maxThreads)
     
 if __name__ == "__main__":
     main()

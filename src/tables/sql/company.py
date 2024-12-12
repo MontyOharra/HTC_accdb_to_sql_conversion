@@ -36,6 +36,7 @@ def createCompanyTable(conn):
 
 def addCompany(
     conn : Connection,
+    companyId : int,
     companyName : str,
     addressId : int,
     phoneId : int,
@@ -67,7 +68,7 @@ def addCompany(
         'is_tsa_compliant' : isTsaCompliant,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('company', data)
+    conn.sqlInsertRow('company', data, insertId=companyId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('company')

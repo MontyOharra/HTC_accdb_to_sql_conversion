@@ -20,6 +20,7 @@ def createOrderTypeTable(conn):
 
 def addOrderType(
     conn : Connection,
+    orderTypeId : int,
     orderTypeName : str,
 ) -> int:
     orderTypeRow = conn.sqlGetInfo('order_type', 'id', f"[order_type_name] = '{orderTypeName}'")
@@ -28,7 +29,7 @@ def addOrderType(
     data = {
         'order_type_name' : orderTypeName,
     }
-    conn.sqlInsertRow('order_type', data)
+    conn.sqlInsertRow('order_type', data, insertId=orderTypeId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('order_type')

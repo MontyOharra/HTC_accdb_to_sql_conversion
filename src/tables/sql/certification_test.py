@@ -23,6 +23,7 @@ def createCertificationTestTable(conn):
 
 def addCertificationTest(
     conn : Connection,
+    certificationTestId : id,
     certificationName : str,
     certificationTestTrainerId : int,
     isActive : bool,
@@ -44,7 +45,7 @@ def addCertificationTest(
         'certification_test_trainer_id': certificationTestTrainerId,
         'is_active': isActive,
     }
-    conn.sqlInsertRow('certification_test', data)
+    conn.sqlInsertRow('certification_test', data, insertId=certificationTestId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('certification_test')

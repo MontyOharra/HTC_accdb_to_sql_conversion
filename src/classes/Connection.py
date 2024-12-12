@@ -18,6 +18,11 @@ class Connection:
     self.sqlConn: Connection = sqlConn
     self.sqlCursor: Cursor = sqlConn.cursor()
     self.currentProcess: str = ""
+    
+  def close(self) -> None:
+    self.sqlCursor.close()
+    for connection in self.dbConnections.values():
+      connection.close()
 
   def sqlDropTable(self, tableName : str) -> None:
     self.currentProcess = "droppingSqlTable"
@@ -49,10 +54,13 @@ class Connection:
         }
       )
 
-  def sqlInsertRow(self, tableName : str, fields: Dict[str, Any]) -> None:
+  def sqlInsertRow(self, tableName : str, fields: Dict[str, Any], insertId : int = None) -> None:
     self.currentProcess = "insertingSqlRow"
     fieldNames: List[str] = list(fields.keys())
-    fieldValues: List[Any] = []
+    if insertId:
+      fieldNames.insert(0, 'id')
+      
+    fieldValues: List[Any] = [] if not insertId else [insertId]
     for value in fields.values():
       if type(value) == str:
         if value.strip() == "":
@@ -76,7 +84,12 @@ class Connection:
       
     insertSql: str = f"INSERT INTO [{tableName}] ({fieldNamesString}) VALUES ({insertValuesString})"
     try:
+      if not insertId == None:
+        self.sqlCursor.execute(f"SET IDENTITY_INSERT [{tableName}] ON")
       self.sqlCursor.execute(insertSql)
+      if not insertId == None:
+        self.sqlCursor.execute(f"SET IDENTITY_INSERT [{tableName}] OFF")
+        
       self.commit()
     except Exception as err:
       self.handleError(

@@ -37,6 +37,7 @@ def createAciDataTable(conn):
 
 def addAciData(
     conn : Connection,
+    aciDataId : int,
     cityId : int,
     postalCodeId : int,
     airportCode : int,
@@ -91,7 +92,7 @@ def addAciData(
         'branch_id' : branchId,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('aci_data', data)
+    conn.sqlInsertRow('aci_data', data, insertId=aciDataId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('aci_data')
