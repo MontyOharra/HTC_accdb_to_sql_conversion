@@ -35,9 +35,22 @@ def addSpecial(
     area : str,
     isActive : bool,
 ) -> int:
-    specialRow = conn.sqlGetInfo('special', 'id', f"[old_id] = '{oldId}' AND [branch_id] = '{branchId}' AND [weekday] = '{weekday}' AND [start_time] = '{startTime}' AND [end_time] = '{endTime}' AND [area] = '{area}' AND [is_active] = '{isActive}'")
+    specialRow = conn.sqlGetInfo(
+        'special',
+        'id',
+        whereDetails={
+            'old_id': oldId,
+            'branch_id': branchId,
+            'weekday': weekday,
+            'start_time': startTime,
+            'end_time': endTime,
+            'area': area,
+            'is_active': isActive
+        }
+    )
     if specialRow:
         return specialRow[0].id
+
     data = {
         'old_id' : oldId,
         'branch_id' : branchId,

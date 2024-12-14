@@ -1,4 +1,5 @@
-  **[HTC_History_Chgs_T010] => NULL;
+Note table_to_table {
+  '''  **[HTC_History_Chgs_T010] => NULL;
   **[HTC_VersionTracking_T010] => NULL;
   **[HTC_VT_T000 Change History Title] => NULL;
   **[HTC_VT_T000 Change History Title Copy] => NULL;
@@ -121,7 +122,7 @@
       getLatLngCityPostalCode(City, Zipcode) => lat, lng
   ];
   **[HTC010_G010_T010 ACI_Data] => NULL;
-  **[HTC010_G100_T010 CertificationTestCatalog] => [
+  [HTC010_G100_T010 CertificationTestCatalog] => [
     certification_test:
       TestID => id
       TestTitle => certification_name
@@ -200,7 +201,7 @@
   **[HTC200E_G070_T010 Completed Documents] => NULL;
   **[HTC200G G070_T015 B4 Rate Changes] => NULL;
   **[HTC200R_LatLngData] => NULL;
-  **[HTC200R_RouteStopData] => NULL;
+  [HTC200R_RouteStopData] => NULL;
   **[HTC220_G010_T010 To Invoiced] => NULL;
   **[HTC220_G010_T020 To Remaining] => NULL;
   **[HTC220_G990_T000 Change History] => NULL;
@@ -232,7 +233,7 @@
       ArcCnt_InvAss => invoiced_order_assessorials
       ArcCnt_InvDim => invoiced_order_dimensions
       ArcCnt_InvDvr => invoiced_order_drivers
-      ArcCnt_InvATT => invoiced_order_attachments
+      ArcCnt_InvAtt => invoiced_order_attachments
       ArcCnt_RemOrd => remaining_orders
       ArcCnt_RemAss => remaining_order_assessorials
       ArcCnt_RemDim => remaining_order_dimensions
@@ -382,7 +383,7 @@
       ACIKey => NULL
       !insertCityPostalCode(
         city = CITY_PLACE
-        postal_code = ZIP_CODE
+        postalCode = ZIP_CODE
         region = STATE
         country = COUNTRY
       ) => postal_code_id & city_id
@@ -421,12 +422,12 @@
       Stat_CoID => NULL
       Stat_BrID => branch_id
       Stat_Seq => id
-      Stat_TEXT => order_status_name
+      Stat_Text => order_status_name
       OnManifest => show_on_manifest
       AutoNotify => is_auto_notify
       Stat_Active => is_active    
   ];
-  **[HTC300_G020_T010 Status Values Updates] => NULL;
+  **[HTC300_G020_T010 Status Values Updates] => NULL
   **[HTC300_G020_T030 Status Update History] => [
     order_status_change_history:
       NULL => NEW id
@@ -470,7 +471,7 @@
       Cus_Notes => notes
       getIdFromTariff(Cus_Tariff) => default_rate_id
       Cus_FSC => fuel_service_charge
-      !createAssessorialLink("default_customer_assessorial", Cus_Assessorials)
+      !createAssessorialLink("customer_default_assessorial", Cus_Assessorials)
       Cus_Remarks => NULL
       Cus_Status => is_active
       Cus_OmitQBInvoice => is_qb_invoice_omitted
@@ -592,7 +593,7 @@
       OA_BrID => NULL
       OA_OrderNo => order_id
       OA_AssNo => NULL
-      OA_AssParent =>
+      OA_AssParent => parent_type
       OA_AssID => assessorial_id
       OA_ShipperFee => NULL
       OA_HowMuch => NULL
@@ -641,7 +642,7 @@
       ODvr_BrID => NULL
       ODvr_OrderNo => order_id
       ODvr_DvrNo => NULL
-      ODvr_EmpID => user_id
+      ODvr_EmpID => driver_user_id
       ODvr_Name => NULL
       ODvr_Leg => order_leg
       ODvr_Role => driver_role
@@ -678,10 +679,9 @@
   **[HTC300_G050_T010 Accessorials] => [
     if (AccType == "Asrl")
       assessorial:
-        NULL => NEW id
         AccCoID => NULL
         AccBrID => branch_id
-        AccID => old_id
+        AccID => id
         AccDesc => assessorial_name
         AccActive => is_active
         AccMinCharge => min_charge
@@ -728,6 +728,7 @@
         Acc_AccID => assessorial_id
         Acc_Changes => changes
     elif (AccType == "SPCL"):
+      special_change_history
         NULL => NEW id
         Acc_UpdtDate => date_changed
         Acc_UpdtLID => getIdFromUsername(user_id)
@@ -751,7 +752,7 @@
         addressLine2 = FavAddrLn2
         city = FavCity
         state = (FavState, isoCode)
-        postal_code = FavZip
+        postalCode = FavZip
         country = (FavCountry, isoCode3)
       ) => address_id
       FavACIListed => NULL
@@ -851,12 +852,13 @@
       Agent_Status => is_active
       Agent_SendAutoEmail => is_set_to_auto_notify_email
   ];
-  **[HTC300_G080_T020 Agent Certifications] => [
+  [HTC300_G080_T020 Agent Certifications] => [
     agent_certification:
+      NULL => NEW ID
       Agent_Coid => NULL
       Agent_BrID => branch_id
       AgentID => agent_id
-      Agent_TestID => test_id
+      Agent_TestID => certification_test_id
       Agent_TestDate => date_tested
       Agent_TestScore => test_score
       Agent_TestTrainerID => NULL
@@ -875,18 +877,17 @@
   ];
   **[HTC300_G090_T020 Staff Certifications] => NULL;
   **[HTC300_G090_T030 Staff Chg History] => [
-    user_change_history:
-        NULL => NEW ID
-        StaffCoID => NULL
-        StaffBrID => NULL
-        StaffID => user_changed_id
-        StaffLID => NULL
-        StaffChgDate & StaffChgTime => date_changed
-        StaffChgBy => user_id
-        StaffChgs => Changes
+    NULL => NEW ID
+    StaffCoID => NULL
+    StaffBrID => NULL
+    StaffID => user_changed_id
+    StaffLID => NULL
+    StaffChgDate & StaffChgTime => date_changed
+    StaffChgBy => user_id
+    StaffChgs => changes
   ];
   **[HTC300_G090_T040 Staff Role Values] => NULL;
-  **[HTC300_G100_T020 Certification Trainers] => [
+  [HTC300_G100_T020 Certification Trainers] => [
     certification_test_trainer:
       TSA_TrainerID => id
       TSA_TrainerName => trainer_name
@@ -894,7 +895,7 @@
       TSA_TrainerUsedByStaff => NULL
       TSA_TrainerUserByAgents => NULL
   ];
-  **[HTC300_G100_T021 Certifaction Trainer Change History] => [
+  [HTC300_G100_T021 Certifaction Trainer Change History] => [
     certification_trainer_change_history:
       NULL => NEW ID
       STACH_STATrainerID => test_trainer_id
@@ -902,7 +903,7 @@
       STACh_Date => date_changed
       STACH_Changes => changes
   ];
-  **[HTC300_G100_T030 CertificationTestCatalogChgHistory] => [
+  [HTC300_G100_T030 CertificationTestCatalogChgHistory] => [
     certification_test_change_history:
       NULL => NEW ID
       TestHistID => certification_test_id
@@ -910,9 +911,9 @@
       TestActivityDate => date_changed
       TestChgdBy => user_id
   ];
-  **[HTC300_G101_T010 Certification Tests] => NULL;
-  **[HTC300_G101_T012 Certification Tests Change History] => NULL;
-  **[HTC300_G101_T014 Copmleted Tests] => NULL;
+  [HTC300_G101_T010 Certification Tests] => NULL;
+  [HTC300_G101_T012 Certification Tests Change History] => NULL;
+  [HTC300_G101_T014 Copmleted Tests] => NULL;
   **[HTC300_G200_T010 No Invoice Customers] => NULL;
   **[HTC300_G990_T000 Change Log] => NULL;
   **[HTC300_new_G010_T010 DFW_ACI_Data] => NULL;
@@ -922,37 +923,50 @@
   **[HTC300_New_G070_T010 Rates] => NULL;
   **[HTC300_new_G090_T040 Staff Role Values] => NULL;
   **[HTC301_G990_T000 Change Log] => NULL;
-  [HTC320_G010_T005 Valid Test Type Names] =>
+  [HTC320_G010_T005 Valid Test Type Names] => [
+    valid_certification_test_type:
+      VTType_ID => id
+      VTType_Title => test_title
+      VTType-_Endurance => NULL
+      VTType_FormOnly => is_form_only
+      VTType_Active => is_active
+  ]
   [HTC320_G010_T010 Test Types] => [
-    certification_test:
+    certification_test_type:
       TType_CoID => NULL
       TType_BrID => branch_id
       TType_ID => id
-      TType_TypeID => 
-      TType_Type => 
+      TType_TypeID => valid_test_type_id
+      TType_Type => NULL
       TType_Name => certification_test_name
       TType_Version => version
       TType_Description => description
-      TType_TimeUnits =>
-      TType_LifeSpan =>
-      TType_Created =>
-      TType_DateReqd =>
-      TType_EmpNameReqd =>
-      TType_TrnrReqd =>
-      TType_ScoreReqd =>
-      TType_Active =>
-      TType_Location =>
+      TType_Created + 1 year * TType_LifeSpan => date_of_expiration
+      TType_DateReqd => is_date_required
+      TType_EmpNameReqd => is_name_required
+      TType_TrnrReqd => is_trainer_required
+      TType_ScoreReqd => is_score_required
+      TType_Active => is_active
+      TType_Location => file_path
 
   ];
   **[HTC320_G010_T010H Form Change History] => NULL;
-  [HTC320_G020_T020 Completed Docs] =>;
-  [HTC320_G020_T020H Completed Docs History] =>;
+  [HTC320_G020_T020 Completed Docs] => [
+
+  ];
+  [HTC320_G020_T020H Completed Docs History] => [
+
+  ];
   **[HTC320_Security Coordinators] => NULL;
   **[HTC320_ThisCoBr] => NULL;
-  [HTC350D_G020_T020 NameSwap_ChgHistory] =>;
+  [HTC350D_G020_T020 NameSwap_ChgHistory] => [
+
+  ];
   **[HTC400_G010_T010 OrdersToArchive] => NULL;
-  *[HTC400_G010_T010 Recovered Orders] => NULL;
-  [HTC400_G030_T010 Attachments To Relocate] => ;
+  **[HTC400_G010_T010 Recovered Orders] => NULL;
+  [HTC400_G030_T010 Attachments To Relocate] => [
+
+  ];
   **[HTC400_G040_T040 HAWB Values] => NULL;
   **[HTC400_G050_T010 Combined OrdersToArchive] => NULL;
   **[HTC400_G070_T010 MissingFromActive] => NULL;
@@ -978,3 +992,852 @@
   **[HTC400_G990_T000 Change Log] => NULL;
   **[Name AutoCorrect Save Failures] => NULL;
   **[Paste Errors] => NULL;
+  '''
+}
+
+
+
+Table aci_data {
+  id INTEGER [pk, not null, increment]
+  city_id INTEGER [
+    not null, 
+    ref: > city.id
+  ]
+  postal_code_id INTEGER [
+    not null,
+    ref: > postal_code.id
+  ]
+  airport_code NVARHCAR(5) [not null]
+  carrier NVARCHAR(50) [default: ""]
+  area NVARCHAR(1) [not null]
+  rate_min MONEY
+  rate_100 MONEY
+  rate_1000 MONEY
+  rate_2000 MONEY
+  rate_5000 MONEY
+  date_created DATETIME2
+  created_by INTEGER [
+    ref: > user.id
+  ]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+  is_active BIT [not null, default: 1]
+}
+
+Table aci_data_change_history {
+  id INTEGER [pk, not null, increment]
+  aci_data_id INTEGER [
+    not null,
+    ref: > aci_data.id
+  ]
+  user_id INTEGER [
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table address {
+  id INTEGER [pk, not null, increment]
+  address_line_1 NVARCHAR(127) [not null]
+  address_line_2 NVARCHAR(63)
+  city_id INTEGER [
+    not null,
+    ref: > city.id
+  ]
+  postal_code_id INTEGER [
+    not null,
+    ref: > postal_code.id
+  ]
+
+  indexes {
+    city_id 
+  }
+
+  note {
+    '''
+      This table is entirely new.
+        Where noted, take addresses and populate this table with them.
+    '''
+  }
+}
+
+Table agent {
+  id INTEGER [pk, not null, increment]
+  customer_id INTEGER [
+    not null,
+    ref: > customer.id
+  ]
+  email_address NVARCHAR(127) [not null]
+  first_name NVARCHAR(50)
+  last_name NVARCHAR(50)
+  phone_id INTEGER [
+    not null,
+    ref: > phone.id,
+    note: 'Function to convert phone numbers to IDs'
+  ]
+  mobile_phone_id INTEGER [
+    ref: > phone.id
+  ]
+  fax_id INTEGER [
+    ref: > fax.id
+  ]
+  is_set_to_auto_notify_email BIT [not null, default: 0]
+  is_active BIT [not null, default: 1]
+}
+
+Table agent_change_history {
+  id INTEGER [pk, not null, increment]
+  agent_id INTEGER [
+    not null,
+    ref: > agent.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table archive_error_log {
+  id INTEGER [pk, not null, increment]
+  order_id INTEGER [
+    ref: > order.id
+  ]
+  archive_date DATETIME2
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  details NTEXT
+}
+
+Enum WHENARCHIVED {
+  "Before Archive"
+  "After Archive"
+}
+Table archive_history {
+  id INTEGER [pk, not null, increment]
+  open_orders INTEGER [default: 0]
+  open_order_assessorials INTEGER [default: 0]
+  open_order_dimensions INTEGER [default: 0]
+  open_order_drivers INTEGER [default: 0]
+  open_order_attachments INTEGER [default: 0]
+  invoiced_orders INTEGER [default: 0]
+  invoiced_order_assessorials INTEGER [default: 0]
+  invoiced_order_dimensions INTEGER [default: 0]
+  invoiced_order_drivers INTEGER [default: 0]
+  invoiced_order_attachments INTEGER [default: 0]
+  remaining_orders INTEGER [default: 0]
+  remaining_order_assessorials INTEGER [default: 0]
+  remaining_order_dimensions INTEGER [default: 0]
+  remaining_order_drivers INTEGER [default: 0]
+  remaining_order_attachments INTEGER [default: 0]
+  dock_orders INTEGER [default: 0]
+  dock_order_assessorials INTEGER [default: 0]
+  dock_order_dimensions INTEGER [default: 0]
+  dock_order_drivers INTEGER [default: 0]
+  dock_order_attachments INTEGER [default: 0]
+  service_orders INTEGER [default: 0]
+  service_order_assessorials INTEGER [default: 0]
+  service_order_dimensions INTEGER [default: 0]
+  service_order_drivers INTEGER [default: 0]
+  service_order_attachments INTEGER [default: 0]
+  active_order_history INTEGER [default: 0]
+  active_order_hawbs INTEGER [default: 0]
+  archived_orders INTEGER [default: 0]
+  archived_order_assessorials INTEGER [default: 0]
+  archived_order_dimensions INTEGER [default: 0]
+  archived_order_drivers INTEGER [default: 0]
+  archived_order_attachments INTEGER [default: 0]
+  archived_order_history INTEGER [default: 0]
+  archived_order_hawbs INTEGER [default: 0]
+  removed_orders INTEGER [default: 0]
+  removed_order_assessorials INTEGER [default: 0]
+  removed_order_dimensions INTEGER [default: 0]
+  removed_order_drivers INTEGER [default: 0]
+  removed_order_attachments INTEGER [default: 0]
+  removed_order_history INTEGER [default: 0]
+  removed_order_hawbs INTEGER [default: 0]
+}
+
+Enum ASSESSORIAL_BASIS_TYPE {
+  "fixed"
+  "weight"
+  "prompt"
+}
+Table assessorial {
+  id INTEGER [pk, not null, increment]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+  old_id INTEGER
+  assessorial_name NVARCHAR(31) [not null]
+  min_charge MONEY [not null]
+  basis_type ASSESSORIAL_BASIS_TYPE [not null]
+  basis_portion FLOAT [not null]
+  basis_rate MONEY
+  user_prompt NVARCHAR(127)
+  date_created DATETIME2 [not null]
+  notes NTEXT
+  is_active BIT [not null, default: 1]
+}
+
+Table assessorial_change_history {
+  id INTEGER [pk, not null, increment]
+  assessorial_id INTEGER [
+    not null,
+    ref: > assessorial.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table branch {
+  id INTEGER [pk, not null, increment]
+  branch_name NVARCHAR(63) [not null]
+  company_id INTEGER [
+    not null,
+    ref: > company.id  
+  ]
+  address_id INTEGER [
+    not null,
+    note: 'Create function to turn address of branch into address row'
+  ]
+  airport_code NVARCHAR(5) [not null]
+  email NVARCHAR(127) [not null]
+  phone_id INTEGER [
+    not null, 
+    ref: > phone.id
+  ]
+  fax_id INTEGER [ref: > fax.id]
+  cartage_agent_type NVARCHAR(15) [default: 'cartage', not null]
+  fuel_service_charge MONEY [not null]
+  transfer_rate MONEY [not null]
+  international_air_dim_divisor INTEGER [not null]
+  domestic_air_dim_divisor INTEGER [not null]
+  truck_dim_divisor INTEGER [not null]
+  aci_low NVARCHAR(1) [not null]
+  aci_high NVARCHAR(1) [not null]
+  notes NTEXT
+  is_active BIT [not null]
+}
+
+Table branch_change_history {
+  id INTEGER [pk, not null, increment]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+
+Table city {
+  id INTEGER [pk, not null, increment]
+  city_name NVARCHAR(63) [not null]
+}
+
+Table city_region {
+  id INTEGER [pk, not null, increment]
+  city_id INTEGER [
+    not null,
+    ref: > city.id
+  ]
+  region_id INTEGER [
+    not null,
+    ref: > region.id
+  ]
+}
+
+Table city_postal_code {
+  id INTEGER [pk, not null, increment]
+
+  city_id INTEGER [
+    not null,
+    ref: > city.id
+  ]
+  postal_code_id INTEGER [
+    not null,
+    ref: > postal_code.id
+  ]
+  lat DECIMAL(9,2) [not null]
+  lng DECIMAL(9,2) [not null]
+}
+
+Table company {
+  id INTEGER [pk, not null, increment]
+  company_name NVARCHAR(63) [not null]
+  address_id INTEGER [
+    not null, 
+    ref: > address.id
+  ]
+  phone_id INTEGER [
+    not null,
+    ref: > phone.id
+  ]  
+  airport_code NVARCHAR(5)
+  fax_id INTEGER [ref: > fax.id]
+  cartage_agent_type NVARCHAR(15) [default: 'cartage', not null]
+  employer_identification_no NCHAR(10) [
+    unique,
+    not null
+  ]
+  email NVARCHAR(255) [unique, not null]
+  scac NVARCHAR(5) [unique, not null]
+  website NVARCHAR(511)
+  notes NTEXT
+  logo_path NVARCHAR(MAX)
+  is_tsa_compliant BIT [default: 0, not null]
+  is_active BIT [default: 1, not null]
+}
+
+Table company_change_history {
+  id INTEGER [pk, not null, increment]
+  company_id INTEGER [
+    not null,
+    ref: > company.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table country {
+  id INTEGER [pk, not null, increment]
+  country_name NVARCHAR(63) [unique, not null]
+  iso_code_2 NVARCHAR(2) [unique, not null]
+  iso_code_3 NVARCHAR(3) [unique, not null]
+}
+
+Table customer {
+  id INTEGER [pk, not null, increment]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+  customer_name NVARCHAR(63) [not null]
+  address_id INTEGER [
+    not null,
+    ref: > address.id
+  ]
+  phone_id INTEGER [
+    not null,
+    ref: > phone.id
+  ]
+  default_rate_id INTEGER [
+    not null,
+    ref: > rate.id
+  ]
+  fuel_service_charge MONEY [not null]
+  qb_customer_ref_id NVARCHAR(127)
+  qb_customer_ref_name NVARCHAR(127)
+  is_qb_invoice_omitted BIT [not null]
+  is_active BIT [not null, default: 1]
+  notes NTEXT [not null]
+}
+
+Table customer_change_history {
+  id INTEGER [pk, not null, increment]
+  customer_id INTEGER [
+    not null,
+    ref: > customer.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table customer_default_assessorial {
+  id INTEGER [pk, not null, increment]
+  customer_id INTEGER [
+    not null,
+    ref: > customer.id
+  ]
+  assessorial_id INTEGER [
+    not null,
+    ref: > assessorial.id
+  ]
+}
+
+Table fax {
+  id INTEGER [pk, not null, increment]
+  country_code NVARCHAR(3) [not null]
+  area_code NVARCHAR(5) [not null]
+  fax_number NVARCHAR(14) [not null]
+  fax_extension NVARCHAR(4)
+}
+
+Table holiday {
+  id INTEGER [pk, not null, increment]
+  holiday_name NVARCHAR(31) [not null]
+  holiday_date DATETIME2 [not null]
+}
+
+Table location {
+  id INTEGER [pk, not null, increment]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+  company_name NVARCHAR(127)
+  location_name NVARCHAR(127)
+  address_id INTEGER [
+    not null,
+    ref: > address.id
+  ]
+  aci_id INTEGER [
+    not null,
+    ref: > aci_data.id
+  ]
+  contact_first_name NVARCHAR(31)
+  contact_last_name NVARCHAR(31)
+  contact_email NVARCHAR(127)
+  contact_phone_id INTEGER [
+    not null,
+    ref: > phone.id
+  ]
+  is_carrier BIT [not null, default: 0]
+  is_local BIT [not null, default: 0]
+  is_international BIT [not null, default: 0]
+  default_wait_time INTEGER
+  is_active BIT [not null, default: 1]
+}
+
+Table location_change_history {
+  id INTEGER [pk, not null, increment]
+  location_id INTEGER [
+    not null,
+    ref: > location.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table location_default_assessorial {
+  id INTEGER [pk, not null, increment]
+  location_id INTEGER [
+    not null,
+    ref: > location.id
+  ]
+  assessorial_id INTEGER [
+    not null,
+    ref: > assessorial.id
+  ]
+}
+
+Table overnight_maintenance_history {
+  id INTEGER [pk, not null, increment]
+  date_overnight_maintenance DATETIME2
+  user_id INTEGER [
+    default: 0,
+    ref: > user.id
+  ]
+  open_orders_in INTEGER [default: 0]
+  open_order_assessorials_in INTEGER [default: 0]
+  open_order_dimensions_in INTEGER [default: 0]
+  open_order_drivers_in INTEGER [default: 0]
+  open_order_attachments_in INTEGER [default: 0]
+  invoiced_orders_in INTEGER [default: 0]
+  invoiced_order_assessorials_in INTEGER [default: 0]
+  invoiced_order_dimensions_in INTEGER [default: 0]
+  invoiced_order_drivers_in INTEGER [default: 0]
+  invoiced_order_attachments_in INTEGER [default: 0]
+  remaining_orders_in INTEGER [default: 0]
+  remaining_order_assessorials_in INTEGER [default: 0]
+  remaining_order_dimensions_in INTEGER [default: 0]
+  remaining_order_drivers_in INTEGER [default: 0]
+  remaining_order_attachments_in INTEGER [default: 0]
+  open_orders_out INTEGER [default: 0]
+  open_order_assessorials_out INTEGER [default: 0]
+  open_order_dimensions_out INTEGER [default: 0]
+  open_order_drivers_out INTEGER [default: 0]
+  open_order_attachments_out INTEGER [default: 0]
+  invoiced_orders_out INTEGER [default: 0]
+  invoiced_order_assessorials_out INTEGER [default: 0]
+  invoiced_order_dimensions_out INTEGER [default: 0]
+  invoiced_order_drivers_out INTEGER [default: 0]
+  invoiced_order_attachments_out INTEGER [default: 0]
+  remaining_orders_out INTEGER [default: 0]
+  remaining_order_assessorials_out INTEGER [default: 0]
+  remaining_order_dimensions_out INTEGER [default: 0]
+  remaining_order_drivers_out INTEGER [default: 0]
+  remaining_order_attachments_out INTEGER [default: 0]
+}
+
+Table order {
+  id INTEGER [pk, not null, increment]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+  order_type_id INTEGER [
+    not null,
+    ref: > order_type.id
+  ]
+  customer_id INTEGER [
+    not null,
+    ref: > customer.id
+  ]
+  agent_id INTEGER [ref: > agent.id]
+  rate_id INTEGER [
+    not null,
+    ref: > rate.id
+  ]
+  hawb NVARCHAR(31)
+  mawb NVARCHAR(31)
+  order_notes NTEXT
+  pu_time_start DATETIME2 [not null]
+  pu_time_end DATETIME2 [not null]
+  del_time_start DATETIME2 [not null]
+  del_time_end DATETIME2 [not null]
+  pu_location_id INTEGER [
+    ref: > location.id
+  ]
+  pu_contact_phone_id INTEGER [
+    ref: > phone.id  
+  ]
+  pu_contact_name NVARCHAR(63)
+  pu_notes NTEXT
+  del_location_id INTEGER [
+    ref: > location.id
+  ]
+  del_contact_phone_id INTEGER [
+    ref: > phone.id  
+  ]
+  del_contact_name NVARCHAR(63)
+  del_notes NTEXT
+  driver_name NVARCHAR()
+  pod_signee NVARCHAR(63)
+  pod_time_signed DATETIME2
+  pod_notes NTEXT
+  status_id INTEGER [
+    not null,
+    ref: > order_status.id  
+  ]
+  rating_weight_charges MONEY
+  rating_fuel_charges MONEY 
+  rating_service_charges MONEY
+  rating_total_charges MONEY
+  rating_total_expenses MONEY
+  rating_storage_charges MONEY
+  rating_adjustments MONEY
+  rating_notes NTEXT
+  quickbooks_customer_list_id NVARCHAR(50)
+  quickbooks_customer_name NVARCHAR(50)
+  quickbooks_invoice_reference_number NVARCHAR(50)
+  quickbooks_line_sequence_number NVARCHAR(50)
+  is_auto_assessorials BIT
+  is_weight_charge_calculated BIT
+}
+
+
+Table order_change_history {
+  id INTEGER [pk, not null, increment]
+  order_id INTEGER [
+    not null,
+    ref: > order.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table order_assessorial {
+  id INTEGER [pk, not null, increment]
+  order_id INTEGER [
+    not null,
+    ref: > order.id
+  ]
+  assessorial_id INTEGER [
+    not null,
+    ref: > assessorial.id
+  ]
+  parent_type NVARCHAR(15) [NOT NULL]
+  basis_count DECIMAL(6,2)
+  total_charge MONEY
+}
+
+Table order_attachment {
+  id INTEGER [pk, not null, increment]
+  order_id INTEGER [
+    not null,
+    ref: > order.id
+  ]
+  attachment_path NVARCHAR(MAX)
+  file_size DECIMAL(30,15)
+}
+
+Table order_dim {
+  id INTEGER [pk, not null, increment]
+  order_id INTEGER [
+    not null,
+    ref: > order.id
+  ]
+  unit_type NVARCHAR(15)
+  unit_quantity INTEGER
+  unit_weight INTEGER
+  dim_height INTEGER
+  dim_width INTEGER
+  dim_length INTEGER
+  dim_weight DECIMAL(20, 10)
+}
+
+Table order_driver {
+  id INTEGER [pk, not null, increment]
+  order_id INTEGER [
+    not null,
+    ref: > order.id
+  ]
+  driver_user_id INTEGER [
+    ref: > user.id
+  ]
+  order_leg NVARCHAR(1)
+  driver_role NVARCHAR(1)
+}
+
+Table order_status {
+  id INTEGER [pk, not null, increment]
+  order_status_name NVARCHAR(25) [not null]
+  is_on_manifest BIT [not null]
+  is_set_to_auto_notify BIT [not null]
+  is_active BIT [not null]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+}
+
+Table order_status_change_history {
+  id INTEGER [pk, not null, increment]
+  order_status_id INTEGER [
+    not null,
+    ref: > order_status.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table order_type {
+  id INTEGER [pk, not null, increment]
+  order_type_name NVARCHAR(31) [not null]
+}
+
+
+Table phone {
+  id INTEGER [pk, not null, increment]
+  country_code NVARCHAR(3) [not null]
+  area_code NVARCHAR(5) [not null]
+  phone_number NVARCHAR(14) [not null]
+  phone_extension NVARCHAR(4)
+}
+
+Table position {
+  id INTEGER [pk, not null, increment]
+  position_name NVARCHAR(25) [not null]
+  security_level INTEGER [not null]
+  is_active BIT [not null]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+}
+
+Table position_change_history {
+  id INTEGER [pk, not null, increment]
+  position_id INTEGER [
+    not null,
+    ref: > position.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table postal_code {
+  id INTEGER [pk, not null, increment]
+  postal_code NVARCHAR(15) [not null]
+}
+
+Table postal_code_region {
+  id INTEGER [pk, not null, increment]
+  postal_code_id INTEGER [
+    not null,
+    ref: > postal_code.id
+  ]
+  region_id INTEGER [
+    not null,
+    ref: > region.id
+  ]
+}
+
+Table rate {
+    id INTEGER [pk, not null, increment]
+    rate_name NVARCHAR(31) [not null]
+    branch_id INTEGER [
+      not null,
+      ref: > branch.id
+    ]
+    is_default BIT [not null, default: 0]
+    is_active BIT [not null, default: 1]
+    date_added DATETIME2
+    added_by_user_id INTEGER [ref: > user.id]
+}
+
+Table rate_area {
+  id INTEGER [pk, not null, increment]
+  rate_id INTEGER [
+    not null,
+    ref: > rate.id  
+  ]
+  area NVARCHAR(1) [not null]
+  rate_min MONEY
+  rate_100 MONEY
+  rate_1000 MONEY
+  rate_2000 MONEY
+  rate_5000 MONEY
+  rate_max MONEY
+}
+
+Table rate_change_history {
+  id INTEGER [pk, not null, increment]
+  rate_id INTEGER [
+    not null,
+    ref: > rate.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table region {
+  id INTEGER [pk, not null, increment]
+  country_id INTEGER [
+    not null,
+    ref: > country.id
+  ]
+  iso_code CHAR [not null]
+  region_name NVARCHAR(63) [not null]
+}
+
+Table special {
+  id INTEGER [pk, not null, increment]
+  old_id INTEGER
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id
+  ]
+  weekday INTEGER [not null]
+  start_time TIME [not null]
+  end_time TIME [not null]
+  area NVARCHAR(1) [not null]
+  is_active BIT [not null, default: 1]
+}
+
+Table special_change_history {
+  id INTEGER [pk, not null, increment]
+  special_id INTEGER [
+    not null,
+    ref: > special.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table user {
+  id INTEGER [pk, not null, increment]
+  username NVARCHAR(63) [unique, not null]
+  email NVARCHAR(255) [unique, not null]
+  password_hash NVARCHAR(255) [not null]
+  password_salt NVARCHAR(32) [not null]
+  name_prefix NVARCHAR(6)
+  first_name NVARCHAR(31) [not null]
+  last_name NVARCHAR(31) [not null]
+  name_suffix NVARCHAR(6)
+  address_id INTEGER [
+    not null,
+    ref: > address.id
+  ]
+  branch_id INTEGER [
+    not null,
+    ref: > branch.id  
+  ]
+  commission_rate MONEY [not null]
+  date_hired DATETIME2
+  date_terminated DATETIME2
+  phone_main_id INTEGER [not null, ref: > phone.id]
+  phone_home_id INTEGER [ref: > phone.id]
+  phone_mobile_id INTEGER [ref: > phone.id]
+  position_id INTEGER [
+    not null,
+    ref: > position.id
+  ]
+  tsa_number NVARCHAR(10)
+  tsa_type NVARCHAR(10)
+  tsa_taken NVARCHAR(31)
+  is_active BIT [not null]
+  is_default_doc_owner BIT [not null]
+  is_security_coordinator BIT [not null]
+  is_tsa_trainer BIT [not null]
+}
+
+Table user_change_history {
+  id INTEGER [pk, not null, increment]
+  user_changed_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  user_id INTEGER [
+    not null,
+    ref: > user.id
+  ]
+  date_changed DATETIME2 [not null]
+  changes NTEXT [not null]
+}
+
+Table valid_certification_test_type {
+  id INTEGER [pk, not null, increment]
+  test_title NVARCHAR(63) [not null]
+  is_form_only BIT [not null]
+  is_active BIT [not null, default: 0]
+}

@@ -27,7 +27,15 @@ def addOrderAttachment(
     attachmentPath : str,
     fileSize : float,
 ) -> int:
-    orderAttachmentRow = conn.sqlGetInfo('order_attachment', 'id', f"[order_id] = '{orderId}' AND [attachment_path] = '{attachmentPath}' AND [file_size] = '{fileSize}'")
+    orderAttachmentRow = conn.sqlGetInfo(
+        'order_attachment',
+        'id',
+        whereDetails={
+            'order_id': orderId,
+            'attachment_path': attachmentPath,
+            'file_size': fileSize
+        }
+    )
     if orderAttachmentRow:
         return orderAttachmentRow[0].id
     data = {

@@ -109,9 +109,7 @@ def addOrder(
     isAutoAssessorials : bool,
     isWeightChargeCalculated : bool,
 ) -> int:
-    orderRow = conn.sqlGetInfo('order', 'id', f"[branch_id] = '{branchId}' AND [order_type_id] = '{orderTypeId}' AND [customer_id] = '{customerId}' AND [agent_id] = '{agentId}' AND [rate_id] = '{rateId}' AND [hawb] = '{hawb}' AND [mawb] = '{mawb}' AND [order_notes] = '{orderNotes}' AND [pu_time_start] = '{puTimeStart}' AND [pu_time_end] = '{puTimeEnd}' AND [del_time_start] = '{delTimeStart}' AND [del_time_end] = '{delTimeEnd}' AND [pu_location_id] = '{puLocationId}' AND [pu_contact_phone_id] = '{puContactPhoneId}' AND [pu_contact_name] = '{puContactName}' AND [pu_notes] = '{puNotes}' AND [del_location_id] = '{delLocationId}' AND [del_contact_phone_id] = '{delContactPhoneId}' AND [del_contact_name] = '{delContactName}' AND [del_notes] = '{delNotes}' AND [driver_name] = '{driverName}' AND [pod_signee] = '{podSignee}' AND [pod_time_signed] = '{podTimeSigned}' AND [pod_notes] = '{podNotes}' AND [status_id] = '{statusId}' AND [rating_weight_charges] = '{ratingWeightCharges}' AND [rating_fuel_charges] = '{ratingFuelCharges}' AND [rating_service_charges] = '{ratingServiceCharges}' AND [rating_total_charges] = '{ratingTotalCharges}' AND [rating_total_expenses] = '{ratingTotalExpenses}' AND [rating_storage_charges] = '{ratingStorageCharges}' AND [rating_adjustments] = '{ratingAdjustments}' AND [rating_notes] = '{ratingNotes}' AND [quickbooks_customer_list_id] = '{quickbooksCustomerListId}' AND [quickbooks_customer_name] = '{quickbooksCustomerName}' AND [quickbooks_invoice_reference_number] = '{quickbooksInvoiceReferenceNumber}' AND [quickbooks_line_sequence_number] = '{quickbooksLineSequenceNumber}' AND [is_auto_assessorials] = '{isAutoAssessorials}' AND [is_weight_charge_calculated] = '{isWeightChargeCalculated}'")
-    if orderRow:
-        return orderRow[0].id
+
     data = {
         'branch_id' : branchId,
         'order_type_id' : orderTypeId,

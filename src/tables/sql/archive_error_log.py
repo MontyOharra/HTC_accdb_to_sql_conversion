@@ -30,18 +30,6 @@ def addArchiveErrorLog(
     userId : int,
     details : int,
 ) -> int:
-    archiveErrorLogRow = conn.sqlGetInfo(
-        'archive_error_log',
-        'id',
-        whereDetails={
-            'order_id': orderId,
-            'archive_date': archiveDate,
-            'user_id': userId,
-            'details': details
-        }
-    )
-    if archiveErrorLogRow:
-        return archiveErrorLogRow[0].id
 
     data = {
         'order_id' : orderId,

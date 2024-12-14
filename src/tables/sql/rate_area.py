@@ -37,9 +37,23 @@ def addRateArea(
     rate5000 : float,
     rateMax : float,
 ) -> int:
-    rateAreaRow = conn.sqlGetInfo('rate_area', 'id', f"[rate_id] = '{rateId}' AND [area] = '{area}' AND [rate_min] = '{rateMin}' AND [rate_100] = '{rate100}' AND [rate_1000] = '{rate1000}' AND [rate_2000] = '{rate2000}' AND [rate_5000] = '{rate5000}' AND [rate_max] = '{rateMax}'")
+    rateAreaRow = conn.sqlGetInfo(
+        'rate_area',
+        'id',
+        whereDetails={
+            'rate_id': rateId,
+            'area': area,
+            'rate_min': rateMin,
+            'rate_100': rate100,
+            'rate_1000': rate1000,
+            'rate_2000': rate2000,
+            'rate_5000': rate5000,
+            'rate_max': rateMax
+        }
+    )
     if rateAreaRow:
         return rateAreaRow[0].id
+
     data = {
         'rate_id' : rateId,
         'area' : area,

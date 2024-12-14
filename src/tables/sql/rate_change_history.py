@@ -30,9 +30,7 @@ def addRateChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    rateChangeHistoryRow = conn.sqlGetInfo('rate_change_history', 'id', f"[rate_id] = '{rateId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
-    if rateChangeHistoryRow:
-        return rateChangeHistoryRow[0].id
+
     data = {
         'rate_id' : rateId,
         'user_id' : userId,

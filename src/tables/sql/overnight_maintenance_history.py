@@ -85,46 +85,7 @@ def addOvernightMaintenanceHistory(
     remainingOrderDriversOut : int,
     remainingOrderAttachmentsOut : int,
 ) -> int:
-    overnightMaintenanceHistoryRow = conn.sqlGetInfo(
-        'overnight_maintenance_history',
-        'id',
-        whereDetails={
-            'date_overnight_maintenance': dateOvernightMaintenance,
-            'user_id': userId,
-            'open_orders_in': openOrdersIn,
-            'open_order_assessorials_in': openOrderAssessorialsIn,
-            'open_order_dimensions_in': openOrderDimensionsIn,
-            'open_order_drivers_in': openOrderDriversIn,
-            'open_order_attachments_in': openOrderAttachmentsIn,
-            'invoiced_orders_in': invoicedOrdersIn,
-            'invoiced_order_assessorials_in': invoicedOrderAssessorialsIn,
-            'invoiced_order_dimensions_in': invoicedOrderDimensionsIn,
-            'invoiced_order_drivers_in': invoicedOrderDriversIn,
-            'invoiced_order_attachments_in': invoicedOrderAttachmentsIn,
-            'remaining_orders_in': remainingOrdersIn,
-            'remaining_order_assessorials_in': remainingOrderAssessorialsIn,
-            'remaining_order_dimensions_in': remainingOrderDimensionsIn,
-            'remaining_order_drivers_in': remainingOrderDriversIn,
-            'remaining_order_attachments_in': remainingOrderAttachmentsIn,
-            'open_orders_out': openOrdersOut,
-            'open_order_assessorials_out': openOrderAssessorialsOut,
-            'open_order_dimensions_out': openOrderDimensionsOut,
-            'open_order_drivers_out': openOrderDriversOut,
-            'open_order_attachments_out': openOrderAttachmentsOut,
-            'invoiced_orders_out': invoicedOrdersOut,
-            'invoiced_order_assessorials_out': invoicedOrderAssessorialsOut,
-            'invoiced_order_dimensions_out': invoicedOrderDimensionsOut,
-            'invoiced_order_drivers_out': invoicedOrderDriversOut,
-            'invoiced_order_attachments_out': invoicedOrderAttachmentsOut,
-            'remaining_orders_out': remainingOrdersOut,
-            'remaining_order_assessorials_out': remainingOrderAssessorialsOut,
-            'remaining_order_dimensions_out': remainingOrderDimensionsOut,
-            'remaining_order_drivers_out': remainingOrderDriversOut,
-            'remaining_order_attachments_out': remainingOrderAttachmentsOut
-        }
-    )
-    if overnightMaintenanceHistoryRow:
-        return overnightMaintenanceHistoryRow[0].id
+
     data = {
         'date_overnight_maintenance' : dateOvernightMaintenance,
         'user_id' : userId,

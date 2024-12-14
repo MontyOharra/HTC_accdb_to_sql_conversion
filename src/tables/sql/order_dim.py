@@ -37,9 +37,23 @@ def addOrderDim(
     dimLength : int,
     dimWeight : float,
 ) -> int:
-    orderDimRow = conn.sqlGetInfo('order_dim', 'id', f"[order_id] = '{orderId}' AND [unit_type] = '{unitType}' AND [unit_quantity] = '{unitQuantity}' AND [unit_weight] = '{unitWeight}' AND [dim_height] = '{dimHeight}' AND [dim_width] = '{dimWidth}' AND [dim_length] = '{dimLength}' AND [dim_weight] = '{dimWeight}'")
+    orderDimRow = conn.sqlGetInfo(
+        'order_dim',
+        'id',
+        whereDetails={
+            'order_id': orderId,
+            'unit_type': unitType,
+            'unit_quantity': unitQuantity,
+            'unit_weight': unitWeight,
+            'dim_height': dimHeight,
+            'dim_width': dimWidth,
+            'dim_length': dimLength,
+            'dim_weight': dimWeight
+        }
+    )
     if orderDimRow:
         return orderDimRow[0].id
+
     data = {
         'order_id' : orderId,
         'unit_type' : unitType,

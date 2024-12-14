@@ -52,9 +52,29 @@ def addLocation(
     defaultWaitTime : int,
     isActive : bool,
 ) -> int:
-    locationRow = conn.sqlGetInfo('location', 'id', f"[branch_id] = '{branchId}' AND [company_name] = '{companyName}' AND [location_name] = '{locationName}' AND [address_id] = '{addressId}' AND [aci_id] = '{aciId}' AND [contact_first_name] = '{contactFirstName}' AND [contact_last_name] = '{contactLastName}' AND [contact_email] = '{contactEmail}' AND [contact_phone_id] = '{contactPhoneId}' AND [is_carrier] = '{isCarrier}' AND [is_local] = '{isLocal}' AND [is_international] = '{isInternational}' AND [default_wait_time] = '{defaultWaitTime}' AND [is_active] = '{isActive}'")
+    locationRow = conn.sqlGetInfo(
+        'location',
+        'id',
+        whereDetails={
+            'branch_id': branchId,
+            'company_name': companyName,
+            'location_name': locationName,
+            'address_id': addressId,
+            'aci_id': aciId,
+            'contact_first_name': contactFirstName,
+            'contact_last_name': contactLastName,
+            'contact_email': contactEmail,
+            'contact_phone_id': contactPhoneId,
+            'is_carrier': isCarrier,
+            'is_local': isLocal,
+            'is_international': isInternational,
+            'default_wait_time': defaultWaitTime,
+            'is_active': isActive
+        }
+    )
     if locationRow:
         return locationRow[0].id
+
     data = {
         'branch_id' : branchId,
         'company_name' : companyName,

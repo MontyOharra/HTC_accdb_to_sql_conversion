@@ -30,18 +30,7 @@ def addLocationChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    locationChangeHistoryRow = conn.sqlGetInfo(
-        'location_change_history',
-        'id',
-        whereDetails={
-            'location_id': locationId,
-            'user_id': userId,
-            'date_changed': dateChanged,
-            'changes': changes
-        }
-    )
-    if locationChangeHistoryRow:
-        return locationChangeHistoryRow[0].id
+
     data = {
         'location_id' : locationId,
         'user_id' : userId,

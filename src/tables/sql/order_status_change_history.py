@@ -30,18 +30,7 @@ def addOrderStatusChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    orderStatusChangeHistoryRow = conn.sqlGetInfo(
-        'order_status_change_history',
-        'id',
-        whereDetails={
-            'order_status_id': orderStatusId,
-            'user_id': userId,
-            'date_changed': dateChanged,
-            'changes': changes
-        }
-    )
-    if orderStatusChangeHistoryRow:
-        return orderStatusChangeHistoryRow[0].id
+
     data = {
         'order_status_id' : orderStatusId,
         'user_id' : userId,

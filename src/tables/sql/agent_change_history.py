@@ -30,18 +30,7 @@ def addAgentChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    agentChangeHistoryRow = conn.sqlGetInfo(
-        'agent_change_history',
-        'id',
-        whereDetails={
-            'agent_id': agentId,
-            'user_id': userId,
-            'date_changed': dateChanged,
-            'changes': changes
-        }
-    )
-    if agentChangeHistoryRow:
-        return agentChangeHistoryRow[0].id
+
     data = {
         'agent_id' : agentId,
         'user_id' : userId,

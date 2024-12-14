@@ -30,18 +30,7 @@ def addAssessorialChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    assessorialChangeHistoryRow = conn.sqlGetInfo(
-        'assessorial_change_history',
-        'id',
-        whereDetails={
-            'assessorial_id': assessorialId,
-            'user_id': userId,
-            'date_changed': dateChanged,
-            'changes': changes
-        }
-    )
-    if assessorialChangeHistoryRow:
-        return assessorialChangeHistoryRow[0].id
+
     data = {
         'assessorial_id' : assessorialId,
         'user_id' : userId,

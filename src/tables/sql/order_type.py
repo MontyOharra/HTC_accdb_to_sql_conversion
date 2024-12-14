@@ -23,9 +23,16 @@ def addOrderType(
     orderTypeId : int,
     orderTypeName : str,
 ) -> int:
-    orderTypeRow = conn.sqlGetInfo('order_type', 'id', f"[order_type_name] = '{orderTypeName}'")
+    orderTypeRow = conn.sqlGetInfo(
+        'order_type',
+        'id',
+        whereDetails={
+            'order_type_name': orderTypeName
+        }
+    )
     if orderTypeRow:
         return orderTypeRow[0].id
+
     data = {
         'order_type_name' : orderTypeName,
     }

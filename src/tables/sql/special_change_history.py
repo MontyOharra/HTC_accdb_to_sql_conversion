@@ -30,9 +30,7 @@ def addSpecialChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    specialChangeHistoryRow = conn.sqlGetInfo('special_change_history', 'id', f"[special_id] = '{specialId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
-    if specialChangeHistoryRow:
-        return specialChangeHistoryRow[0].id
+
     data = {
         'special_id' : specialId,
         'user_id' : userId,

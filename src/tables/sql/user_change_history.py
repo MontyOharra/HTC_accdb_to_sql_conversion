@@ -30,9 +30,7 @@ def addUserChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    userChangeHistoryRow = conn.sqlGetInfo('user_change_history', 'id', f"[user_changed_id] = '{userChangedId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
-    if userChangeHistoryRow:
-        return userChangeHistoryRow[0].id
+
     data = {
         'user_changed_id' : userChangedId,
         'user_id' : userId,

@@ -30,18 +30,7 @@ def addAciDataChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    aciDataChangeHistoryRow = conn.sqlGetInfo(
-        'aci_data_change_history',
-        'id',
-        whereDetails={
-            'aci_data_id': aciDataId,
-            'user_id': userId,
-            'date_changed': dateChanged,
-            'changes': changes
-        }
-    )
-    if aciDataChangeHistoryRow:
-        return aciDataChangeHistoryRow[0].id
+
     data = {
         'aci_data_id' : aciDataId,
         'user_id' : userId,

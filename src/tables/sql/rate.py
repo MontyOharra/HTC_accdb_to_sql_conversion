@@ -27,6 +27,7 @@ def createRateTable(conn):
 
 def addRate(
     conn : Connection,
+    rateId : int,
     rateName : str,
     branchId : int,
     isDefault : bool,
@@ -34,9 +35,21 @@ def addRate(
     dateAdded : str,
     addedByUserId : int,
 ) -> int:
-    rateRow = conn.sqlGetInfo('rate', 'id', f"[rate_name] = '{rateName}' AND [branch_id] = '{branchId}' AND [is_default] = '{isDefault}' AND [is_active] = '{isActive}' AND [date_added] = '{dateAdded}' AND [added_by_user_id] = '{addedByUserId}'")
+    rateRow = conn.sqlGetInfo(
+        'rate',
+        'id',
+        whereDetails={
+            'rate_name': rateName,
+            'branch_id': branchId,
+            'is_default': isDefault,
+            'is_active': isActive,
+            'date_added': dateAdded,
+            'added_by_user_id': addedByUserId
+        }
+    )
     if rateRow:
         return rateRow[0].id
+
     data = {
         'rate_name' : rateName,
         'branch_id' : branchId,
@@ -45,7 +58,7 @@ def addRate(
         'date_added' : dateAdded,
         'added_by_user_id' : addedByUserId,
     }
-    conn.sqlInsertRow('rate', data)
+    conn.sqlInsertRow('rate', data, insertId=rateId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('rate')
