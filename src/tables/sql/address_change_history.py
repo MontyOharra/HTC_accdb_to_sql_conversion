@@ -30,7 +30,16 @@ def addAddressChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    addressChangeHistoryRow = conn.sqlGetInfo('address_change_history', 'id', f"[address_id] = '{addressId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
+    addressChangeHistoryRow = conn.sqlGetInfo(
+        'address_change_history',
+        'id',
+        whereDetails={
+            'address_id': addressId,
+            'user_id': userId,
+            'date_changed': dateChanged,
+            'changes': changes
+        }
+    )
     if addressChangeHistoryRow:
         return addressChangeHistoryRow[0].id
     data = {

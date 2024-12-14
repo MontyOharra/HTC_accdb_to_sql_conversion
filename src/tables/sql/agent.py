@@ -42,9 +42,24 @@ def addAgent(
     isSetToAutoNotifyEmail : bool,
     isActive : bool,
 ) -> int:
-    agentRow = conn.sqlGetInfo('agent', 'id', f"[customer_id] = '{customerId}' AND [email_address] = '{emailAddress}' AND [first_name] = '{firstName}' AND [last_name] = '{lastName}' AND [phone_id] = '{phoneId}' AND [mobile_phone_id] = '{mobilePhoneId}' AND [fax_id] = '{faxId}' AND [is_set_to_auto_notify_email] = '{isSetToAutoNotifyEmail}' AND [is_active] = '{isActive}'")
+    agentRow = conn.sqlGetInfo(
+        'agent',
+        'id',
+        whereDetails={
+            'customer_id': customerId,
+            'email_address': emailAddress,
+            'first_name': firstName,
+            'last_name': lastName,
+            'phone_id': phoneId,
+            'mobile_phone_id': mobilePhoneId,
+            'fax_id': faxId,
+            'is_set_to_auto_notify_email': isSetToAutoNotifyEmail,
+            'is_active': isActive
+        }
+    )
     if agentRow:
         return agentRow[0].id
+
     data = {
         'customer_id' : customerId,
         'email_address' : emailAddress,

@@ -30,9 +30,19 @@ def addCompanyChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    companyChangeHistoryRow = conn.sqlGetInfo('company_change_history', 'id', f"[company_id] = '{companyId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
+    companyChangeHistoryRow = conn.sqlGetInfo(
+        'company_change_history',
+        'id',
+        whereDetails={
+            'company_id': companyId,
+            'user_id': userId,
+            'date_changed': dateChanged,
+            'changes': changes
+        }
+    )
     if companyChangeHistoryRow:
         return companyChangeHistoryRow[0].id
+
     data = {
         'company_id' : companyId,
         'user_id' : userId,

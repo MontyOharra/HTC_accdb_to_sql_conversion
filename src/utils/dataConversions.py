@@ -31,6 +31,24 @@ def getPhoneNumber(phoneString):
     plainPhoneString = getPhonePlainNumber(phoneString)
     return plainPhoneString[3:10] if len(plainPhoneString) >= 10 else ''
 
+def infer_regex_patterns(strings):
+    # Map for storing regex patterns and corresponding strings
+    pattern_groups = defaultdict(list)
+
+    for s in strings:
+        # Generate regex pattern for the string
+        pattern = re.sub(r'[0-9]', '0', s)  # Replace digits with '0'
+        pattern = re.sub(r'[A-Za-z]', 'A', pattern)  # Replace letters with 'A'
+
+        # Add string to the corresponding regex group
+        pattern_groups[pattern].append(s)
+
+    # Sort the strings in each group for better readability
+    for pattern in pattern_groups:
+        pattern_groups[pattern].sort()
+
+    return pattern_groups
+
 def correctPostalCode(postalCode):
     if postalCode == None:
         return ''
@@ -66,20 +84,13 @@ def correctPostalCode(postalCode):
     else:
         return ''
 
-def infer_regex_patterns(strings):
-    # Map for storing regex patterns and corresponding strings
-    pattern_groups = defaultdict(list)
-
-    for s in strings:
-        # Generate regex pattern for the string
-        pattern = re.sub(r'[0-9]', '0', s)  # Replace digits with '0'
-        pattern = re.sub(r'[A-Za-z]', 'A', pattern)  # Replace letters with 'A'
-
-        # Add string to the corresponding regex group
-        pattern_groups[pattern].append(s)
-
-    # Sort the strings in each group for better readability
-    for pattern in pattern_groups:
-        pattern_groups[pattern].sort()
-
-    return pattern_groups
+def getAssessorialIds(assessorialIdString):
+    if assessorialIdString == None:
+        return []
+      
+    ids = []  
+    for index, character in enumerate(assessorialIdString):
+        if character.lower() == 'x':
+            ids.append(index + 1)
+            
+    return ids

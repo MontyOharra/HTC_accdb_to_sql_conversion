@@ -24,9 +24,17 @@ def addCertificationTestTrainer(
     trainerName : str,
     isActive : bool,
 ) -> int:
-    certificationTestTrainerRow = conn.sqlGetInfo('certification_test_trainer', 'id', f"[trainer_name] = '{trainerName}' AND [is_active] = '{isActive}'")
+    certificationTestTrainerRow = conn.sqlGetInfo(
+        'certification_test_trainer',
+        'id',
+        whereDetails={
+            'trainer_name': trainerName,
+            'is_active': isActive
+        }
+    )
     if certificationTestTrainerRow:
         return certificationTestTrainerRow[0].id
+
     data = {
         'trainer_name' : trainerName,
         'is_active' : isActive,

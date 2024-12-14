@@ -26,9 +26,17 @@ def addLocationDefaultAssessorial(
     locationId : int,
     assessorialId : int,
 ) -> int:
-    locationDefaultAssessorialRow = conn.sqlGetInfo('location_default_assessorial', 'id', f"[location_id] = '{locationId}' AND [assessorial_id] = '{assessorialId}'")
+    locationDefaultAssessorialRow = conn.sqlGetInfo(
+        'location_default_assessorial',
+        'id',
+        whereDetails={
+            'location_id': locationId,
+            'assessorial_id': assessorialId
+        }
+    )
     if locationDefaultAssessorialRow:
         return locationDefaultAssessorialRow[0].id
+
     data = {
         'location_id' : locationId,
         'assessorial_id' : assessorialId,

@@ -32,7 +32,17 @@ def addAgentCertificationTest(
     testScore : int,
     isActive : bool,
 ) -> int:
-    agentCertificationTestRow = conn.sqlGetInfo('agent_certification_test', 'id', f"[agent_id] = '{agentId}' AND [certification_test_id] = '{certificationTestId}' AND [date_tested] = '{dateTested}' AND [test_score] = '{testScore}' AND [is_active] = '{isActive}'")
+    agentCertificationTestRow = conn.sqlGetInfo(
+        'agent_certification_test',
+        'id',
+        whereDetails={
+            'agent_id': agentId,
+            'certification_test_id': certificationTestId,
+            'date_tested': dateTested,
+            'test_score': testScore,
+            'is_active': isActive
+        }
+    )
     if agentCertificationTestRow:
         return agentCertificationTestRow[0].id
     data = {

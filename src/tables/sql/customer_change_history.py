@@ -30,9 +30,19 @@ def addCustomerChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    customerChangeHistoryRow = conn.sqlGetInfo('customer_change_history', 'id', f"[customer_id] = '{customerId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
+    customerChangeHistoryRow = conn.sqlGetInfo(
+        'customer_change_history',
+        'id',
+        whereDetails={
+            'customer_id': customerId,
+            'user_id': userId,
+            'date_changed': dateChanged,
+            'changes': changes
+        }
+    )
     if customerChangeHistoryRow:
         return customerChangeHistoryRow[0].id
+
     data = {
         'customer_id' : customerId,
         'user_id' : userId,

@@ -30,9 +30,19 @@ def addBranchChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    branchChangeHistoryRow = conn.sqlGetInfo('branch_change_history', 'id', f"[branch_id] = '{branchId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
+    branchChangeHistoryRow = conn.sqlGetInfo(
+        'branch_change_history',
+        'id',
+        whereDetails={
+            'branch_id': branchId,
+            'user_id': userId,
+            'date_changed': dateChanged,
+            'changes': changes
+        }
+    )
     if branchChangeHistoryRow:
         return branchChangeHistoryRow[0].id
+
     data = {
         'branch_id' : branchId,
         'user_id' : userId,

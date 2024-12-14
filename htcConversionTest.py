@@ -72,7 +72,7 @@ tableConversionTasks = [
       ('HTC000_G025_T010 Positions', convert_HTC000_G025_T010_Positions),
       ('HTC000_G090_T010 Staff', convert_HTC000_G090_T010_Staff),
       ('HTC010_G000_T000 OrderType Values', convert_HTC010_G000_T000_OrderType_Values),
-      # ('HTC010_G000_T000 US Zip Codes', convert_HTC010_G000_T000_US_Zip_Codes),
+      # ## ('HTC010_G000_T000 US Zip Codes', convert_HTC010_G000_T000_US_Zip_Codes),
       ('HTC010_G100_T010 CertificationTestCatalog', convert_HTC010_G100_T010_CertificationTestCatalog),
       ('HTC300_G000_T000 Archive Update History', convert_HTC300_G000_T000_Archive_Update_History),
       ('HTC300_G000_T000 Holidays', convert_HTC300_G000_T000_Holidays),

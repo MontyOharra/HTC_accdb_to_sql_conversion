@@ -76,5 +76,3 @@ def addAssessorial(
     conn.commit()
 
     return conn.sqlGetLastIdCreated('assessorial')
-
-def getAssessorialFields()

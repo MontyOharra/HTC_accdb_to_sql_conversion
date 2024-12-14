@@ -26,9 +26,17 @@ def addCustomerDefaultAssessorial(
     customerId : int,
     assessorialId : int,
 ) -> int:
-    customerDefaultAssessorialRow = conn.sqlGetInfo('customer_default_assessorial', 'id', f"[customer_id] = '{customerId}' AND [assessorial_id] = '{assessorialId}'")
+    customerDefaultAssessorialRow = conn.sqlGetInfo(
+        'customer_default_assessorial',
+        'id',
+        whereDetails={
+            'customer_id': customerId,
+            'assessorial_id': assessorialId
+        }
+    )
     if customerDefaultAssessorialRow:
         return customerDefaultAssessorialRow[0].id
+
     data = {
         'customer_id' : customerId,
         'assessorial_id' : assessorialId,

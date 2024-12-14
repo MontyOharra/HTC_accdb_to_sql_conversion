@@ -30,9 +30,19 @@ def addCertificationTestTrainerChangeHistory(
     dateChanged : str,
     changes : str,
 ) -> int:
-    certificationTestTrainerChangeHistoryRow = conn.sqlGetInfo('certification_test_trainer_change_history', 'id', f"[certification_test_trainer_id] = '{certificationTestTrainerId}' AND [user_id] = '{userId}' AND [date_changed] = '{dateChanged}' AND [changes] = '{changes}'")
+    certificationTestTrainerChangeHistoryRow = conn.sqlGetInfo(
+        'certification_test_trainer_change_history',
+        'id',
+        whereDetails={
+            'certification_test_trainer_id': certificationTestTrainerId,
+            'user_id': userId,
+            'date_changed': dateChanged,
+            'changes': changes
+        }
+    )
     if certificationTestTrainerChangeHistoryRow:
         return certificationTestTrainerChangeHistoryRow[0].id
+
     data = {
         'certification_test_trainer_id' : certificationTestTrainerId,
         'user_id' : userId,

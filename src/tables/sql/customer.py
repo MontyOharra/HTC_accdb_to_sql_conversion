@@ -47,9 +47,26 @@ def addCustomer(
     isActive : bool,
     notes : bool,
 ) -> int:
-    customerRow = conn.sqlGetInfo('customer', 'id', f"[branch_id] = '{branchId}' AND [customer_name] = '{customerName}' AND [address_id] = '{addressId}' AND [phone_id] = '{phoneId}' AND [default_rate_id] = '{defaultRateId}' AND [fuel_service_charge] = '{fuelServiceCharge}' AND [qb_customer_ref_id] = '{qbCustomerRefId}' AND [qb_customer_ref_name] = '{qbCustomerRefName}' AND [is_qb_invoice_omitted] = '{isQbInvoiceOmitted}' AND [is_active] = '{isActive}' AND [notes] = '{notes}'")
+    customerRow = conn.sqlGetInfo(
+        'customer',
+        'id',
+        whereDetails={
+            'branch_id': branchId,
+            'customer_name': customerName,
+            'address_id': addressId,
+            'phone_id': phoneId,
+            'default_rate_id': defaultRateId,
+            'fuel_service_charge': fuelServiceCharge,
+            'qb_customer_ref_id': qbCustomerRefId,
+            'qb_customer_ref_name': qbCustomerRefName,
+            'is_qb_invoice_omitted': isQbInvoiceOmitted,
+            'is_active': isActive,
+            'notes': notes
+        }
+    )
     if customerRow:
         return customerRow[0].id
+
     data = {
         'branch_id' : branchId,
         'customer_name' : customerName,
