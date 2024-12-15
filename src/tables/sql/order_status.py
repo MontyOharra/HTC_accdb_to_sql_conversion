@@ -26,6 +26,7 @@ def createOrderStatusTable(conn):
 
 def addOrderStatus(
     conn : Connection,
+    orderStatusId : int,
     sequenceNumber : int,
     orderStatusName : str,
     isOnManifest : bool,
@@ -54,7 +55,7 @@ def addOrderStatus(
         'is_active' : isActive,
         'branch_id' : branchId,
     }
-    conn.sqlInsertRow('order_status', data)
+    conn.sqlInsertRow('order_status', data, insertId=orderStatusId)
     conn.commit()
 
     return conn.sqlGetLastIdCreated('order_status')

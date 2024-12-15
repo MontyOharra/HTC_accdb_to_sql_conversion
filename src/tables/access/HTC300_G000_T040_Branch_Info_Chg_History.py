@@ -9,7 +9,7 @@ def convert_HTC300_G000_T040_Branch_Info_Chg_History(conn : Connection, row):
     addBranchChangeHistory(
         conn,
         branchId=row.BrInfo_BrID,
-        userId=getUserIdFromUsername(userId),
+        userId=userId,
         dateChanged=row.BrInfo_Now,
         changes=row.BrInfo_Chgs
     )

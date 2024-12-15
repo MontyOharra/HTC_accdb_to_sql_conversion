@@ -194,6 +194,7 @@ class Connection:
         info={
           'sqlStatement' : selectSql,
           'tableName' : tableName,
+          'selectColumns' : selectDetails,
           'whereDetails': whereDetails,
         }
       )
@@ -217,28 +218,60 @@ class Connection:
     self, 
     accessDb: str,
     tableName: str,
-    selectColumns: Optional[List[str]] = None,
-    whereClause: str = ""
+    selectDetails : List[str | Dict[str, str]] | str | None = None,
+    whereDetails : Dict[str, any] | str | None = None
   ) -> List[Any]:
     self.currentProcess = 'gettingAccessInfo'
-    if selectColumns:
-      selectColumns: str = ', '.join(selectColumns)
+    
+    # Create column selection string
+    selectColumnsClause : str
+    if type(selectDetails) ==  list: # Columns can be a single string, or a dictionary, with the key being the column name and value being its alias
+      selectColumnsClause = ', '.join([column if type(column) == str else f"{list(column.keys())[0]} AS {list(column.values())[0]}" for column in selectDetails])
+    elif type(selectDetails) == str: # If column is single string
+      selectColumnsClause = selectDetails
+    else: # Otherwise select all columns
+      selectColumnsClause = '*'
+    
+    if type(whereDetails) == dict:  
+      whereArgs = []
+      for tableField, fieldValue in whereDetails.items():
+        if fieldValue == None: # If value is None, check if NULL in SQL
+          whereArgs.append(f"[{tableField}] IS NULL")
+        elif type(fieldValue) == str: # If string type, double up any single quotations within the string for escaping
+          fieldValue = ''.join(["''" if x == "'" else x for x in fieldValue])
+          whereArgs.append(f"[{tableField}] LIKE '{fieldValue}'")
+        elif type(fieldValue) == int or type(fieldValue) == float: # IF numeric type, do not include quotations
+          whereArgs.append(f"[{tableField}] = {fieldValue}")
+        elif type(fieldValue) == bool: # If boolean type, convert to 1/0 instead of true/false
+          if fieldValue == True:
+            whereArgs.append(f"[{tableField}] = 1")
+          else:
+            whereArgs.append(f"[{tableField}] = 0")
+        else: # In all unchecked cases, check equality with single quotations around value
+          whereArgs.append(f"[{tableField}] = '{fieldValue}'")
+        whereClause = ' AND '.join(whereArgs)
+        
+    elif type(whereDetails) == str:
+      whereClause = whereDetails
     else:
-      selectColumns: str = '*'
-    selectSql: str = f"SELECT {selectColumns} FROM [{tableName}] {f'WHERE {whereClause}' if whereClause else ''}"
+      whereClause = ''
+
+    selectSql: str = f"SELECT {selectColumnsClause} FROM [{tableName}] {f'WHERE {whereClause}' if whereClause else ''}"
+    
     try:
       accessConn: Connection = self.dbConnections[accessDb]
       accessCursor: Cursor = accessConn.cursor()
       accessCursor.execute(selectSql)
       return accessCursor.fetchall()
+    
     except Exception as err:
       self.handleError(
         info={
           'sqlStatement' : selectSql,
           'accessDb': accessDb,
           'tableName' : tableName,
-          'selectColumns' : selectColumns,
-          'whereClause' : whereClause
+          'selectColumns' : selectDetails,
+          'whereClause' : whereDetails
         }
       )
       
@@ -250,32 +283,36 @@ class Connection:
       self.handleError(str(err))      
 
   def handleError(self, info: Optional[Dict[str, Any]] = None) -> None:
+    errorMessage: str = '\n'
     if self.currentProcess == '':
-      errorMessage: str = 'Error initializing connection object.\n'
+      errorMessage += 'Error initializing connection object.\n'
     elif self.currentProcess == 'droppingSqlTable':
-      errorMessage = f'Error dropping table [{info['tableName']}].\n'
+      errorMessage += f'Error dropping table [{info['tableName']}].\n'
     elif self.currentProcess == 'creatingSqlTable':
-      errorMessage = f'Error creating table [{info['tableName']}].\n'
+      errorMessage += f'Error creating table [{info['tableName']}].\n'
     elif self.currentProcess == 'insertingSqlRow':
-      errorMessage = f'Error inserting row into [{info['tableName']}].\n    Details:\n'
+      errorMessage += f'Error inserting row into [{info['tableName']}].\n    Details:\n'
       for fieldName, fieldValue in info['fields'].items():
         errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
     elif self.currentProcess == "addingIndex":
-      errorMessage = f"Error adding index onto [{info['tableName']}].\n    Details:\n"
+      errorMessage += f"Error adding index onto [{info['tableName']}].\n    Details:\n"
       errorMessage += f"        Column Name: [{info['indexField']}], Index Type: '{info['indexType']}', Is Unique: {info['isUnique']}"
     elif self.currentProcess == "addingSqlForeignKey":
-      errorMessage = f"Error adding foreign key to [{info['fromTableName']}].\n    Details:\n"
+      errorMessage += f"Error adding foreign key to [{info['fromTableName']}].\n    Details:\n"
       errorMessage += f'            From field: [{info['fromTableField']}], Target table: [{info['toTableName']}], Target table field: [{info['toTableField']}]'
     elif self.currentProcess == f"gettingSqlInfo":
-      errorMessage = f'Error getting info from [{info['tableName']}].\n    Details:\n'
-      for fieldName, fieldValue in info['whereDetails'].items():
-        errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
+      errorMessage += f'Error getting info from [{info['tableName']}].\n    Details:\n'
+      if (type(info['whereDetails']) == dict):  
+        for fieldName, fieldValue in info['whereDetails'].items():
+          errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
+      elif (type(info['whereDetails']) == str):
+        errorMessage += f'        Details: [{info["whereDetails"]}]\n'
     elif self.currentProcess == 'gettingSqlLastIdCreated':
-      errorMessage = f'Error getting last id created in [{info['tableName']}].\n'
+      errorMessage += f'Error getting last id created in [{info['tableName']}].\n'
     elif self.currentProcess == "gettingAccessTable":
-      errorMessage = "Error getting access table data.\n"
+      errorMessage += "Error getting access table data.\n"
     elif self.currentProcess == "committing":
-      errorMessage = "Error committing statement.\n"
+      errorMessage += "Error committing statement.\n"
     else:
       errorMessage = "Error message not defined\n"
       

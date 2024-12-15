@@ -3,7 +3,7 @@ from ...imports import *
 from ..sql.location import addLocation
 from ..sql.address import addAddress
 from ..sql.phone import addPhone
-
+from ..sql.location_default_assessorial import addLocationDefaultAssessorial
 def convert_HTC300_G060_T010_Addresses(conn : Connection, row):
     addressId = addAddress(
         conn,
@@ -22,6 +22,13 @@ def convert_HTC300_G060_T010_Addresses(conn : Connection, row):
         phoneNumber=getPhoneNumber(row.FavPhone),
         phoneExtension=row.FavExt
     )
+    
+    for assessorialId in getAssessorialIds(row.FavAssessorials):
+        addLocationDefaultAssessorial(
+            conn,
+            locationId=row.FavID,
+            assessorialId=assessorialId
+        )
     
     addLocation(
         conn,

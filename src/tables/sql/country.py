@@ -40,9 +40,11 @@ def addCountry(
     countryDetails : Dict[str, str]
 ) -> int:    
     if not countryDetails:
-        return 0
+        return None
     if 'countryName' in countryDetails:
-        countryName = countryDetails['countryName'].lower()
+        countryName = countryDetails['countryName'].lower().strip()
+        if not countryName:
+            return None
         countryRow = conn.sqlGetInfo('country', 'id', f"[country_name] = '{countryName}'")
         if countryRow:
             return countryRow[0].id
@@ -52,7 +54,9 @@ def addCountry(
             'country_name': countryName
         }
     elif 'isoCode2' in countryDetails:
-        isoCode2 = countryDetails['isoCode2'].lower()
+        isoCode2 = countryDetails['isoCode2'].lower().strip()
+        if not isoCode2:
+            return None
         countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_2] = '{isoCode2}'")
         if countryRow:
             return countryRow[0].id
@@ -62,7 +66,9 @@ def addCountry(
             'country_name': countryGet(alpha_2=isoCode2)[0]['name'].lower()
         }
     elif 'isoCode3' in countryDetails:
-        isoCode3 = countryDetails['isoCode3'].lower()
+        isoCode3 = countryDetails['isoCode3'].lower().strip()
+        if not isoCode3:
+            return None
         countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_3] = '{isoCode3}'")
         if countryRow:
             return countryRow[0].id

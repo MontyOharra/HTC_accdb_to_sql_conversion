@@ -36,6 +36,9 @@ def addCityPostalCode(
     
     regionId = addRegion(conn, regionDetails, countryDetails)
     
+    if regionId == None:
+        return (None, None)
+    
     cityRow = conn.sqlGetInfo('city INNER JOIN city_region ON [city].[id] = [city_region].[city_id]', '[city].[id] AS selected_city_id', f"[city].[city_name] = '{cityName}' AND [city_region].[region_id] = '{regionId}'")
     postalCodeRow = conn.sqlGetInfo('postal_code INNER JOIN postal_code_region ON [postal_code].id = [postal_code_region].[postal_code_id]', '[postal_code].[id] AS selected_postal_code_id', f"[postal_code].[postal_code] = '{postalCode}' AND [postal_code_region].[region_id] = '{regionId}'")
     if cityRow:

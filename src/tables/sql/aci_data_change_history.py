@@ -37,6 +37,8 @@ def addAciDataChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
+    
+    
     conn.sqlInsertRow('aci_data_change_history', data)
     conn.commit()
 

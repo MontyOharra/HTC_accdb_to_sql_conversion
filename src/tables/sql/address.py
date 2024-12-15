@@ -40,14 +40,19 @@ def addAddress(
 
     if not addressLine1 or not cityName or not postalCode or not regionDetails or not countryDetails:
         return None
+
+    cityId, postalCodeId = addCityPostalCode(conn, cityName, postalCode, regionDetails=regionDetails, countryDetails=countryDetails)
     
+    if cityId == None or postalCodeId == None:
+        return None
+      
     addressLine1 = addressLine1.lower()
+    
     if type(addressLine2) == str:
         addressLine2 = addressLine2.lower()
         if addressLine2.strip() == '':
             addressLine2 = None
         
-    cityId, postalCodeId = addCityPostalCode(conn, cityName, postalCode, regionDetails=regionDetails, countryDetails=countryDetails)
     
     addressRow = conn.sqlGetInfo(
         'address',

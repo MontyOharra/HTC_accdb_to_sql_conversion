@@ -4,15 +4,15 @@ customerFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
     Field(fieldName="branch_id", fieldDetails="INTEGER NOT NULL"),
     Field(fieldName="customer_name", fieldDetails="NVARCHAR(63) NOT NULL"),
-    Field(fieldName="address_id", fieldDetails="INTEGER NOT NULL"),
-    Field(fieldName="phone_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="address_id", fieldDetails="INTEGER"),
+    Field(fieldName="phone_id", fieldDetails="INTEGER"),
     Field(fieldName="default_rate_id", fieldDetails="INTEGER NOT NULL"),
     Field(fieldName="fuel_service_charge", fieldDetails="MONEY NOT NULL"),
     Field(fieldName="qb_customer_ref_id", fieldDetails="NVARCHAR(127)"),
     Field(fieldName="qb_customer_ref_name", fieldDetails="NVARCHAR(127)"),
     Field(fieldName="is_qb_invoice_omitted", fieldDetails="BIT NOT NULL"),
     Field(fieldName="is_active", fieldDetails="BIT NOT NULL DEFAULT (1)"),
-    Field(fieldName="notes", fieldDetails="NTEXT NOT NULL"),
+    Field(fieldName="notes", fieldDetails="NTEXT"),
 ]
 
 customerIndexes: List[Index] = [

@@ -2,7 +2,7 @@ from ...imports import *
 
 from ..sql.order_assessorial import addOrderAssessorial
 
-def convert_HTC300_G040_T011C_Remaining_Order_Assessorials(conn : Connection, row):
+def convert_HTC400_G040_T011A_Assessorials(conn : Connection, row):
     if row.OA_MinutesWaitTime:
         basisCount = row.OA_MinutesWaitTime
     elif row.OA_HowManyMiles:

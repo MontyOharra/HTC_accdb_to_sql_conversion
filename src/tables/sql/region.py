@@ -43,13 +43,17 @@ def addRegion(
     countryDetails : Dict[str, str]
 ) -> int : 
     if not regionDetails or not countryDetails:
-        return 0
+        return None
     
     countryId = addCountry(conn, countryDetails=countryDetails)
     countryIsoCode = conn.sqlGetInfo('country', 'iso_code_2', f"[id] = '{countryId}'")[0].iso_code_2
     
-    if 'regionName' in regionDetails:
-        regionName = regionDetails['regionName'].lower()
+    
+    if 'regionName' in regionDetails:      
+        regionName = regionDetails['regionName'].lower().strip()
+        
+        if not regionName:
+          return None
         regionRow = conn.sqlGetInfo('region', 'id', f"[region_name] = '{regionName}' AND [country_id] = {countryId}")
         if regionRow:
             return regionRow[0].id
@@ -64,7 +68,9 @@ def addRegion(
             'country_id' : countryId
         } 
     elif 'isoCode' in regionDetails:
-        isoCode = regionDetails['isoCode'].lower()
+        isoCode = regionDetails['isoCode'].lower().strip()
+        if not isoCode:
+            return None
         regionRow = conn.sqlGetInfo('region', 'id', f"[iso_code] = '{isoCode}' AND [country_id] = '{countryId}'")
         if regionRow:
             return regionRow[0].id

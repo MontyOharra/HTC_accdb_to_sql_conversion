@@ -2,10 +2,14 @@ from ...imports import *
 
 from ..sql.order import addOrder
 
-def convert_HTC300_G040_T010C_Remaining_Orders(conn : Connection, row):
-    # Retrieve rate ID based on the tariff
-    rateId = 1
-    # Add the order
+def convert_HTC400_G040_T010A_Orders(conn : Connection, row):
+    rateId = 1    
+    
+    if row.M_Driver:
+        driverName = row.M_Driver.strip()
+    else:
+        driverName = None
+        
     addOrder(
         conn,
         orderId=row.M_OrderNo,
@@ -25,11 +29,11 @@ def convert_HTC300_G040_T010C_Remaining_Orders(conn : Connection, row):
         puNotes=row.M_PUNotes,
         delLocationId=row.M_DelID,
         delNotes=row.M_DelNotes,
-        driverName=row.M_Driver.strip(),
+        driverName=driverName,
         podSignee=row.M_PODSig,
         podTimeSigned=combineDateTime(row.M_PODDate, row.M_PODTime),
         podNotes=row.M_PODNotes,
-        statusId=row.m_StatSeq,
+        statusId=row.M_StatSeq,
         ratingWeightCharges=row.M_Rate,
         ratingFuelCharges=row.M_FSC,
         ratingServiceCharges=row.M_Services,

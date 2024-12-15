@@ -3,7 +3,7 @@ from ...imports import *
 assessorialFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
     Field(fieldName="branch_id", fieldDetails="INTEGER NOT NULL"),
-    Field(fieldName="assessorial_name", fieldDetails="NVARCHAR(31) NOT NULL"),
+    Field(fieldName="assessorial_name", fieldDetails="NVARCHAR(127) NOT NULL"),
     Field(fieldName="min_charge", fieldDetails="MONEY NOT NULL"),
     Field(fieldName="basis_type", fieldDetails="nvarchar(255) NOT NULL CHECK ([basis_type] IN ('fixed', 'weight', 'prompt'))"),
     Field(fieldName="basis_portion", fieldDetails="FLOAT NOT NULL"),

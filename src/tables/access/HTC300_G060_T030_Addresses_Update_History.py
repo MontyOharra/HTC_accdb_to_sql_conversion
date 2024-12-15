@@ -1,7 +1,12 @@
 from ...imports import *
 
-def convert_HTC300_G060_T030_Addresses_Update_History(conn : Connection):
-    location_change_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G060_T030 Addresses Update History')
-    for row in location_change_historyInfo:
-        pass
-    print('Completed [HTC300_G060_T030 Addresses Update History] Conversion.')
+from ..sql.location_change_history import addLocationChangeHistory
+
+def convert_HTC300_G060_T030_Addresses_Update_History(conn : Connection, row):
+    addLocationChangeHistory(
+        conn,
+        locationId=row.Addr_ID,
+        userId=getUserIdFromUsername(conn, row.Addr_UpdtLID),
+        dateChanged=row.Addr_UpdtDate,
+        changes=row.Addr_Chgs.strip() if not row.Addr_Chgs.strip() == '' else 'N/A'
+    )

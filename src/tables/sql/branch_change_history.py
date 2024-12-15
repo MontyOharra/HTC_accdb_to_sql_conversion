@@ -5,7 +5,7 @@ branchChangeHistoryFields: List[Field] = [
     Field(fieldName="branch_id", fieldDetails="INTEGER NOT NULL"),
     Field(fieldName="user_id", fieldDetails="INTEGER"),
     Field(fieldName="date_changed", fieldDetails="DATETIME2 NOT NULL"),
-    Field(fieldName="changes", fieldDetails="NTEXT NOT NULL"),
+    Field(fieldName="changes", fieldDetails="NTEXT"),
 ]
 
 branchChangeHistoryIndexes: List[Index] = [

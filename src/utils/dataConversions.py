@@ -1,6 +1,9 @@
 import re
 from collections import defaultdict
 
+from typing import List, Dict
+from datetime import datetime
+
 def getCityLng(
     cityName: str,
     postalCode : str
@@ -22,6 +25,113 @@ def getPhonePlainNumber(phoneString):
         if char.isdigit():
             numbers += char
     return numbers
+  
+def isPhoneNumber(phoneString):
+    return getPhonePlainNumber(phoneString) != ''
+from datetime import datetime
+
+def combineDateTime(date, time):
+    # Define potential formats for date and time
+    date_formats = [
+        "%Y-%m-%d",    # YYYY-MM-DD
+        "%m/%d/%Y",    # MM/DD/YYYY
+        "%d-%m-%Y",    # DD-MM-YYYY
+        "%d/%m/%Y",    # DD/MM/YYYY
+        "%m/%d/%y",    # MM/DD/YY, adjusted to 20YY if year < 2000
+        "%m/%d/%Y",    # MM/D/YYYY
+        "%m/%d/%y",    # MM/D/YY
+        "%m/%d/%Y",    # M/D/YYYY
+        "%m/%d/%y",    # M/D/YY
+        "%m/%d/%Y",    # M/DD/YYYY
+        "%m/%d/%y",    # M/DD/YY
+        "%m-%d-%y",    # MM-DD-YY
+    ]
+    time_formats = [
+        "%H:%M:%S.%f",  # HH:MM:SS.milliseconds
+        "%H:%M:%S",     # HH:MM:SS
+        "%H:%M",        # HH:MM
+        "%I:%M %p",     # HH:MM AM/PM
+        "%I:%M:%S %p",  # HH:MM:SS AM/PM
+    ]
+    
+    if not date:
+      return None
+    
+    # Parse the date
+    if isinstance(date, str):
+        date = date.strip()
+        try:
+            if len(date.split('-')[2]) == 3:
+            # Attempt to parse the three-digit year as an integer
+                year = int(date.split('-')[2])
+                if year == 202:
+                    date = date.replace("202", "2022", 1)
+                elif year == 203 or year == 223:
+                    date = date.replace(str(year), "2023", 1)
+        except:
+            pass  # If parsing fails, let the normal format validation handle it
+          
+        try:
+            if len(date.split('/')[2]) == 3:
+            # Attempt to parse the three-digit year as an integer
+                year = int(date.split('/')[2])
+                if year == 202:
+                    date = date.replace("202", "2022", 1)
+                elif year == 203 or year == 223:
+                    date = date.replace(str(year), "2023", 1)
+                elif year == 209 or str(year) == "019":  
+                    date = date.replace(str(year), "2019", 1)
+            elif len(date.split('/')[2]) == 5:
+                if str(year) == "02018":
+                    date = date.replace("02018", "2018", 1)
+            elif len(date.split('/')[1]) == 6:
+                    date = date.replace(str(year), f"{str(year)[0:1]}/{str(year)[2:5]}", 1) 
+        except:
+            pass  # If parsing fails, let the normal format validation handle it
+        
+        if not date:
+            return None
+          
+        for fmt in date_formats:
+            try:
+                parsed_date = datetime.strptime(date, fmt)
+                # Adjust for formats like MM/DD/YY to enforce 20YY
+                if fmt.endswith("%y") and parsed_date.year < 2000:
+                    parsed_date = parsed_date.replace(year=parsed_date.year + 2000)
+                date = parsed_date
+                break
+            except ValueError:
+                continue
+        else:
+            print(f"[DEBUG] Error: Date format not recognized: {date}")
+            return None
+    
+    # Parse the time
+    if not time:
+        return None
+      
+    if isinstance(time, str):
+        if not time:
+            return None
+        for fmt in time_formats:
+            try:
+                time = datetime.strptime(time, fmt)
+                break
+            except ValueError:
+                continue
+        else:
+            # Default to "00:00:00" if no valid time format is recognized
+            timeString = "00:00:00"
+            time = datetime.strptime(timeString, "%H:%M:%S")
+    
+    # Combine the date and time
+    combined_datetime = datetime.combine(date.date(), time.time())
+    
+    # Format the output as "YYYY-MM-DD HH:MM:SS.{milliseconds}"
+    return combined_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
+
+
+
 
 def getPhoneAreaCode(phoneString):
     plainPhoneString = getPhonePlainNumber(phoneString)

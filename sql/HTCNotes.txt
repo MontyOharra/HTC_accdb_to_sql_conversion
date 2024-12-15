@@ -521,59 +521,51 @@ Note table_to_table {
       M_PUSpecificYN => NULL
       M_DelSpecficYN => NULL
       M_DeclaredValue => NULL
-      M_PUID => pu_address_id
-      M_PUCo => pu_location_id
+      M_PUID => pu_location_id
+      M_PUCo => NULL
       M_PULocn => NULL
       M_PUZip => NULL
       M_PULatitude => NULL
       M_PULongitude => NULL
       M_PUACI => NULL
       M_PUAssessorials => NULL
-      if isPhoneNumber(M_PUContactName):
-        M_PUContactName => pu_contact_phone_id
-        M_PUContactMeans => pu_contact_name
-      else:
-        M_PUContactName => pu_contact_name
-        M_PUContactMeans => pu_contact_phone_id
+      M_PUContactName => NULL
+      M_PUContactMeans => NULL
       M_PUNotes => pu_notes
       M_PUCarrier => NULL
       M_PUIntlYN => NULL
       M_PULocalYN => NULL
       M_PUBranchYN => NULL
-      M_DelID => del_address_id
-      M_DelCo => del_location_id
+      M_DelID => del_location_id
+      M_DelCo => NULL
       M_DelLocn => NULL
       M_DelZip => NULL
       M_DelLatitude => NULL
       M_DelLongitude => NULL
       M_DelACI => NULL
       M_DelAssessorials => NULL
-      if isPhoneNumber(M_PUContactName):
-        M_DelContactName => del_contact_phone_id
-        M_DelContactMeans => del_contact_name
-      else:
-        M_DelContactName => del_contact_name
-        M_DelContactMeans => del_contact_phone_id
+      M_DelContactName => NULL
+      M_DelContactMeans => NULL
       M_DelNotes => del_notes
       M_DelCarrier => NULL
       M_DelIntlYN => NULL
       M_DelLocalYN => NULL
       M_DelBranchYN => NULL
       M_Driver => GetIdFromField('user', 'name')
-      M_PODSignee => pod_signee
+      M_PODSig => pod_signee
       M_PODDate & M_PODTime => pod_time_signed
       M_PODNotes => pod_notes
       M_Status => NULL
-      M_StatSeq => status_id
+      m_StatSeq => status_id
       M_Rate => rating_weight_charges
       M_FSC => rating_fuel_charges 
       M_Services => rating_service_charges
       M_Charges => rating_total_charges
       M_Costs => rating_total_expenses
-      M_StorageCosts => rating_storage_charges
+      M_StorageChgs => rating_storage_charges
       M_Adjustments => rating_adjustments
       M_RatingNotes => rating_notes
-      M_QBCustomer => quickbooks_customer_list_id
+      M_QBCustomerListID => quickbooks_customer_list_id
       M_QBCustFullName => quickbooks_customer_name
       M_QBInvoiceRefNumber => quickbooks_invoice_reference_number
       M_QBInvoiceLineSeqNo => quickbooks_line_sequence_number
@@ -759,13 +751,16 @@ Note table_to_table {
       (FavACIID if FavAciID != 0 else NULL) => aci_id
       FavFirstName => contact_first_name
       FavLastName => contact_last_name
+      if (isPhoneNumber(favPhone)):
+        !insertPhone(
+          countryCode = 1,
+          areaCode = getAreaCode(FavPhone)
+          phoneNumber = getPhoneNumber(FavPhone),
+          extension = FavExt
+        ) => phone_id
+      else:
+        NULL => phone_id
       FavEMail => contact_email
-      !insertPhone(
-        countryCode = 1,
-        areaCode = getAreaCode(FavPhone)
-        phoneNumber = getPhoneNumber(FavPhone),
-        extension = FavExt
-      ) => phone_id
       !createAssessorialLink("default_location_assessorial", FavAssessorials)
       FavCarrierYN => is_carrier
       FavLocalYN => is_local
@@ -1334,11 +1329,9 @@ Table customer {
   ]
   customer_name NVARCHAR(63) [not null]
   address_id INTEGER [
-    not null,
     ref: > address.id
   ]
   phone_id INTEGER [
-    not null,
     ref: > phone.id
   ]
   default_rate_id INTEGER [
@@ -1350,7 +1343,7 @@ Table customer {
   qb_customer_ref_name NVARCHAR(127)
   is_qb_invoice_omitted BIT [not null]
   is_active BIT [not null, default: 1]
-  notes NTEXT [not null]
+  notes NTEXT
 }
 
 Table customer_change_history {
@@ -1517,18 +1510,10 @@ Table order {
   pu_location_id INTEGER [
     ref: > location.id
   ]
-  pu_contact_phone_id INTEGER [
-    ref: > phone.id  
-  ]
-  pu_contact_name NVARCHAR(63)
   pu_notes NTEXT
   del_location_id INTEGER [
     ref: > location.id
   ]
-  del_contact_phone_id INTEGER [
-    ref: > phone.id  
-  ]
-  del_contact_name NVARCHAR(63)
   del_notes NTEXT
   driver_name NVARCHAR()
   pod_signee NVARCHAR(63)

@@ -40,7 +40,8 @@ def getConnection(htcAllPath, sqlDriver, sqlServerName, sqlDatabaseName):
         htc300Conn = connectToAccessDatabase(htcAllPath + 'HTC300_Data-01-01.accdb')
         htc320Conn = connectToAccessDatabase(htcAllPath + 'HTC320_TSA_Data-01-01.accdb')
         htc350Conn = connectToAccessDatabase(htcAllPath + 'HTC350D ETO Parameters.accdb')
-        htc400Conn = connectToAccessDatabase(htcAllPath + 'HTC400_Order Archives.accdb')
+        htc400ArchiveConn = connectToAccessDatabase(htcAllPath + 'HTC400_Order Archives.accdb')
+        htc400Conn = connectToAccessDatabase(htcAllPath + 'HTC400_Order Archive DB-01-01.accdb')
 
         dbConnections = {
             'sqlServer': sqlConn,
@@ -49,6 +50,7 @@ def getConnection(htcAllPath, sqlDriver, sqlServerName, sqlDatabaseName):
             'htc300': htc300Conn,
             'htc320': htc320Conn,
             'htc350': htc350Conn,
+            'htc400archive': htc400ArchiveConn,
             'htc400': htc400Conn
         }
         return Connection(dbConnections)

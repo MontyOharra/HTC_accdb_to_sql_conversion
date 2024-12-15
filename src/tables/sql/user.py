@@ -139,11 +139,13 @@ def addUser(
     return conn.sqlGetLastIdCreated('user')
 
 
-def getUserIdFromUsername(conn : Connection, username : str | None) -> int:
+def getUserIdFromUsername(conn : Connection, username) -> int:
     if username == None:
         return None
     if username.strip() == "":
         return None
+      
+    username = username.strip()
     
     userRow = conn.sqlGetInfo('user', 'id', f"[username] = '{username}'")
     if not userRow:
