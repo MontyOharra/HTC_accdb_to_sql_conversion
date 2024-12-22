@@ -20,6 +20,10 @@ agentIndexes: List[Index] = [
   
 ]
 
+agentCertificationTestIndexes: List[Index] = [
+  
+]
+
 archiveErrorLogIndexes: List[Index] = [
   
 ]
@@ -44,6 +48,23 @@ branchIndexes: List[Index] = [
   
 ]
 
+certificationTestIndexes: List[Index] = [
+]
+
+
+certificationTestChangeHistoryIndexes: List[Index] = [
+  
+]
+
+certificationTestTrainerForeignKeys: List[ForeignKey] = [
+  
+]
+
+certificationTestTrainerChangeHistoryIndexes: List[Index] = [
+  
+]
+
+
 cityPostalCodeIndexes: List[Index] = [
   
 ]
@@ -51,7 +72,6 @@ cityPostalCodeIndexes: List[Index] = [
 cityRegionIndexes: List[Index] = [
   
 ]
-
 
 cityIndexes: List[Index] = [
   

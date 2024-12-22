@@ -1,4 +1,4 @@
-from ....imports import *
+from ...imports import *
 from .helpers import *
 
 def addAciDataChangeHistory(
@@ -199,6 +199,39 @@ def addAgent(
     conn.commit()
 
     return conn.sqlGetLastIdCreated('agent')
+  
+def addAgentCertificationTest(
+    conn : Connection,
+    agentId : int,
+    certificationTestId : int,
+    dateTested : str,
+    testScore : int,
+    isActive : bool,
+) -> int:
+    agentCertificationTestRow = conn.sqlGetInfo(
+        'agent_certification_test',
+        'id',
+        whereDetails={
+            'agent_id': agentId,
+            'certification_test_id': certificationTestId,
+            'date_tested': dateTested,
+            'test_score': testScore,
+            'is_active': isActive
+        }
+    )
+    if agentCertificationTestRow:
+        return agentCertificationTestRow[0].id
+    data = {
+        'agent_id' : agentId,
+        'certification_test_id' : certificationTestId,
+        'date_tested' : dateTested,
+        'test_score' : testScore,
+        'is_active' : isActive,
+    }
+    conn.sqlInsertRow('agent_certification_test', data)
+    conn.commit()
+
+    return conn.sqlGetLastIdCreated('agent_certification_test')  
   
 def addArchiveErrorLog(
     conn : Connection,
@@ -469,7 +502,122 @@ def addBranch(
     conn.commit()
 
     return conn.sqlGetLastIdCreated('branch')
+
+def addCertificationTest(
+    conn : Connection,
+    certificationTestId : id,
+    certificationName : str,
+    certificationTestTrainerId : int,
+    isActive : bool,
+) -> int:
+    certificationTestRow = conn.sqlGetInfo(
+        'certification_test',
+        'id',
+        whereDetails={
+            'certification_name': certificationName,
+            'certification_test_trainer_id': certificationTestTrainerId,
+            'is_active': isActive
+        }
+    )
+    if certificationTestRow:
+        return certificationTestRow[0].id
+
+    data = {
+        'certification_name': certificationName,
+        'certification_test_trainer_id': certificationTestTrainerId,
+        'is_active': isActive,
+    }
+    conn.sqlInsertRow('certification_test', data, insertId=certificationTestId)
+    conn.commit()
+
+    return conn.sqlGetLastIdCreated('certification_test')
   
+def addCertificationTestChangeHistory(
+    conn : Connection,
+    certificationTestId : int,
+    userId : int,
+    dateChanged : str,
+    changes : str,
+) -> int:
+    certificationTestChangeHistoryRow = conn.sqlGetInfo(
+        'certification_test_change_history',
+        'id',
+        whereDetails={
+            'certification_test_id': certificationTestId,
+            'user_id': userId,
+            'date_changed': dateChanged,
+            'changes': changes
+        }
+    )
+    if certificationTestChangeHistoryRow:
+        return certificationTestChangeHistoryRow[0].id
+    data = {
+        'certification_test_id' : certificationTestId,
+        'user_id' : userId,
+        'date_changed' : dateChanged,
+        'changes' : changes,
+    }
+    conn.sqlInsertRow('certification_test_change_history', data)
+    conn.commit()
+
+    return conn.sqlGetLastIdCreated('certification_test_change_history')  
+
+def addCertificationTestTrainer(
+    conn : Connection,
+    trainerName : str,
+    isActive : bool,
+) -> int:
+    certificationTestTrainerRow = conn.sqlGetInfo(
+        'certification_test_trainer',
+        'id',
+        whereDetails={
+            'trainer_name': trainerName,
+            'is_active': isActive
+        }
+    )
+    if certificationTestTrainerRow:
+        return certificationTestTrainerRow[0].id
+
+    data = {
+        'trainer_name' : trainerName,
+        'is_active' : isActive,
+    }
+    conn.sqlInsertRow('certification_test_trainer', data)
+    conn.commit()
+
+    return conn.sqlGetLastIdCreated('certification_test_trainer')
+  
+def addCertificationTestTrainerChangeHistory(
+    conn : Connection,
+    certificationTestTrainerId : int,
+    userId : int,
+    dateChanged : str,
+    changes : str,
+) -> int:
+    certificationTestTrainerChangeHistoryRow = conn.sqlGetInfo(
+        'certification_test_trainer_change_history',
+        'id',
+        whereDetails={
+            'certification_test_trainer_id': certificationTestTrainerId,
+            'user_id': userId,
+            'date_changed': dateChanged,
+            'changes': changes
+        }
+    )
+    if certificationTestTrainerChangeHistoryRow:
+        return certificationTestTrainerChangeHistoryRow[0].id
+
+    data = {
+        'certification_test_trainer_id' : certificationTestTrainerId,
+        'user_id' : userId,
+        'date_changed' : dateChanged,
+        'changes' : changes,
+    }
+    conn.sqlInsertRow('certification_test_trainer_change_history', data)
+    conn.commit()
+
+    return conn.sqlGetLastIdCreated('certification_test_trainer_change_history')
+
 def addCityPostalCode(
     conn : Connection,
     cityId : int,

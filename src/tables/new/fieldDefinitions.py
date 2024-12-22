@@ -1,4 +1,4 @@
-from ....imports import *
+from ...imports import *
 
 aciDataChangeHistoryFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
@@ -32,6 +32,15 @@ addressFields: List[Field] = [
     Field(fieldName="address_line_2", fieldDetails="NVARCHAR(63)"),
     Field(fieldName="city_id", fieldDetails="INTEGER NOT NULL"),
     Field(fieldName="postal_code_id", fieldDetails="INTEGER NOT NULL"),
+]
+
+agentCertificationTestFields: List[Field] = [
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
+    Field(fieldName="agent_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="certification_test_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="date_tested", fieldDetails="DATETIME2 NOT NULL"),
+    Field(fieldName="test_score", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="is_active", fieldDetails="BIT NOT NULL DEFAULT (1)"),
 ]
 
 agentChangeHistoryFields: List[Field] = [
@@ -158,6 +167,35 @@ branchFields: List[Field] = [
     Field(fieldName="aci_high", fieldDetails="NVARCHAR(1) NOT NULL"),
     Field(fieldName="notes", fieldDetails="NTEXT"),
     Field(fieldName="is_active", fieldDetails="BIT NOT NULL"),
+]
+
+certificationTestFields: List[Field] = [
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
+    Field(fieldName="certification_name", fieldDetails="NVARCHAR(63) NOT NULL"),
+    Field(fieldName="certification_test_trainer_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="is_active", fieldDetails="BIT NOT NULL"),
+]
+
+certificationTestChangeHistoryFields: List[Field] = [
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
+    Field(fieldName="certification_test_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="user_id", fieldDetails="INTEGER"),
+    Field(fieldName="date_changed", fieldDetails="DATETIME2 NOT NULL"),
+    Field(fieldName="changes", fieldDetails="NTEXT NOT NULL"),
+]
+
+certificationTestTrainerFields: List[Field] = [
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
+    Field(fieldName="trainer_name", fieldDetails="NVARCHAR(63)"),
+    Field(fieldName="is_active", fieldDetails="BIT NOT NULL DEFAULT (1)"),
+]
+
+certificationTestTrainerChangeHistoryFields: List[Field] = [
+    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
+    Field(fieldName="certification_test_trainer_id", fieldDetails="INTEGER NOT NULL"),
+    Field(fieldName="user_id", fieldDetails="INTEGER"),
+    Field(fieldName="date_changed", fieldDetails="DATETIME2 NOT NULL"),
+    Field(fieldName="changes", fieldDetails="NTEXT NOT NULL"),
 ]
 
 cityPostalCodeFields: List[Field] = [

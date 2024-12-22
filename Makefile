@@ -1,11 +1,4 @@
-                            # UTCS
 PYTHON   := python
-PIP      := pip3
-PYLINT   := pylint3
-COVERAGE := coverage
-PYDOC    := pydoc3
-AUTOPEP8 := autopep8
-
 
 test: htcConversionTest.py
 	$(PYTHON) -u -m htcConversionTest | tee htcConversion.log
@@ -16,5 +9,8 @@ clean: htcConversionTest.py htcConversionFull.py
 full: htcConversionFull.py
 	$(PYTHON) -u -m htcConversionFull | tee htcConversion.log
 
-migration: htcMigrationTest.py
+migration-test: htcMigrationTest.py
 	$(PYTHON) -u -m htcMigrationTest | tee htcMigration.log
+
+migration-full: htcMigrationFull.py
+	$(PYTHON) -u -m htcMigrationFull | tee htcMigration.log

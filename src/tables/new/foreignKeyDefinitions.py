@@ -17,16 +17,21 @@ addressForeignKeys: List[ForeignKey] = [
     ForeignKey('address', 'postal_code_id', 'postal_code', 'id'),
 ]
 
-agentChangeHistoryForeignKeys: List[ForeignKey] = [
-    ForeignKey('agent_change_history', 'agent_id', 'agent', 'id'),
-    ForeignKey('agent_change_history', 'user_id', 'user', 'id'),
-]
-
 agentForeignKeys: List[ForeignKey] = [
     ForeignKey('agent', 'customer_id', 'customer', 'id'),
     ForeignKey('agent', 'phone_id', 'phone', 'id'),
     ForeignKey('agent', 'mobile_phone_id', 'phone', 'id'),
     ForeignKey('agent', 'fax_id', 'fax', 'id'),
+]
+
+agentChangeHistoryForeignKeys: List[ForeignKey] = [
+    ForeignKey('agent_change_history', 'agent_id', 'agent', 'id'),
+    ForeignKey('agent_change_history', 'user_id', 'user', 'id'),
+]
+
+agentCertificationTestForeignKeys: List[ForeignKey] = [
+    ForeignKey('agent_certification_test', 'agent_id', 'agent', 'id'),
+    ForeignKey('agent_certification_test', 'certification_test_id', 'certification_test', 'id'),
 ]
 
 archiveErrorLogForeignKeys: List[ForeignKey] = [
@@ -56,6 +61,24 @@ branchForeignKeys: List[ForeignKey] = [
     ForeignKey('branch', 'company_id', 'company', 'id'),
     ForeignKey('branch', 'phone_id', 'phone', 'id'),
     ForeignKey('branch', 'fax_id', 'fax', 'id'),
+]
+
+certificationTestForeignKeys: List[ForeignKey] = [
+    ForeignKey('certification_test', 'certification_test_trainer_id', 'certification_test_trainer', 'id'),
+]
+
+certificationTestChangeHistoryForeignKeys: List[ForeignKey] = [
+    ForeignKey('certification_test_change_history', 'certification_test_id', 'certification_test', 'id'),
+    ForeignKey('certification_test_change_history', 'user_id', 'user', 'id'),
+]
+
+certificationTestTrainerForeignKeys: List[ForeignKey] = [
+  
+]
+
+certificationTestTrainerChangeHistoryForeignKeys: List[ForeignKey] = [
+    ForeignKey('certification_test_trainer_change_history', 'certification_test_trainer_id', 'certification_test_trainer', 'id'),
+    ForeignKey('certification_test_trainer_change_history', 'user_id', 'user', 'id'),
 ]
 
 cityPostalCodeForeignKeys: List[ForeignKey] = [
