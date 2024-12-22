@@ -30,7 +30,10 @@ def isPhoneNumber(phoneString):
     return getPhonePlainNumber(phoneString) != ''
 from datetime import datetime
 
-def combineDateTime(date, time):
+def fixDate(date):
+    if not date:
+      return None
+    
     # Define potential formats for date and time
     date_formats = [
         "%Y-%m-%d",    # YYYY-MM-DD
@@ -46,17 +49,7 @@ def combineDateTime(date, time):
         "%m/%d/%y",    # M/DD/YY
         "%m-%d-%y",    # MM-DD-YY
     ]
-    time_formats = [
-        "%H:%M:%S.%f",  # HH:MM:SS.milliseconds
-        "%H:%M:%S",     # HH:MM:SS
-        "%H:%M",        # HH:MM
-        "%I:%M %p",     # HH:MM AM/PM
-        "%I:%M:%S %p",  # HH:MM:SS AM/PM
-    ]
-    
-    if not date:
-      return None
-    
+
     # Parse the date
     if isinstance(date, str):
         date = date.strip()
@@ -88,9 +81,6 @@ def combineDateTime(date, time):
                     date = date.replace(str(year), f"{str(year)[0:1]}/{str(year)[2:5]}", 1) 
         except:
             pass  # If parsing fails, let the normal format validation handle it
-        
-        if not date:
-            return None
           
         for fmt in date_formats:
             try:
@@ -106,9 +96,19 @@ def combineDateTime(date, time):
             print(f"[DEBUG] Error: Date format not recognized: {date}")
             return None
     
-    # Parse the time
+    return date
+    
+def fixTime(time):
     if not time:
         return None
+      
+    time_formats = [
+        "%H:%M:%S.%f",  # HH:MM:SS.milliseconds
+        "%H:%M:%S",     # HH:MM:SS
+        "%H:%M",        # HH:MM
+        "%I:%M %p",     # HH:MM AM/PM
+        "%I:%M:%S %p",  # HH:MM:SS AM/PM
+    ]
       
     if isinstance(time, str):
         if not time:
@@ -123,15 +123,20 @@ def combineDateTime(date, time):
             # Default to "00:00:00" if no valid time format is recognized
             timeString = "00:00:00"
             time = datetime.strptime(timeString, "%H:%M:%S")
+            
+    return time
+
+def combineDateTime(date, time):
+    date = fixDate(date)
+    time = fixTime(time)
     
+    if not date or not time:
+        return None
+      
     # Combine the date and time
     combined_datetime = datetime.combine(date.date(), time.time())
-    
     # Format the output as "YYYY-MM-DD HH:MM:SS.{milliseconds}"
     return combined_datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
-
-
-
 
 def getPhoneAreaCode(phoneString):
     plainPhoneString = getPhonePlainNumber(phoneString)

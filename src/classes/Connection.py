@@ -1,11 +1,14 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from pyodbc import Connection, Cursor
 
 from ..types.Field import Field
 from ..types.ForeignKey import ForeignKey
 from ..types.Index import Index
+from datetime import datetime
+from decimal import Decimal
 
 import traceback
+import sys
 
 class Connection:
   def __init__(self, dbConnections: Dict[str, Connection]):
@@ -38,10 +41,10 @@ class Connection:
         }
       )
 
-  def sqlCreateTable(self, tableName: str, tableFields: List[Field]) -> None:
+  def sqlCreateTable(self, tableName: str, tableFields: List[Field], primaryKeys: List[str] = None) -> None:
     self.currentProcess = "creatingSqlTable"
     tableFieldsString = ', '.join([f'[{field.fieldName}] {field.fieldDetails}' for field in tableFields])
-    createSql: str = f"CREATE TABLE [{tableName}] ({tableFieldsString})"
+    createSql: str = f"CREATE TABLE [{tableName}] ({tableFieldsString}{f", PRIMARY KEY ({', '.join(primaryKeys)})" if primaryKeys else ''})"
     try:
       self.sqlDropTable(tableName)
       self.sqlCursor.execute(createSql)
@@ -53,8 +56,24 @@ class Connection:
           'tableName' : tableName
         }
       )
+      
+  def sqlGetColumnType(self, tableName : str, columnName : str) -> str:
+    self.currentProcess = "gettingSqlColumnType"
+    selectSql: str = f"SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}' AND COLUMN_NAME = '{columnName}'"
+    try:
+      self.sqlCursor.execute(selectSql)
+      rows = self.sqlCursor.fetchall()
+      return rows[0][0]
+    except Exception as err:
+      self.handleError(
+        info={
+          'sqlStatement' : selectSql,
+          'tableName' : tableName,
+          'columnName' : columnName
+        }
+      )
 
-  def sqlInsertRow(self, tableName : str, fields: Dict[str, Any], insertId : int = None) -> None:
+  def sqlInsertRow(self, tableName : str, fields: Dict[str, Any], insertId : int = None, allowNulls : bool = True) -> None:
     self.currentProcess = "insertingSqlRow"
     fieldNames: List[str] = list(fields.keys())
     if insertId:
@@ -64,9 +83,9 @@ class Connection:
     for value in fields.values():
       if type(value) == str:
         if value.strip() == "":
-          fieldValues.append("NULL")
+          fieldValues.append("NULL" if allowNulls else "''")
         else:
-          fieldValues.append(f"'{''.join(["''" if x == "'" else x for x in value])}'".strip())
+          fieldValues.append(f"'{''.join(["''" if x == "'" else x for x in value]).strip()}'")
       elif type(value) == int or type(value) == float:
         fieldValues.append(value)
       elif type(value) == bool:
@@ -75,7 +94,7 @@ class Connection:
         else:
           fieldValues.append('0')
       elif value == None:
-        fieldValues.append('NULL')
+          fieldValues.append("NULL")
       else:
         fieldValues.append(f"'{value}'")
     fieldNamesString: str = ', '.join(f'[{name}]' for name in fieldNames)
@@ -275,14 +294,99 @@ class Connection:
         }
       )
       
+  def accessGetTableStructure(self, accessDb: str, tableName: str) -> Dict[str, List[Dict[str, Any]] | List[str]]:
+      """
+      Fetches the table structure (column names, data types, nullability, primary key, and auto-increment info)
+      from an Access table.
+
+      Args:
+          accessDb (str): Name of the Access database connection.
+          tableName (str): Name of the table to retrieve structure from.
+
+      Returns:
+          List[Dict[str, Any]]: A list of dictionaries containing column metadata.
+      """
+      self.currentProcess = "gettingAccessTableStructure"
+      columnsInfo = []
+
+      try:
+          # Connect to the Access database
+          accessConn: Connection = self.dbConnections[accessDb]
+          accessCursor: Cursor = accessConn.cursor()
+
+          # Execute a dummy query to get metadata
+          accessCursor.execute(f"SELECT TOP 1 * FROM [{tableName}]")
+          # Fetch column metadata from cursor description
+          columnDescriptions = accessCursor.description
+          for columnDescription in columnDescriptions:
+              columnsInfo.append({
+                  "name": columnDescription[0],
+                  "details": self.getSqlColumnDetails(columnDescription)
+              })
+              
+          primaryKeyColumns = [row[8] for row in accessCursor.statistics(tableName) if row[5]=='PrimaryKey']
+
+          return {'columnsInfo': columnsInfo, 'primaryKeyColumns': primaryKeyColumns}
+
+      except Exception as err:
+          self.handleError(
+              info={
+                  "tableName": tableName,
+                  "accessDb": accessDb,
+                  "sqlStatement": f"SELECT TOP 1 * FROM [{tableName}]"
+              }
+          )
+          
+  def getSqlColumnDetails(self, columnDescription : Tuple[any]) -> str:
+      typeCode : any = columnDescription[1]
+      displaySize : int = columnDescription[2]
+      internalSize : int = columnDescription[3]
+      precision : int = columnDescription[4]
+      scale : int = columnDescription[5]
+      nullable : bool = columnDescription[6]
+      
+      columnDetails : str = ''
+      if typeCode == bool:
+          columnDetails += 'BIT'
+      elif typeCode == int:
+          columnDetails += 'INTEGER'
+      elif typeCode == float or typeCode == Decimal:
+          if scale == 0:
+              columnDetails += 'INTEGER'
+          else:
+              columnDetails += f'DECIMAL({precision},{scale})'
+      elif typeCode == str:
+          if columnDescription[3] == 1073741823:
+              columnDetails += 'NTEXT'
+          else:
+              columnDetails += 'NVARCHAR'
+              columnDetails += f'({columnDescription[3]})'
+      elif typeCode == datetime:
+          columnDetails += 'DATETIME2'
+      else:
+          columnDetails += 'UNKNOWN_TYPE'
+          
+      if not nullable:
+          columnDetails += ' NOT NULL'
+        
+      return columnDetails
+      
   def commit(self) -> None:
     self.currentProcess = 'committing'
     try:
       self.sqlConn.commit()
     except Exception as err:
-      self.handleError(str(err))      
+      self.handleError()      
+      
+  def rollback(self) -> None:
+    self.currentProcess = 'rollingBack'
+    try:
+      self.sqlConn.rollback()
+    except Exception as err:
+      self.handleError()
 
   def handleError(self, info: Optional[Dict[str, Any]] = None) -> None:
+    self.rollback()
     errorMessage: str = '\n'
     if self.currentProcess == '':
       errorMessage += 'Error initializing connection object.\n'
@@ -306,7 +410,7 @@ class Connection:
         for fieldName, fieldValue in info['whereDetails'].items():
           errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
       elif (type(info['whereDetails']) == str):
-        errorMessage += f'        Details: [{info["whereDetails"]}]\n'
+        errorMessage += f'        Where Clause: [{info["whereDetails"]}]\n'
     elif self.currentProcess == 'gettingSqlLastIdCreated':
       errorMessage += f'Error getting last id created in [{info['tableName']}].\n'
     elif self.currentProcess == "gettingAccessTable":
@@ -314,10 +418,12 @@ class Connection:
     elif self.currentProcess == "committing":
       errorMessage += "Error committing statement.\n"
     else:
-      errorMessage = "Error message not defined\n"
+      errorMessage += "Error message not defined\n"
       
     errorMessage += f'\n    SQL:\n        {info['sqlStatement']}'
-    print(errorMessage)
-    print("    Detailed Error Message:")
-    print(f'        {''.join([char if char != "\n" else '\n        ' for char in traceback.format_exc()])}')
-    print('\n')
+    errorMessage += "\n    Detailed Error Message:"
+    errorMessage += f'\n        {''.join([char if char != "\n" else '\n        ' for char in traceback.format_exc()])}'
+    errorMessage += '\n'
+    
+    sys.stdout.write(errorMessage)
+    sys.stdout.flush()
