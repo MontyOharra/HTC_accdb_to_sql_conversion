@@ -1,0 +1,12 @@
+{
+  "tableName": "HTC000",
+  "logDetails": {
+    "errors": [],
+    "errorCount": 0,
+    "totalRows": 300,
+    "processedRows": 200,
+    "startTime": "1970-01-01T00:00:00Z",
+    "endTime": "2024-01-01T00:00:00Z",
+    "status": "Incomplete"
+  }
+}
