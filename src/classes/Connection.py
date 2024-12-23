@@ -425,5 +425,4 @@ class Connection:
     errorMessage += f'\n        {''.join([char if char != "\n" else '\n        ' for char in traceback.format_exc()])}'
     errorMessage += '\n'
     
-    sys.stdout.write(errorMessage)
-    sys.stdout.flush()
+    raise Exception(errorMessage)
