@@ -1,4 +1,5 @@
-from ....imports import *
+from typing import List
+from ..types.Index import Index
 
 aciDataChangeHistoryIndexes: List[Index] = [
   
@@ -56,7 +57,7 @@ certificationTestChangeHistoryIndexes: List[Index] = [
   
 ]
 
-certificationTestTrainerForeignKeys: List[ForeignKey] = [
+certificationTestTrainerIndexes: List[Index] = [
   
 ]
 

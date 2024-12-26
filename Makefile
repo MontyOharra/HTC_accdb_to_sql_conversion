@@ -1,16 +1,27 @@
 PYTHON   := python
 
-test: htcConversionTest.py
-	$(PYTHON) -u -m htcConversionTest | tee htcConversion.log
+venv:
+	python -m venv env
+	source env/Scripts/activate && \
+	pip install -r requirements.txt && \
+	deactivate
 
-clean: htcConversionTest.py htcConversionFull.py
-	rm -f ./htcConversion.log
+migrate-testing:
+	source env/Scripts/activate && \
+	python applications/migrate/main.py && \
+	deactivate
 
-full: htcConversionFull.py
-	$(PYTHON) -u -m htcConversionFull | tee htcConversion.log
+migrate-production:
+	source env/Scripts/activate && \
+	python applications/migrate/main.py && \
+	deactivate
 
-migration-test: htcMigrationTest.py
-	$(PYTHON) -u -m htcMigrationTest | tee htcMigration.log
+normalize-testing:
+	source env/Scripts/activate && \
+	python -u -m applications.normalize.test && \ 
+	deactivate
 
-migration-full: htcMigrationFull.py
-	$(PYTHON) -u -m htcMigrationFull | tee htcMigration.log
+normalize-production:
+	source env/Scripts/activate && \
+	python applications/normalize/main.py && \
+	deactivate

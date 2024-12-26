@@ -4,11 +4,11 @@ import sys
 import os
 import pyodbc
 
-from src.tables.tableImports import *
+from archived.tableImports import *
 from src.imports import *
 
-from src.utils.sqlHelpers import checkIfDatabaseExists, getSqlServerName
-from src.utils.dbConnections import getConnection
+from src.utils.sqlServerHelpers import checkIfDatabaseExists, getSqlServerName
+from src.utils.connectionHelpers import getConnection
 
 tablesToConvert = [
     'HTC000_G010_T010 Company Info',
@@ -238,9 +238,14 @@ def migrateAccessTables(connFactory, maxThreads):
 def main():
     # Variables defined here for testing purposes
     # Allow user input in main file
-    htcAllPath = r'C:/HTC_Apps/'
-    sqlDriver = r'ODBC Driver 17 for SQL Server'
-    sqlDatabaseName = r'HTC_Migration_testing'
+    
+    htcAllPath = str(input("Enter the path to the HTC_Apps folder: "))
+    useDifferentDriver = str(input("Default is ODBC Driver 17 for SQL Server. Would you like to enter a different driver name? (y/n): "))
+    if useDifferentDriver == 'y':
+        sqlDriver = str(input("Enter the name of the driver: "))
+    elif useDifferentDriver == 'n':
+        sqlDriver = r'ODBC Driver 17 for SQL Server'
+    sqlDatabaseName = str(input("Enter the what you want the SQL Server database name to be: "))
     
     sqlServerName = getSqlServerName()
     if not sqlServerName:
@@ -273,15 +278,16 @@ def main():
         
     # Variable defined here for testing purposes
     # Allow user input in main file
-    resetSqlDatabase = True
-    if resetSqlDatabase:
-      try:
-          initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
-          initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
-          print(f"The database {sqlDatabaseName} exists. Resetting it...")
-      except pyodbc.Error as e:
-          print(f"There was an error resetting the database: {e}")
-          return
+    else:
+      resetSqlDatabase = str(input("Would you like to reset the SQL Server database? (y/n): "))
+      if resetSqlDatabase == 'y':
+        try:
+            initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
+            initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
+            print(f"The database {sqlDatabaseName} exists. Resetting it...")
+        except pyodbc.Error as e:
+            print(f"There was an error resetting the database: {e}")
+            return
         
     # Passdown method to create connections to all HTC databases
     def connFactory():

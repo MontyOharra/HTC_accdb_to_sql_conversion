@@ -1,6 +1,10 @@
-from isocodes import subdivisions_countries, countries
+import re
 
-from ...imports import *
+from isocodes import subdivisions_countries, countries
+from collections import defaultdict
+
+from ..classes.Connection import Connection
+
 
 def regionGet(**kwargs: str):
     try:

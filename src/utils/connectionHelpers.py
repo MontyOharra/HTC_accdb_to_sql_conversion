@@ -1,6 +1,6 @@
 import pyodbc
 
-from ..imports import Connection
+from ..classes.Connection import Connection
 
 
 def connectToAccessDatabase(accessDbPath):

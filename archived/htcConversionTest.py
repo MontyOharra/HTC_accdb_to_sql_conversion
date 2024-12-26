@@ -4,11 +4,11 @@ import sys
 import os
 import pyodbc
 
-from src.tables.tableImports import *
+from archived.tableImports import *
 from src.imports import *
 
-from src.utils.sqlHelpers import checkIfDatabaseExists, getSqlServerName
-from src.utils.dbConnections import getConnection
+from src.utils.sqlServerHelpers import checkIfDatabaseExists, getSqlServerName
+from src.utils.connectionHelpers import getConnection
 
 createSqlServerTableTasks = [
     createAciDataTable,

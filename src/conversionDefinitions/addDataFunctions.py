@@ -1,5 +1,6 @@
-from ...imports import *
 from .helpers import *
+
+from typing import List, Dict, Tuple
 
 def addAciDataChangeHistory(
     conn : Connection,
