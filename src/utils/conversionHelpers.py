@@ -81,7 +81,8 @@ def convertAccessTable(connFactory, accessConversionLogQueue, tableName, rows, r
                 rowConversion(localConn, row)
             except Exception as err:
                 errorCount += 1
-                print(err)
+                # IMPLEMENT LOGGING FUNCTIONALITY
+                # print(err)
                 accessConversionLogQueue.put((tableName, "errorCount", errorCount))
                 continue
             finally:

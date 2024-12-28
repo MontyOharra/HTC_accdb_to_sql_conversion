@@ -10,7 +10,7 @@ from src.utils.sqlServerSetup import setupSqlServer
 from .definitions import *
 
 def main():
-    connFactory, maxConversionThreads = setupSqlServer(isDefault=False)
+    connFactory, maxConversionThreads = setupSqlServer()
     console = Console()
     sqlTablesCreationData = {
         tableName : {} for tableName in sqlTableDefinitions.keys()

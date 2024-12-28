@@ -1,6 +1,6 @@
 PYTHON   := python
 
-venv:
+init:
 	python -m venv env
 	source env/Scripts/activate && \
 	pip install -r requirements.txt && \
@@ -8,12 +8,12 @@ venv:
 
 migrate-testing:
 	source env/Scripts/activate && \
-	python applications/migrate/main.py && \
+	python -u -m applications.migrate.test && \ 
 	deactivate
 
 migrate-production:
 	source env/Scripts/activate && \
-	python applications/migrate/main.py && \
+	python -u -m applications.migrate.main && \ 
 	deactivate
 
 normalize-testing:
@@ -23,5 +23,5 @@ normalize-testing:
 
 normalize-production:
 	source env/Scripts/activate && \
-	python applications/normalize/main.py && \
+	python -u -m applications.normalize.main && \ 
 	deactivate

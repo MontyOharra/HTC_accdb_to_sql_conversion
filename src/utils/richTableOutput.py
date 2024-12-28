@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.live import Live
 
 def createSqlCreationStatusesTable(sqlCreationTableStatuses):
-    table = Table()
+    table = Table(title="SQL Creation Statuses")
     table.add_column("Table Name", justify="left")
     table.add_column("Creation Status", justify="center")
     table.add_column("Indexes Status", justify="center")
@@ -68,10 +68,12 @@ def outputLoggingTable(logQueue, tableType, tableData, successMessage):
     Updates tablesData accordingly, rebuilds Rich tables, & calls live.update().
     """
     console = Console()
-    with Live(console=console, refresh_per_second=1, transient=False) as live:
+    with Live(console=console, refresh_per_second=1, transient=False, vertical_overflow='visible') as live:
         while True:
             try:
                 message = logQueue.get(timeout=1)
+            except KeyboardInterrupt:
+                break
             except:
                 # If no message for 1s, just re-check
                 continue
@@ -104,9 +106,7 @@ def outputLoggingTable(logQueue, tableType, tableData, successMessage):
                 panelTitle = "Access Conversion Statuses"
             else:
                 raise Exception(f"Invalid table type: {tableType}")
-            table = tableSetupFunction(tableData)
-            panel = Panel(table, title=panelTitle, border_style="green")
-            
-            live.update(panel)
+            table = tableSetupFunction(tableData)            
+            live.update(table)
 
     console.print(f"[green]{successMessage}[/green]")

@@ -9,8 +9,14 @@ from src.utils.sqlServerSetup import setupSqlServer
 
 from .definitions import *
 
-def main():
-    connFactory, maxConversionThreads = setupSqlServer(isDefault=True)
+def main():    
+    connFactory, maxConversionThreads = setupSqlServer(
+        htcAllPath=r'C:/HTC_Apps/',
+        sqlDriver=r'ODBC Driver 17 for SQL Server',
+        sqlDatabaseName=r'HTC_Test',
+        autoResetDatabase=True,
+        useMaxConversionThreads=True
+    )
     console = Console()
     sqlTablesCreationData = {
         tableName : {} for tableName in sqlTableDefinitions.keys()

@@ -87,6 +87,13 @@ def convert_HTC000_G090_T010_Staff(conn : Connection, row):
         {'isoCode3' : row.Staff_Home_Country}
     )
     
+    if row.Staff_Password.strip() == '':
+        passwordHash = ""
+        passwordSalt = ""
+    else:
+        passwordSalt = generatePasswordSalt()
+        passwordHash = generatePasswordHash(row.Staff_Password.strip(), passwordSalt)
+    
     addUser(
         conn,
         userId=row.Staff_EmpID,
@@ -108,8 +115,8 @@ def convert_HTC000_G090_T010_Staff(conn : Connection, row):
         phoneHomeId=phoneHomeId,
         dateHired=row.Staff_DateOfHire,
         dateTerminated=row.Staff_DateOfTermination,
-        passwordHash=row.Staff_Password if row.Staff_Password else '',
-        passwordSalt='',
+        passwordHash=passwordHash,
+        passwordSalt=passwordSalt,
         isSecurityCoordinator=row.Staff_SecCoord,
         isTsaTrainer=row.Staff_TSATrainer,
         isDefaultDocOwner=row.Staff_DefaultDocOwner,
@@ -147,7 +154,7 @@ def convert_HTC010_G000_T000_US_Zip_Codes(conn : Connection, row):
           countryDetails={'default' : ''}
       )
       
-def convert_HTC010_G100_T010_CertificationTestCatalog(conn : Connection, row):
+def convert_HTC010_G100_T010_Certification_Test_Catalog(conn : Connection, row):
     addCertificationTest(
       conn,
       certificationTestId=row.TestID,

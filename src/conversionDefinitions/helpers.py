@@ -249,3 +249,10 @@ def getAssessorialIds(assessorialIdString):
             ids.append(index + 1)
             
     return ids
+
+def generatePasswordSalt(saltLength : int) -> str:
+    return ''.join([randomThing for randomThing in range(saltLength)])
+
+
+def generatePasswordHash(password : str, passwordSalt : str) -> str:
+    return password
