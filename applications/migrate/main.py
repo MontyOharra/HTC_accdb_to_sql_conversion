@@ -31,6 +31,12 @@ def main():
             ) for tableName in tablesToMigrate
     }
 
+    accessConversionDefinitions = {
+        tableName : getAccessConversionFunction(definitionsConn, tableName) for tableName in tablesToMigrate
+    }
+    
+    definitionsConn.close()
+    
     try:
         # Create SQL tables
         sqlCreationLogQueue = Queue()
@@ -62,7 +68,7 @@ def main():
             sqlCreationLogQueue.put("STOP")
             sqlCreationLogThread.join()
             
-        '''try:          
+        try:          
             convertAccessTables(
                 connFactory, 
                 accessConversionLogQueue, 
@@ -73,7 +79,7 @@ def main():
             console.print(f"[red]Error convertion Access tables: {e}[/red]")
         finally:
             accessConversionLogQueue.put("STOP")
-            accessConversionLogThread.join()'''
+            accessConversionLogThread.join()
 
     except Exception as e:
         console.print(f"[red]Application encountered a critical error: {e} \n Detailed: {traceback.format_exc()}[/red]")

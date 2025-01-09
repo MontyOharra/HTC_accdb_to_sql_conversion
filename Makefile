@@ -6,22 +6,22 @@ init:
 	pip install -r requirements.txt && \
 	deactivate
 
-migrate-testing:
+migration-test:
 	source env/Scripts/activate && \
 	python -u -m applications.migrate.test && \ 
 	deactivate
 
-migrate-production:
+migration:
 	source env/Scripts/activate && \
 	python -u -m applications.migrate.main && \ 
 	deactivate
 
-normalize-testing:
+normalization-test:
 	source env/Scripts/activate && \
 	python -u -m applications.normalize.test && \ 
 	deactivate
 
-normalize-production:
+normalization:
 	source env/Scripts/activate && \
 	python -u -m applications.normalize.main && \ 
 	deactivate

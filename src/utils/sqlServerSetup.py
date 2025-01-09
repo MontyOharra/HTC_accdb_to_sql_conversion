@@ -54,7 +54,7 @@ def setupSqlServer(htcAllPath = None, sqlDriver = None, sqlDatabaseName = None, 
             initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
             console.print(f"[yellow]The database {sqlDatabaseName} exists. Resetting it...[/yellow]")
         else:
-            resetSqlDatabase = Confirm.ask("Would you like to reset the SQL Server database? (y/n): ")
+            resetSqlDatabase = Confirm.ask("Would you like to reset the SQL Server database?")
             if resetSqlDatabase == 'y':
                 try:
                     initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
@@ -69,7 +69,7 @@ def setupSqlServer(htcAllPath = None, sqlDriver = None, sqlDatabaseName = None, 
         maxConversionThreads = 8 or cpu_count() - 1
         console.print(f"[yellow]Using {maxConversionThreads} threads for conversion[/yellow]")
     else:
-        maxConversionThreads = Prompt.ask("How many threads would you like to use for conversion? Please enter 'max' to use all avaiable threads: ")
+        maxConversionThreads = Prompt.ask("How many threads would you like to use for conversion? Please enter 'max' to use all avaiable threads")
         if maxConversionThreads == 'max':
             maxConversionThreads = 8 or cpu_count() - 1
             console.print(f"[yellow]Using {maxConversionThreads} threads for conversion[/yellow]")
