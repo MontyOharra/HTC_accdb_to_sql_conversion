@@ -32,8 +32,6 @@ def createSqlTable(connFactory, tableName, tableFields, tableIndexes, sqlCreatio
             sqlCreationLogQueue.put((tableName, "indexesStatus", "Completed"))
         except Exception as err:
             sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))
-    except KeyboardInterrupt:
-        sqlCreationLogQueue.put("STOP")
     except Exception as err:
         sqlCreationLogQueue.put(("sqlCreation", tableName, "creationStatus", "Failure"))
         sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))

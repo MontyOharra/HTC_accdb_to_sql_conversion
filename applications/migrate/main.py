@@ -7,17 +7,17 @@ from src.utils.conversionHelpers import convertAccessTables, createSqlTables
 from src.utils.richTableOutput import outputLoggingTable
 from src.utils.sqlServerSetup import setupSqlServer
 
-from .definitions import *
+import definitions
 
 def main():
     connFactory, maxConversionThreads = setupSqlServer()
     console = Console()
     sqlTablesCreationData = {
-        tableName : {} for tableName in tablesToMigrate
+        tableName : {} for tableName in definitions.tablesToMigrate
     }
     
     accessConversionData = {
-        tableName : {} for tableName in tablesToMigrate
+        tableName : {} for tableName in definitions.tablesToMigrate
     }
     
     definitionsConn = connFactory()
@@ -28,11 +28,11 @@ def main():
                 getSqlTableFields(definitionsConn, tableName), 
                 getSqlTableIndexes(definitionsConn, tableName), 
                 getSqlTableForeignKeys(definitionsConn, tableName)
-            ) for tableName in tablesToMigrate
+            ) for tableName in definitions.tablesToMigrate
     }
 
     accessConversionDefinitions = {
-        tableName : getAccessConversionFunction(definitionsConn, tableName) for tableName in tablesToMigrate
+        tableName : getAccessConversionFunction(definitionsConn, tableName) for tableName in definitions.tablesToMigrate
     }
     
     definitionsConn.close()

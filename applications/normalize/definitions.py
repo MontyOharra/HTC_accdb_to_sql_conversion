@@ -1,7 +1,7 @@
-from src.conversionDefinitions.fieldDefinitions import *
-from src.conversionDefinitions.indexDefinitions import *
-from src.conversionDefinitions.foreignKeyDefinitions import *
-from src.conversionDefinitions.conversionFunctions import *
+from .conversionDefinitions.fieldDefinitions import *
+from .conversionDefinitions.indexDefinitions import *
+from .conversionDefinitions.foreignKeyDefinitions import *
+from .conversionDefinitions.conversionFunctionDefinitions import *
 
 sqlTableDefinitions = {
     "aci_data": (aciDataFields, aciDataIndexes, aciDataForeignKeys),

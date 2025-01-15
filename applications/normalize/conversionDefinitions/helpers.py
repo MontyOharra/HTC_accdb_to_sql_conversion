@@ -3,7 +3,7 @@ import re
 from isocodes import subdivisions_countries, countries
 from collections import defaultdict
 
-from ..classes.Connection import Connection
+from src.classes.Connection import Connection
 
 
 def regionGet(**kwargs: str):

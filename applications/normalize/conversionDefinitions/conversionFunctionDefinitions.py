@@ -1,4 +1,4 @@
-from .addDataFunctions import *
+from .addDataFunctionDefinitions import *
 
 def convert_HTC000_G010_T010_Company_Info(conn : Connection, row):
     phoneId = addPhone(
