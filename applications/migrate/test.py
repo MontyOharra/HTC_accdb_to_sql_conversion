@@ -52,14 +52,6 @@ def main():
         )
         sqlCreationLogThread.start()
         
-        accessConversionLogQueue = Queue()
-        accessConversionLogThread = Thread(
-            target=outputAccessConversionLoggingProgress,
-            args=(accessConversionLogQueue, accessConversionData, "Access tables conversion process has been finished."),
-            daemon=True
-        )
-        accessConversionLogThread.start()
-        
         try:
             createSqlTables(
                 connFactory, 
@@ -90,11 +82,6 @@ def main():
                 maxThreads=maxConversionThreads
             )
             print("this shit aint working")
-        except KeyboardInterrupt:
-            console.print("[red]Keyboard interrupt during Access table conversion. Stopping...[/red]")
-            accessConversionLogQueue.put("STOP")
-            accessConversionLogThread.join()
-            return  # or sys.exit(1)
         except Exception as e:
             console.print(f"[red]Error convertion Access tables: {e}[/red]")
         finally:

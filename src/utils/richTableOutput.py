@@ -156,7 +156,7 @@ def outputSqlCreationLoggingProgress(logQueue, tableData, successMessage):
         StepStatusColumn("create"),
         TextColumn("•"),
         StepStatusColumn("index"),
-        # ... add other columns if needed
+        transient=True
     ) as progressBar:
         progressIds = {}
         for tableName, data in tableData.items():
@@ -165,34 +165,37 @@ def outputSqlCreationLoggingProgress(logQueue, tableData, successMessage):
                 create="Not Started",
                 index="Not Started"
             )
-            
-        while True:
-            try:
-                message = logQueue.get(timeout=1)
-            except KeyboardInterrupt:
-                break
-            except:
-                continue
-              
-            if message == "STOP":
-                break
+        try:
+            while True:
+                try:
+                    message = logQueue.get(timeout=1)
+                except KeyboardInterrupt:
+                    message = "STOP"
+                except:
+                    continue
+                
+                if message == "STOP":
+                    progressBar.stop()
+                    break
 
-            # Expecting 4-tuple
-            if isinstance(message, tuple) and len(message) == 3:
-                (tableName, detailName, newValue) = message
-                if tableName in tableData.keys():
-                    if detailName == "creationStatus":
-                        progressBar.update(progressIds[tableName], create=newValue)
-                    elif detailName == "indexesStatus":
-                        progressBar.update(progressIds[tableName], index=newValue)
+                # Expecting 4-tuple
+                if isinstance(message, tuple) and len(message) == 3:
+                    (tableName, detailName, newValue) = message
+                    if tableName in tableData.keys():
+                        if detailName == "creationStatus":
+                            progressBar.update(progressIds[tableName], create=newValue)
+                        elif detailName == "indexesStatus":
+                            progressBar.update(progressIds[tableName], index=newValue)
+                        else:
+                            console.print(f"[yellow]Unknown detail: {detailName}[/yellow]")
                     else:
-                        console.print(f"[yellow]Unknown detail: {detailName}[/yellow]")
+                        console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
                 else:
-                    console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
-            else:
-                console.print(f"[red]Invalid message: {message}[/red]")
-
-    console.print(f"[green]{successMessage}[/green]")
+                    console.print(f"[red]Invalid message: {message}[/red]")
+                    
+            console.print(f"[green]{successMessage}[/green]")
+        except KeyboardInterrupt:
+            console.print("[red]Keyboard interrupt during SQL table creation. Stopping...[/red]") 
 
 class ErrorCountColumn(ProgressColumn):
     """A column that displays how many errors have occurred for a task."""
