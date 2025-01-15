@@ -49,14 +49,16 @@ def setupSqlServer(htcAllPath = None, sqlDriver = None, sqlDatabaseName = None, 
     # Variable defined here for testing purposes
     # Allow user input in main file
     else:
-        if autoResetDatabase == True:
+        if autoResetDatabase == True:        
+            initialSqlConn.cursor().execute(f"ALTER DATABASE [{sqlDatabaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;")
             initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
             initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
             console.print(f"[yellow]The database {sqlDatabaseName} exists. Resetting it...[/yellow]")
         else:
             resetSqlDatabase = Confirm.ask("Would you like to reset the SQL Server database?")
             if resetSqlDatabase == 'y':
-                try:
+                try:  
+                    initialSqlConn.cursor().execute(f"ALTER DATABASE [{sqlDatabaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;")
                     initialSqlConn.cursor().execute(f"DROP DATABASE [{sqlDatabaseName}]")
                     initialSqlConn.cursor().execute(f"CREATE DATABASE [{sqlDatabaseName}]")
                     print(f"The database {sqlDatabaseName} exists. Resetting it...")

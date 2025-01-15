@@ -20,7 +20,6 @@ def createSqlTable(connFactory, tableName, tableFields, tableIndexes, sqlCreatio
     localConn = None
     try:
         localConn = connFactory()
-        sqlCreationLogQueue.put((tableName, "startTime", str(datetime.now())))
         try:
             localConn.sqlCreateTable(tableName, tableFields)
             sqlCreationLogQueue.put((tableName, "creationStatus", "Completed"))
@@ -33,8 +32,8 @@ def createSqlTable(connFactory, tableName, tableFields, tableIndexes, sqlCreatio
             sqlCreationLogQueue.put((tableName, "indexesStatus", "Completed"))
         except Exception as err:
             sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))
-        sqlCreationLogQueue.put((tableName, "endTime", str(datetime.now())))
-        
+    except KeyboardInterrupt:
+        sqlCreationLogQueue.put("STOP")
     except Exception as err:
         sqlCreationLogQueue.put(("sqlCreation", tableName, "creationStatus", "Failure"))
         sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))
@@ -56,22 +55,27 @@ def createSqlTables(connFactory, sqlCreationLogQueue, sqlTableDefinitions, maxTh
             )
             for tableName, (fields, indexes, fks) in sqlTableDefinitions.items()
         ]
-        for future in as_completed(futures):
-            future.result()
+
+        try:
+            for future in as_completed(futures):
+                future.result()
+        except KeyboardInterrupt:
+            # Cancel any futures that have not yet completed
+            for f in futures:
+                f.cancel()
+            # Re-raise the exception so the main thread can handle it
+            raise
 
 
 def convertAccessTable(connFactory, accessConversionLogQueue, tableName, rows, rowConversion): 
     # Mark table in progress
     if not rows:
-        accessConversionLogQueue.put((tableName, "status", "Empty"))
         accessConversionLogQueue.put((tableName, "totalRows", 0))
         return
     
     try:
         localConn = connFactory()
-        accessConversionLogQueue.put((tableName, "status", "Incomplete"))
         accessConversionLogQueue.put((tableName, "totalRows", len(rows)))
-        accessConversionLogQueue.put((tableName, "startTime", str(datetime.now())))
         
         processedRows = 0
         errorCount = 0 
@@ -89,11 +93,9 @@ def convertAccessTable(connFactory, accessConversionLogQueue, tableName, rows, r
                 processedRows += 1
                 accessConversionLogQueue.put((tableName, "processedRows", processedRows))
         
-        accessConversionLogQueue.put((tableName, "endTime", str(datetime.now())))
-        accessConversionLogQueue.put((tableName, "status", "Complete"))
             
     except Exception as err:
-        accessConversionLogQueue.put(("sqlCreation", tableName, "status", "Failure"))
+        accessConversionLogQueue.put((tableName, "status", "Failure"))
     finally:
         if localConn:
             localConn.close()
@@ -111,5 +113,10 @@ def convertAccessTables(connFactory, accessConversionLogQueue, accessConversionD
             )
             for tableName, rowConversionFunction in accessConversionDefinitions.items()
         ]
-        for future in as_completed(futures):
-            future.result()
+        try:
+            for future in as_completed(futures):
+                future.result()
+        except KeyboardInterrupt:
+            for f in futures:
+                f.cancel()
+            raise

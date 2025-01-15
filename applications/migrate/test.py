@@ -4,7 +4,7 @@ from queue import Queue
 from rich.console import Console
 
 from src.utils.conversionHelpers import convertAccessTables, createSqlTables
-from src.utils.richTableOutput import outputLoggingTable
+from src.utils.richTableOutput import outputLoggingTable, outputSqlCreationLoggingProgress, outputAccessConversionLoggingProgress
 from src.utils.sqlServerSetup import setupSqlServer
 
 from .definitions import *
@@ -42,21 +42,20 @@ def main():
     }
     
     definitionsConn.close()
-
     try:
         # Create SQL tables
         sqlCreationLogQueue = Queue()
         sqlCreationLogThread = Thread(
-            target=outputLoggingTable,
-            args=(sqlCreationLogQueue, "sqlCreate", sqlTablesCreationData, "SQL Server tables creation process has been finished."),
+            target=outputSqlCreationLoggingProgress,
+            args=(sqlCreationLogQueue, sqlTablesCreationData, "SQL Server tables creation process has been finished."),
             daemon=True
         )
         sqlCreationLogThread.start()
         
         accessConversionLogQueue = Queue()
         accessConversionLogThread = Thread(
-            target=outputLoggingTable,
-            args=(accessConversionLogQueue, "accessConvert", accessConversionData, "Access tables conversion process has been finished."),
+            target=outputAccessConversionLoggingProgress,
+            args=(accessConversionLogQueue, accessConversionData, "Access tables conversion process has been finished."),
             daemon=True
         )
         accessConversionLogThread.start()
@@ -68,11 +67,20 @@ def main():
                 sqlTableDefinitions,
                 maxThreads=maxConversionThreads
             )
+        except KeyboardInterrupt:
+            console.print("[red]Keyboard interrupt during SQL table creation. Stopping...[/red]")
+            # Put STOP on the queue so the logging thread can terminate gracefully
+            sqlCreationLogQueue.put("STOP")
+            sqlCreationLogThread.join()
+            return  # or sys.exit(1)
         except Exception as e:
             console.print(f"[red]Error creating SQL tables: {e}[/red]")
         finally:
             sqlCreationLogQueue.put("STOP")
             sqlCreationLogThread.join()
+            print("Hey ginga")
+            
+        print("this shit working")
             
         try:          
             convertAccessTables(
@@ -81,6 +89,12 @@ def main():
                 accessConversionDefinitions, 
                 maxThreads=maxConversionThreads
             )
+            print("this shit aint working")
+        except KeyboardInterrupt:
+            console.print("[red]Keyboard interrupt during Access table conversion. Stopping...[/red]")
+            accessConversionLogQueue.put("STOP")
+            accessConversionLogThread.join()
+            return  # or sys.exit(1)
         except Exception as e:
             console.print(f"[red]Error convertion Access tables: {e}[/red]")
         finally:

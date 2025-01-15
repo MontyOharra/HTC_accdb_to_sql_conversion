@@ -2,6 +2,16 @@ from rich.table import Table
 from rich.console import Console
 from rich.panel import Panel
 from rich.live import Live
+from rich.text import Text
+from rich.progress import (
+    Progress,
+    BarColumn,
+    MofNCompleteColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    ProgressColumn
+)
 
 def createSqlCreationStatusesTable(sqlCreationTableStatuses):
     table = Table(title="SQL Creation Statuses")
@@ -100,13 +110,158 @@ def outputLoggingTable(logQueue, tableType, tableData, successMessage):
             # Rebuild the tables
             if tableType == "sqlCreate":
                 tableSetupFunction = createSqlCreationStatusesTable
-                panelTitle = "SQL Creation Statuses"
             elif tableType == "accessConvert":
                 tableSetupFunction = createAccessConversionStatusesTable
-                panelTitle = "Access Conversion Statuses"
             else:
                 raise Exception(f"Invalid table type: {tableType}")
             table = tableSetupFunction(tableData)            
             live.update(table)
 
     console.print(f"[green]{successMessage}[/green]")
+    
+class StepStatusColumn(ProgressColumn):
+    """A custom column to show the status of a given step (unstarted, working, completed)."""
+
+    def __init__(self, step_name: str):
+        super().__init__()
+        self.step_name = step_name
+
+    def render(self, task) -> Text:
+        # Get the step status from the task fields
+        step_status = task.fields.get(self.step_name, "Not Started")
+
+        # You can define custom styling or coloring
+        if step_status == "Not Started":
+            style = "dim"
+        elif step_status == "In Progress":
+            style = "yellow"
+        elif step_status == "Complete":
+            style = "green"
+        else:
+            style = "red"
+
+        return Text(step_status, style=style)    
+    
+def outputSqlCreationLoggingProgress(logQueue, tableData, successMessage):
+    """
+    Listens for messages like:
+        ("sqlCreation", tableName, "status", "In Progress")
+        ...
+    Updates tablesData accordingly, rebuilds Rich tables, & calls live.update().
+    """
+    console = Console()
+    
+    with Progress(
+        "[progress.description]{task.description}",
+        StepStatusColumn("create"),
+        TextColumn("•"),
+        StepStatusColumn("index"),
+        # ... add other columns if needed
+    ) as progressBar:
+        progressIds = {}
+        for tableName, data in tableData.items():
+            progressIds[tableName] = progressBar.add_task(
+                tableName,
+                create="Not Started",
+                index="Not Started"
+            )
+            
+        while True:
+            try:
+                message = logQueue.get(timeout=1)
+            except KeyboardInterrupt:
+                break
+            except:
+                continue
+              
+            if message == "STOP":
+                break
+
+            # Expecting 4-tuple
+            if isinstance(message, tuple) and len(message) == 3:
+                (tableName, detailName, newValue) = message
+                if tableName in tableData.keys():
+                    if detailName == "creationStatus":
+                        progressBar.update(progressIds[tableName], create=newValue)
+                    elif detailName == "indexesStatus":
+                        progressBar.update(progressIds[tableName], index=newValue)
+                    else:
+                        console.print(f"[yellow]Unknown detail: {detailName}[/yellow]")
+                else:
+                    console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
+            else:
+                console.print(f"[red]Invalid message: {message}[/red]")
+
+    console.print(f"[green]{successMessage}[/green]")
+
+class ErrorCountColumn(ProgressColumn):
+    """A column that displays how many errors have occurred for a task."""
+
+    def render(self, task) -> Text:
+        # Retrieve the number of errors from the task fields.
+        errors = task.fields.get("errors", 0)
+
+        # Simple styling: if errors are zero, display in green; otherwise, red.
+        style = "green" if errors == 0 else "red"
+
+        return Text(f"Conversion Errors: {errors}", style=style)
+      
+def outputAccessConversionLoggingProgress(logQueue, tableData, successMessage):
+    """
+    Listens for messages like:
+        ("sqlCreation", tableName, "status", "In Progress")
+        ...
+    Updates tablesData accordingly, rebuilds Rich tables, & calls live.update().
+    """
+    console = Console()
+    print("Starting this shit")
+    
+    with Progress(
+        "[progress.description]{task.description}",
+        BarColumn(),
+        TextColumn("•"),
+        MofNCompleteColumn(),
+        TextColumn("•"),
+        TimeElapsedColumn(),
+        TextColumn("•"),
+        ErrorCountColumn()
+    ) as progressBar:
+        progressIds = {}
+        print(tableData)
+        for tableName, data in tableData.items():
+            progressIds[tableName] = progressBar.add_task(
+                tableName,
+                start=False,
+                errors=0
+            )
+            
+        while True:
+            try:
+                message = logQueue.get(timeout=1)
+            except KeyboardInterrupt:
+                break
+            except:
+                continue
+              
+            if message == "STOP":
+                break
+
+            # Expecting 4-tuple
+            if isinstance(message, tuple) and len(message) == 3:
+                (tableName, detailName, newValue) = message
+                if tableName in tableData.keys():
+                    if detailName == "processedRows":
+                        progressBar.advance(progressIds[tableName])
+                    elif detailName == "totalRows":
+                        progressBar.update(progressIds[tableName], total=newValue)
+                    elif detailName == "errorCount":
+                        progressBar.update(progressIds[tableName], errors=newValue)
+                    else:
+                        console.print(f"[yellow]Unknown detail: {detailName}[/yellow]")
+                else:
+                    console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
+            else:
+                console.print(f"[red]Invalid message: {message}[/red]")
+
+    console.print(f"[green]{successMessage}[/green]")
+    
