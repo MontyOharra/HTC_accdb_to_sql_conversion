@@ -8,7 +8,8 @@ init:
 
 migration-test:
 	source env/Scripts/activate && \
-	python -u -m applications.migrate.test
+	python -u -m applications.migrate.test && \
+	deactivate
 
 migration:
 	source env/Scripts/activate && \

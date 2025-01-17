@@ -7,7 +7,7 @@ tablesToMigrate = [
     "HTC010_G000_T000 All State Abbrev",
     "HTC010_G000_T000 Canadian Provinces to include",
     "HTC010_G000_T000 OrderType Values",
-    "HTC010_G000_T000 US Zip Codes",
+    # "HTC010_G000_T000 US Zip Codes",
     "HTC010_G010_T010 ACI_Data",
     "HTC010_G100_T010 CertificationTestCatalog",
     "HTC300_G000_T000 Archive Update History",

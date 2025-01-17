@@ -12,7 +12,7 @@ def getRows(connFactory, tableName):
     rows = localConn.accessGetTableInfo(getAccessDbName(tableName), tableName)
     localConn.close()
     return rows
-  
+
 def createSqlTable(connFactory, tableName, tableFields, tableIndexes, sqlCreationLogQueue):
     # Mark table in progress
     sqlCreationLogQueue.put((tableName, "creationStatus", "In Progress"))
@@ -33,7 +33,7 @@ def createSqlTable(connFactory, tableName, tableFields, tableIndexes, sqlCreatio
         except Exception as err:
             sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))
     except Exception as err:
-        sqlCreationLogQueue.put(("sqlCreation", tableName, "creationStatus", "Failure"))
+        sqlCreationLogQueue.put((tableName, "creationStatus", "Failure"))
         sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))
         # logError("error.log", f"SQL Table: {tableName}, Error: {err}")
     finally:
@@ -62,13 +62,17 @@ def createSqlTables(connFactory, sqlCreationLogQueue, sqlTableDefinitions, maxTh
             for f in futures:
                 f.cancel()
             # Re-raise the exception so the main thread can handle it
-            raise
+            raise KeyboardInterrupt
 
 
 def convertAccessTable(connFactory, accessConversionLogQueue, tableName, rows, rowConversion): 
     # Mark table in progress
+    accessConversionLogQueue.put((tableName, "conversionStatus", "In Progress"))
+    
     if not rows:
         accessConversionLogQueue.put((tableName, "totalRows", 0))
+        accessConversionLogQueue.put((tableName, "processedRows", 0))
+        accessConversionLogQueue.put((tableName, "conversionStatus", "Completed"))
         return
     
     try:
@@ -91,9 +95,10 @@ def convertAccessTable(connFactory, accessConversionLogQueue, tableName, rows, r
                 processedRows += 1
                 accessConversionLogQueue.put((tableName, "processedRows", processedRows))
         
+        accessConversionLogQueue.put(tableName, "conversionStatus", "Completed")
             
     except Exception as err:
-        accessConversionLogQueue.put((tableName, "status", "Failure"))
+        accessConversionLogQueue.put((tableName, "conversionStatus", "Failure"))
     finally:
         if localConn:
             localConn.close()
@@ -117,4 +122,4 @@ def convertAccessTables(connFactory, accessConversionLogQueue, accessConversionD
         except KeyboardInterrupt:
             for f in futures:
                 f.cancel()
-            raise
+            raise KeyboardInterrupt
