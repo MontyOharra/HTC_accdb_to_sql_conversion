@@ -44,8 +44,8 @@ def createSqlTables(connFactory, sqlCreationLogQueue, sqlTableDefinitions, maxTh
     with ThreadPoolExecutor(maxThreads) as executor:
         futures = [
             executor.submit(
-                createSqlTable, 
-                connFactory, 
+                createSqlTable,
+                connFactory,
                 tableName,
                 fields,
                 indexes,

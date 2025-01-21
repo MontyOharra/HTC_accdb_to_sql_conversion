@@ -17,7 +17,10 @@ from rich.progress import (
 )
     
 class StepStatusColumn(ProgressColumn):
-    """A custom column to show the status of a given step (unstarted, working, completed)."""
+    """
+        A custom column to show the status of a given step:
+        ("Not Started", "In Progress", "Completed").
+    """
 
     def __init__(self, step_name: str):
         super().__init__()
@@ -27,7 +30,6 @@ class StepStatusColumn(ProgressColumn):
         # Get the step status from the task fields
         step_status = task.fields.get(self.step_name, "Not Started")
 
-        # You can define custom styling or coloring
         if step_status == "Not Started":
             style = "dim"
         elif step_status == "In Progress":
@@ -40,7 +42,9 @@ class StepStatusColumn(ProgressColumn):
         return Text(step_status, style=style)    
 
 class ErrorCountColumn(ProgressColumn):
-    """A column that displays how many errors have occurred for a task."""
+    """
+        A column that displays how many errors have occurred for a task.
+    """
     
     def __init__(self, step_name: str):
         super().__init__()
@@ -49,14 +53,19 @@ class ErrorCountColumn(ProgressColumn):
     def render(self, task) -> Text:
         errors = task.fields.get(self.step_name, 0)
         style = "green" if errors == 0 else "red"
-        return Text(f"Conversion Errors: {errors}", style=style)
+        return Text(f"Errors: {errors}", style=style)
       
-def printSqlCreationProgress(logQueue, tableData, successMessage):
+def printSqlCreationProgress(
+    logQueue : Queue,
+    tableCreationData : Dict[str, any],
+    successMessage : str
+):
     """
-    Listens for messages like:
-        ("sqlCreation", tableName, "status", "In Progress")
-        ...
-    Updates tablesData accordingly, rebuilds Rich tables, & calls live.update().
+        Listens for messages sent in from a Queue object.
+        
+        logQueue - Queue object to listen for messages from.
+        tableData - Dictionary of table names and their status.
+        successMessage - Message to display when the process is complete.
     """
     console = Console()
     
@@ -102,7 +111,6 @@ def printSqlCreationProgress(logQueue, tableData, successMessage):
             else:
                 console.print(f"[red]Invalid message: {message}[/red]")
                 
-
       
 def printAccessConversionProgress(logQueue, tableData, successMessage):
     """
@@ -166,7 +174,6 @@ def printAccessConversionProgress(logQueue, tableData, successMessage):
                 console.print(f"[red]Invalid message: {message}[/red]")
     
 
-
 def processAndOutputData(
     connFactory, 
     conversionThreads, 
@@ -177,7 +184,6 @@ def processAndOutputData(
     nonErrorMessage : str,
     errorMessage: str
 ):
-    
     console = Console()
     logQueue = Queue()
     logThread = Thread(
@@ -214,7 +220,7 @@ def splitAndProcessOutputData(
     successMessage : str,
     errorMessage: str,
     maxProgressRowCount : int
-):
+) :
     
     processesCompleted = 0
     processCount = len(tableDefinitions.keys())
@@ -223,7 +229,7 @@ def splitAndProcessOutputData(
         tablesCreationDataSubset = {
             tableName : {} for tableName in tableDefinitionsSubset.keys()
         }
-        try:    
+        try:  
             processesCompleted += len(tableDefinitionsSubset)
             nonErrorMessage = f"{successMessage if processesCompleted == processCount else progressMessage} ({processesCompleted}/{processCount})"
             processAndOutputData(

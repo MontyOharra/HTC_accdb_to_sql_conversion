@@ -1,5 +1,5 @@
 from typing import List
-from src.types.ForeignKey import ForeignKey
+from src.types.types import ForeignKey
 
 aciDataChangeHistoryForeignKeys: List[ForeignKey] = [
     ForeignKey('aci_data_change_history', 'aci_data_id', 'aci_data', 'id'),

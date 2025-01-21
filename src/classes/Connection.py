@@ -1,31 +1,30 @@
 from typing import Dict, Any, List, Optional, Tuple
 from pyodbc import Connection, Cursor
 
-from ..types.Field import Field
-from ..types.ForeignKey import ForeignKey
-from ..types.Index import Index
+from ..types.types import Field, Index, ForeignKey
 from datetime import datetime
 from decimal import Decimal
 
 import traceback
 import sys
 
-class Connection:
+class DatabaseAPI:
+  """
+      A class for interacting with SQL Server and Access databases.
+  """
+  
   def __init__(self, dbConnections: Dict[str, Connection]):
-    if "sqlServer" in dbConnections:
-      sqlConn: Connection = dbConnections["sqlServer"]
-    else:
-      raise Exception("SQL Server connection not found in dbConnections.")
-    
     self.dbConnections: Dict[str, Connection] = dbConnections
-    self.sqlConn: Connection = sqlConn
-    self.sqlCursor: Cursor = sqlConn.cursor()
-    self.currentProcess: str = ""
     
+  def sqlConn(self) -> Connection:
+      return self.dbConnections["sqlServer"]  
+    
+  def sqlCursor(self) -> Cursor:
+      return self.sqlConn().cursor()
+  
   def close(self) -> None:
-    self.sqlCursor.close()
-    for connection in self.dbConnections.values():
-      connection.close()
+    for conn in self.dbConnections.values():
+      conn.close()
 
   def sqlDropTable(self, tableName : str) -> None:
     self.currentProcess = "droppingSqlTable"

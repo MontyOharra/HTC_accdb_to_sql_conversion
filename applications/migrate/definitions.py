@@ -2,7 +2,7 @@ from src.utils.conversionHelpers import getAccessDbName
 
 from .conversionDefinitions.tablesToMigrate import tablesToMigrate as tablesToMigrateDefault
 
-from src.types.Field import Field
+from src.types.types import Field
 
 def getMigrationDefinitions(connFactory, tablesToMigrate=tablesToMigrateDefault):
     definitionsConn = connFactory()
