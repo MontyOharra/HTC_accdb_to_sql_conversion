@@ -1,21 +1,127 @@
-from src.utils.connectionHelpers import getConnection
-from src.utils.sqlServerHelpers import checkIfDatabaseExists, getSqlServerName
 import pyodbc
+import winreg
+import socket
+from os import cpu_count
 
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
-from os import cpu_count
 
-from typing import Tuple
+from typing import Dict, List, Tuple
 from collections.abc import Callable
 
+from src.classes.SqlServerConn import SqlServerConn
+from src.classes.AccessConn import AccessConn
+
+def getSqlServerInstanceNames() -> List[str]:
+    """ 
+        Returns a list of local SQL Server instances.
+    """
+    instances = []
+
+    # Define the registry key path
+    keyPath = r"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL"
+    
+    # Open the registry key
+    try:
+        # Try accessing the 64-bit registry view first
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, keyPath, 0,
+                                winreg.KEY_READ | winreg.KEY_WOW64_64KEY)
+    except FileNotFoundError:
+        # Fall back to the 32-bit registry view
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, keyPath, 0, winreg.KEY_READ)
+    
+    # Enumerate the instances
+    i = 0
+    while True:
+        try:
+            instanceName = winreg.EnumValue(key, i)[0]
+            instances.append(instanceName)
+            i += 1
+        except OSError:
+            break  # No more instances
+    winreg.CloseKey(key)
+        
+    return instances
+
+def getSqlServerFullNameFromInstanceName(instanceName: str) -> str:
+    """ 
+        Returns the full name of a SQL Server instance.
+        
+        instanceName - Name of the SQL Server instance.
+    """
+    hostname = socket.gethostname()
+    
+    if instanceName == "MSSQLSERVER":
+        serverName = hostname  # Default instance
+    else:
+        serverName = f"{hostname}\\{instanceName}"  # Named instance
+    
+    return serverName
+
+def getFullSqlServerName() -> str:
+    """
+        Gets the full name of the intended SQL Server instance.
+        If there is only one instance, it will be returned.
+        If there are multiple instances, the user will be prompted to select one.
+    """
+    console = Console()
+    # Get SQL Server instances
+    sqlInstanceNames = getSqlServerInstanceNames()
+    if not sqlInstanceNames:
+        console.print("There are no sql servers on this machine. Please setup a server and retry the converion. \n [ABORTING CONVERSION PROCCESS]")
+        return None
+    if len(sqlInstanceNames) == 1: # If there is only one instance, select it
+        instance = sqlInstanceNames[0]
+        return getSqlServerFullNameFromInstanceName(instance)
+    else: # If there are multiple instances, prompt user to select one
+        console.print("There are more than one sql servers on this machine. Please choose the server you would like to target:")
+        for instanceNumber, instance in enumerate(sqlInstanceNames):
+            console.print(f"  {getFullSqlServerName(instance)} [{instanceNumber}]" )
+        instanceNum = Prompt.ask("Type the number next to the server instance you would like to select")
+        return (getSqlServerFullNameFromInstanceName(instance[instanceNum]))
+    
+def checkIfDatabaseExists(sqlCursor : pyodbc.Cursor, databaseName : str) -> bool:
+    """
+        Checks if a database exists on the SQL Server.
+        
+        sqlCursor - Cursor object for the SQL Server connection.
+        databaseName - Name of the database to check.
+    """
+    console = Console()
+    
+    checkDbExistsSql = f"SELECT 1 FROM sys.databases WHERE name = '{databaseName}'"
+    try:
+        sqlCursor.execute(checkDbExistsSql)
+        return sqlCursor.fetchone() is not None
+    except Exception as err:
+        console.print(f"[red]There was an error checking if the database {databaseName} exists.[/red]")
+        raise err
+
+def createDatabase(sqlCursor : pyodbc.Cursor, databaseName : str) -> None:
+    """
+        Creates a database on the SQL Server.
+        
+        sqlCursor - Cursor object for the SQL Server connection.
+        databaseName - Name of the database to create.
+    """
+    console = Console()
+    
+    createDbSql = f"CREATE DATABASE [{databaseName}]"
+    try:
+        sqlCursor.execute(createDbSql)
+        console.print(f"Database '{databaseName}' created successfully.")
+    except Exception as err:
+        console.print(f"[red]Failed to create database '{databaseName}'[/red]")
+        exit(1)
+        raise err
+      
 def setupSqlServer(
     htcAllPath : str = None, 
     sqlDriver : str = None, 
     sqlDatabaseName : str = None,
     autoResetDatabase : bool = False,
     useMaxConversionThreads : bool = False
-) -> Tuple[Callable, int] :    
+) -> Tuple[Dict[str, Callable], int] :    
     
     """ 
         Setup SQL Server connection and create database if it does not exist.
@@ -29,7 +135,7 @@ def setupSqlServer(
     """
     
     console = Console()
-    sqlServerName = getSqlServerName()
+    sqlServerName = getFullSqlServerName()
     if not sqlServerName:
         raise Exception("SQL Server could not be found on this machine.")
     
@@ -103,13 +209,18 @@ def setupSqlServer(
         maxConversionThreads = 8 or cpu_count() - 1
         
     console.print(f"[yellow]Using {maxConversionThreads} threads for conversion[/yellow]")
-    
-    def connFactory() -> pyodbc.Connection:
-        return getConnection(
-            htcAllPath=htcAllPath,
-            sqlDriver=sqlDriver,
-            sqlServerName=sqlServerName,
-            sqlDatabaseName=sqlDatabaseName
-        )
+
+    return (
+        {
+            'sql' : lambda : SqlServerConn(sqlDriver, sqlServerName, sqlDatabaseName),
+            'htc000' : lambda : AccessConn(htcAllPath, 'HTC000_Data_Staff.accdb'),
+            'htc010' : lambda : AccessConn(htcAllPath, 'HTC010_Static_data.accdb'),
+            'htc300' : lambda : AccessConn(htcAllPath, 'HTC300_Data-01-01.accdb'),
+            'htc320' : lambda : AccessConn(htcAllPath, 'HTC320_TSA_Data-01-01.accdb'),
+            'htc350' : lambda : AccessConn(htcAllPath, 'HTC350D ETO Parameters.accdb'),
+            'htc400Archive' : lambda : AccessConn(htcAllPath, 'HTC400_Order Archives.accdb'),
+            'htc400' : lambda : AccessConn(htcAllPath, 'HTC400_Order Archive DB-01-01.accdb'),
+        },
+        maxConversionThreads
+    )
         
-    return (connFactory, maxConversionThreads)

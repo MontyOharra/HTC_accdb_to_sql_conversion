@@ -15,6 +15,8 @@ from rich.progress import (
     TimeRemainingColumn,
     ProgressColumn
 )
+
+from src.types.types import SqlCreationDetails
     
 class StepStatusColumn(ProgressColumn):
     """
@@ -55,7 +57,8 @@ class ErrorCountColumn(ProgressColumn):
         style = "green" if errors == 0 else "red"
         return Text(f"Errors: {errors}", style=style)
       
-def printSqlCreationProgress(
+                
+def logSqlCreationProgress(
     logQueue : Queue,
     tableCreationData : Dict[str, any],
     successMessage : str
@@ -71,14 +74,16 @@ def printSqlCreationProgress(
     
     with Progress(
         "[progress.description]{task.description}",
-        StepStatusColumn("create"),
+        StepStatusColumn("creationStatus"),
         TextColumn("•"),
-        StepStatusColumn("index"),
+        StepStatusColumn("indexesStatus"),
     ) as progressBar:
         progressIds = {}
-        for tableName in tableData.keys():
+        for tableName, sqlCreationDetails in tableCreationData.items():
             progressIds[tableName] = progressBar.add_task(
-                tableName
+                tableName,
+                creationStatus=sqlCreationDetails.creationStatus,
+                indexesStatus=sqlCreationDetails.indexesStatus
             )
         while True:
             try:
@@ -99,11 +104,11 @@ def printSqlCreationProgress(
             # Expecting 4-tuple
             if isinstance(message, tuple) and len(message) == 3:
                 (tableName, detailName, newValue) = message
-                if tableName in tableData.keys():
+                if tableName in tableCreationData.keys():
                     if detailName == "creationStatus":
-                        progressBar.update(progressIds[tableName], create=newValue)
+                        progressBar.update(progressIds[tableName], creationStatus=newValue)
                     elif detailName == "indexesStatus":
-                        progressBar.update(progressIds[tableName], index=newValue)
+                        progressBar.update(progressIds[tableName], indexesStatus=newValue)
                     else:
                         console.print(f"[yellow]Unknown detail: {detailName}[/yellow]")
                 else:

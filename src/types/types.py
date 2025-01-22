@@ -1,11 +1,13 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Literal
+
+ValidIndexType = Literal['clustered', 'nonclustered']
 
 @dataclass
 class Index:
     indexName: str
     indexFields: str | List[str]
-    indexType: str
+    indexType: ValidIndexType
     isUnique: bool
     
 @dataclass
@@ -22,9 +24,8 @@ class Field:
     
 @dataclass
 class SqlCreationDetails:
-    tableName: str
-    creationStatus: bool
-    indexesStatus: bool
+    creationStatus: str
+    indexesStatus: str
     
 class accessConversionDetails:
     tableName: str

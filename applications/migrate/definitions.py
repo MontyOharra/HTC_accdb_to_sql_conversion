@@ -1,29 +1,30 @@
-from src.utils.conversionHelpers import getAccessDbName
+from src.utils.conversionHelpers import generateAccessDbNameCache
 
 from .conversionDefinitions.tablesToMigrate import tablesToMigrate as tablesToMigrateDefault
-
+from typing import Dict
 from src.types.types import Field
 
-def getMigrationDefinitions(connFactory, tablesToMigrate=tablesToMigrateDefault):
-    definitionsConn = connFactory()
-    sqlTableDefinitions = {
-        tableName : 
-            (
-                getSqlTableFields(definitionsConn, tableName), 
-                getSqlTableIndexes(definitionsConn, tableName), 
-                getSqlTableForeignKeys(definitionsConn, tableName)
-            ) for tableName in tablesToMigrate
-    }
-    accessConversionDefinitions = {
-        tableName : getAccessConversionFunction(definitionsConn, tableName) for tableName in tablesToMigrate
-    }
-    definitionsConn.close()
+from collections.abc import Callable
+
+def getMigrationDefinitions(connFactories : Dict[str, Callable], tablesToMigrate=tablesToMigrateDefault):
+    accessDbNameCache = generateAccessDbNameCache(tablesToMigrate)
+    
+    sqlTableDefinitions = {}
+    accessConversionDefinitions = {}
+    for tableName in tablesToMigrate:
+        conn = connFactories[accessDbNameCache[tableName]]()
+        sqlTableDefinitions[tableName] = (
+            getSqlTableFields(conn, tableName), 
+            getSqlTableIndexes(conn, tableName), 
+            getSqlTableForeignKeys(conn, tableName)
+        )
+        accessConversionDefinitions[tableName] = getAccessConversionFunction(conn, tableName)
     
     return sqlTableDefinitions, accessConversionDefinitions
 
 
 def getSqlTableFields(conn, accessTableName):
-    structureDetails = conn.accessGetTableStructure(getAccessDbName(accessTableName), accessTableName)
+    structureDetails = conn.getTableStructure(accessTableName)
     fields = []
     for column in structureDetails['columnsInfo']:
         fields.append(Field(column['name'], column['details']))
@@ -37,14 +38,14 @@ def getSqlTableForeignKeys(conn, accessTableName):
     return []
 
 def getAccessConversionFunction(conn, accessTableName):
-    columnNames = [column['name'] for column in conn.accessGetTableStructure(getAccessDbName(accessTableName), accessTableName)['columnsInfo']]
+    columnNames = [column['name'] for column in conn.getTableStructure(accessTableName)['columnsInfo']]
 
-    def conversionFunction(conversionConn, row):
+    def conversionFunction(sqlConn, row):
         data = {columnNames[i] : row[i] for i in range(len(columnNames))}
         
         for columnName in columnNames:
             if data[columnName] == None:
-                rowType = conversionConn.sqlGetColumnType(accessTableName, columnName)
+                rowType = sqlConn.getColumnType(accessTableName, columnName)
                 if rowType in ('int', 'float', 'decimal'):
                     data[columnName] = 0
                 elif rowType in ('nvarchar', 'varchar', 'ntext', 'text'):
@@ -55,6 +56,6 @@ def getAccessConversionFunction(conn, accessTableName):
                 data[columnName] = data[columnName].strip().lower()
             except:
                 pass
-        conversionConn.sqlInsertRow(accessTableName, data, allowNulls=False)
+        sqlConn.insertRow(accessTableName, data, allowNulls=False)
     
     return conversionFunction

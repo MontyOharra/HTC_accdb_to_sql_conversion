@@ -1,69 +1,120 @@
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from concurrent.futures import as_completed
+from pebble import ProcessPool
+from queue import Queue
 
-def getAccessDbName(tableName):
-    if tableName == 'HTC400_G900_T010 Archive Event Log':
-        return 'htc400archive'
-    else:
-        return tableName[0:6].lower()
+from collections.abc import Callable
+from typing import Dict, List, Tuple
 
-def getRows(connFactory, tableName):
-    localConn = connFactory()
-    rows = localConn.accessGetTableInfo(getAccessDbName(tableName), tableName)
-    localConn.close()
-    return rows
+from src.classes.AccessConn import AccessConn
+from src.types.types import Field, Index, ForeignKey, SqlCreationDetails
 
-def createSqlTable(connFactory, tableName, tableFields, tableIndexes, sqlCreationLogQueue):
+def generateAccessDbNameCache(tableNames):
+    accessDbNameCache = {
+        tableName : tableName[0:6].lower() for tableName in tableNames
+    }
+    accessDbNameCache['HTC400_G900_T010 Archive Event Log'] = 'htc400archive'
+    return accessDbNameCache
+
+def getRows(accessConnFactory : Callable, tableName : str):
+    conn = accessConnFactory()
+    return conn.select(tableName)
+
+def createSqlTable(
+    sqlConnFactory : Callable, 
+    tableName : str, 
+    tableFields : List[Field], 
+    tableIndexes : List[Index], 
+    sqlCreationLogQueue : Queue, 
+    errorLogQueue : Queue
+): 
+    """
+        Create a table in the SQL Server database.
+        Send status updates to the sqlCreationLogQueue.
+        Send errors to the errorLogQueue.
+        
+        sqlConnFactory - A function that returns a SQL Server connection.
+        tableName - Name of the table to create.
+        tableFields - List of Field objects representing the fields in the table.
+        tableIndexes - List of Index objects representing the indexes on the table.
+        sqlCreationLogQueue - Queue object to send status updates to.
+        errorLogQueue - Queue object to send errors to.
+    """
     # Mark table in progress
-    sqlCreationLogQueue.put((tableName, "creationStatus", "In Progress"))
-    sqlCreationLogQueue.put((tableName, "indexesStatus", "In Progress"))
-    localConn = None
+    sqlCreationLogQueue.put((tableName, "creationStatus", "Incomplete"))
+    sqlCreationLogQueue.put((tableName, "indexesStatus", "Incomplete"))
     try:
-        localConn = connFactory()
+        conn = sqlConnFactory()
         try:
-            localConn.sqlCreateTable(tableName, tableFields)
-            sqlCreationLogQueue.put((tableName, "creationStatus", "Completed"))
+            conn.sqlCreateTable(tableName, tableFields)
+            sqlCreationLogQueue.put((tableName, "creationStatus", "Complete"))
         except Exception as err:
             sqlCreationLogQueue.put((tableName, "creationStatus", "Failure"))
-        
+            errorLogQueue.put(("sqlTableCreation", tableName, err))
+
         try:
             for index in tableIndexes:
-                localConn.sqlAddIndex(tableName, index.indexType, index.indexFields, index.indexName, index.isUnique)
-            sqlCreationLogQueue.put((tableName, "indexesStatus", "Completed"))
+                conn.sqlAddIndex(tableName, index.indexType, index.indexFields, index.indexName, index.isUnique)
+            sqlCreationLogQueue.put((tableName, "indexesStatus", "Complete"))
         except Exception as err:
             sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))
+            errorLogQueue.put(("sqlTableCreation", tableName, err))
+
+    except KeyboardInterrupt:
+        errorLogQueue.put(("sqlTableCreation", tableName, "KeyboardInterrupt"))
+        raise
+
     except Exception as err:
         sqlCreationLogQueue.put((tableName, "creationStatus", "Failure"))
         sqlCreationLogQueue.put((tableName, "indexesStatus", "Failure"))
-        # logError("error.log", f"SQL Table: {tableName}, Error: {err}")
-    finally:
-        if localConn:
-            localConn.close()
+        errorLogQueue.put(("sqlTableCreation", tableName, err))
 
-def createSqlTables(connFactory, sqlCreationLogQueue, sqlTableDefinitions, maxThreads = 1): 
-    with ThreadPoolExecutor(maxThreads) as executor:
+def createSqlTables(
+    sqlConnFactory : Callable, 
+    sqlTableDefinitions : Dict[str, Tuple[List[Field], List[Index], List[ForeignKey]]], 
+    maxThreads : int,
+    sqlCreationLogQueue : Queue,
+    errorLogQueue : Queue
+): 
+    """
+        Create SQL tables in the SQL Server database based on the table definitions.
+        
+        sqlConnFactory - A function that returns a SQL Server connection.
+        sqlTableDefinitions - A dictionary of table names and their definitions.
+        maxThreads - The maximum number of threads to use for the creation process.
+        sqlCreationLogQueue - A queue to send status updates to.
+        errorLogQueue - A queue to send errors to.
+    """
+    with ProcessPool(maxWorkers=maxThreads) as executor:
         futures = [
-            executor.submit(
+            executor.schedule(
                 createSqlTable,
-                connFactory,
+                sqlConnFactory,
                 tableName,
                 fields,
                 indexes,
-                sqlCreationLogQueue
+                sqlCreationLogQueue,
+                errorLogQueue
             )
             for tableName, (fields, indexes, fks) in sqlTableDefinitions.items()
         ]
-
         try:
             for future in as_completed(futures):
-                future.result()
+                try:
+                    future.result()
+                except KeyboardInterrupt:
+                    sqlCreationLogQueue.put("STOP")
+                    errorLogQueue.put("STOP")
+                    for f in futures:
+                        f.cancel()
+                    raise
+                except Exception as err:
+                    errorLogQueue.put(("sqlTableCreation", "UNKNOWN_TABLE", err))
         except KeyboardInterrupt:
-            # Cancel any futures that have not yet completed
+            sqlCreationLogQueue.put("STOP")
+            errorLogQueue.put("STOP")
             for f in futures:
                 f.cancel()
-            # Re-raise the exception so the main thread can handle it
-            raise KeyboardInterrupt
-
+            raise
 
 def convertAccessTable(connFactory, accessConversionLogQueue, tableName, rows, rowConversion): 
     # Mark table in progress

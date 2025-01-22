@@ -84,5 +84,5 @@ tablesToMigrate = [
     "HTC300_G101_T010 Certification Tests",
     "HTC300_G101_T012 Certification Tests Change History",
     "HTC300_G101_T014 Copmleted Tests",
-    "HTC300_G200_T010 No Invoice Customers",
+    "HTC300_G200_T010 No Invoice Customers"
 ]

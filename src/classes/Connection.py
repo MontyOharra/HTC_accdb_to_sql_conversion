@@ -8,7 +8,7 @@ from decimal import Decimal
 import traceback
 import sys
 
-class DatabaseAPI:
+class Connection:
   """
       A class for interacting with SQL Server and Access databases.
   """
@@ -40,7 +40,7 @@ class DatabaseAPI:
         }
       )
 
-  def sqlCreateTable(self, tableName: str, tableFields: List[Field], primaryKeys: List[str] = None) -> None:
+  def sqlCreateTable(self, tableName: str, tableFields: List[Field]) -> None:
     self.currentProcess = "creatingSqlTable"
     tableFieldsString = ', '.join([f'[{field.fieldName}] {field.fieldDetails}' for field in tableFields])
     createSql: str = f"CREATE TABLE [{tableName}] ({tableFieldsString}{f", PRIMARY KEY ({', '.join(primaryKeys)})" if primaryKeys else ''})"
@@ -335,40 +335,39 @@ class DatabaseAPI:
                   "sqlStatement": f"SELECT TOP 1 * FROM [{tableName}]"
               }
           )
-          
-  def getSqlColumnDetails(self, columnDescription : Tuple[any]) -> str:
-      typeCode : any = columnDescription[1]
-      displaySize : int = columnDescription[2]
-      internalSize : int = columnDescription[3]
-      precision : int = columnDescription[4]
-      scale : int = columnDescription[5]
-      nullable : bool = columnDescription[6]
-      
-      columnDetails : str = ''
-      if typeCode == bool:
-          columnDetails += 'BIT'
-      elif typeCode == int:
-          columnDetails += 'INTEGER'
-      elif typeCode == float or typeCode == Decimal:
-          if scale == 0:
-              columnDetails += 'INTEGER'
-          else:
-              columnDetails += f'DECIMAL({precision},{scale})'
-      elif typeCode == str:
-          if columnDescription[3] == 1073741823:
-              columnDetails += 'NTEXT'
-          else:
-              columnDetails += 'NVARCHAR'
-              columnDetails += f'({columnDescription[3]})'
-      elif typeCode == datetime:
-          columnDetails += 'DATETIME2'
-      else:
-          columnDetails += 'UNKNOWN_TYPE'
-          
-      if not nullable:
-          columnDetails += ' NOT NULL'
+                      
+    def getSqlColumnDetails(self, columnDescription : Tuple[any]) -> str:
+        typeCode : any = columnDescription[1]
+        displaySize : int = columnDescription[2]
+        internalSize : int = columnDescription[3]
+        precision : int = columnDescription[4]
+        scale : int = columnDescription[5]
+        nullable : bool = columnDescription[6]
         
-      return columnDetails
+        if typeCode == bool:
+            columnDetails = 'BIT'
+        elif typeCode == int:
+            columnDetails = 'INTEGER'
+        elif typeCode == float or typeCode == Decimal:
+            if scale == 0:
+                columnDetails = 'INTEGER'
+            else:
+                columnDetails = f'DECIMAL({precision},{scale})'
+        elif typeCode == str:
+            if columnDescription[3] == 1073741823:
+                columnDetails = 'NTEXT'
+            else:
+                columnDetails = 'NVARCHAR'
+                columnDetails = f'({columnDescription[3]})'
+        elif typeCode == datetime:
+            columnDetails = 'DATETIME'
+        else:
+            columnDetails = 'UNKNOWN_TYPE'
+            
+        if not nullable:
+            columnDetails += ' NOT NULL'
+          
+        return columnDetails
       
   def commit(self) -> None:
     self.currentProcess = 'committing'
