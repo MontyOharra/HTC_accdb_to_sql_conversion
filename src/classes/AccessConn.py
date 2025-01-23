@@ -143,7 +143,6 @@ class AccessConn:
                     "name": columnDescription[0],
                     "details": self.getColumnDetails(columnDescription)
                 })
-                
             primaryKeyColumns = [row[8] for row in self.cursor.statistics(tableName) if row[5]=='PrimaryKey']
 
             return {'columnsInfo': columnsInfo, 'primaryKeyColumns': primaryKeyColumns}
@@ -169,26 +168,26 @@ class AccessConn:
         precision : int = columnDescription[4]
         scale : int = columnDescription[5]
         nullable : bool = columnDescription[6]
-        
+        columnDetails : str = ''
         if typeCode == bool:
-            columnDetails = 'BIT'
+            columnDetails += 'BIT'
         elif typeCode == int:
-            columnDetails = 'INTEGER'
+            columnDetails += 'INTEGER'
         elif typeCode == float or typeCode == Decimal:
             if scale == 0:
-                columnDetails = 'INTEGER'
+                columnDetails += 'INTEGER'
             else:
-                columnDetails = f'DECIMAL({precision},{scale})'
+                columnDetails += f'DECIMAL({precision},{scale})'
         elif typeCode == str:
             if columnDescription[3] == 1073741823:
-                columnDetails = 'NTEXT'
+                columnDetails += 'NTEXT'
             else:
-                columnDetails = 'NVARCHAR'
-                columnDetails = f'({columnDescription[3]})'
+                columnDetails += 'NVARCHAR'
+                columnDetails += f'({columnDescription[3]})'
         elif typeCode == datetime:
-            columnDetails = 'DATETIME'
+            columnDetails += 'DATETIME'
         else:
-            columnDetails = 'UNKNOWN_TYPE'
+            columnDetails += 'UNKNOWN_TYPE'
             
         if not nullable:
             columnDetails += ' NOT NULL'

@@ -26,9 +26,10 @@ def getMigrationDefinitions(connFactories : Dict[str, Callable], tablesToMigrate
 def getSqlTableFields(conn, accessTableName):
     structureDetails = conn.getTableStructure(accessTableName)
     fields = []
+    
     for column in structureDetails['columnsInfo']:
-        fields.append(Field(column['name'], column['details']))
-        
+        fields.append(Field(column['name'], column['details'] + ' NOT NULL' if column['details'][-8:] != 'NOT NULL' else column['details']))
+    
     return fields
 
 def getSqlTableIndexes(conn, accessTableName):

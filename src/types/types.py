@@ -22,8 +22,15 @@ class Field:
     fieldName: str
     fieldDetails: str
     
-status = Literal["Incomplete", "Complete", "Failure"]
+status = Literal["In Progress", "Complete", "Failure", "Not Started"]
 @dataclass
 class SqlCreationDetails:
     creationStatus: status
     indexesStatus: status
+    
+@dataclass
+class AccessConversionDetails:
+    conversionStatus: status
+    totalRows: int
+    rowsConverted: int
+    errorCount: int

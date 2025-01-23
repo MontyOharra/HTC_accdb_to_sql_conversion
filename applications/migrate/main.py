@@ -4,7 +4,7 @@ from queue import Queue
 from rich.console import Console
 
 from src.utils.conversionHelpers import convertAccessTables, createSqlTables
-from src.utils.richTableOutput import outputLoggingTable
+from src.utils.loggingProcesses import outputLoggingTable
 from src.utils.sqlServerSetup import setupSqlServer
 
 import definitions

@@ -12,6 +12,48 @@ from collections.abc import Callable
 from src.classes.SqlServerConn import SqlServerConn
 from src.classes.AccessConn import AccessConn
 
+class ConnectionFactory:
+    def __init__(self, sqlDriver, sqlServerName, sqlDatabaseName, htcAllPath):
+        self.sqlDriver = sqlDriver
+        self.sqlServerName = sqlServerName
+        self.sqlDatabaseName = sqlDatabaseName
+        self.htcAllPath = htcAllPath
+
+    def sql(self):
+        """Return a new SqlServerConn."""
+        return SqlServerConn(self.sqlDriver, self.sqlServerName, self.sqlDatabaseName)
+
+    def htc000(self):
+        return AccessConn(self.htcAllPath, 'HTC000_Data_Staff.accdb')
+
+    def htc010(self):
+        return AccessConn(self.htcAllPath, 'HTC010_Static_data.accdb')
+
+    def htc300(self):
+        return AccessConn(self.htcAllPath, 'HTC300_Data-01-01.accdb')
+
+    def htc320(self):
+        return AccessConn(self.htcAllPath, 'HTC320_TSA_Data-01-01.accdb')
+
+    def htc350(self):
+        return AccessConn(self.htcAllPath, 'HTC350D ETO Parameters.accdb')
+
+    def htc400Archive(self):
+        return AccessConn(self.htcAllPath, 'HTC400_Order Archives.accdb')
+
+    def htc400(self):
+        return AccessConn(self.htcAllPath, 'HTC400_Order Archive DB-01-01.accdb')
+    
+def createSqlServerConn(sqlDriver, sqlServerName, sqlDatabaseName):
+    def getSqlServerConn():
+        return SqlServerConn(sqlDriver, sqlServerName, sqlDatabaseName)
+    return getSqlServerConn
+
+def createAccessConn(htcAllPath, filename):
+    def getAccessConn():
+        return AccessConn(htcAllPath, filename)
+    return getAccessConn
+
 def getSqlServerInstanceNames() -> List[str]:
     """ 
         Returns a list of local SQL Server instances.
@@ -210,17 +252,18 @@ def setupSqlServer(
         
     console.print(f"[yellow]Using {maxConversionThreads} threads for conversion[/yellow]")
 
-    return (
-        {
-            'sql' : lambda : SqlServerConn(sqlDriver, sqlServerName, sqlDatabaseName),
-            'htc000' : lambda : AccessConn(htcAllPath, 'HTC000_Data_Staff.accdb'),
-            'htc010' : lambda : AccessConn(htcAllPath, 'HTC010_Static_data.accdb'),
-            'htc300' : lambda : AccessConn(htcAllPath, 'HTC300_Data-01-01.accdb'),
-            'htc320' : lambda : AccessConn(htcAllPath, 'HTC320_TSA_Data-01-01.accdb'),
-            'htc350' : lambda : AccessConn(htcAllPath, 'HTC350D ETO Parameters.accdb'),
-            'htc400Archive' : lambda : AccessConn(htcAllPath, 'HTC400_Order Archives.accdb'),
-            'htc400' : lambda : AccessConn(htcAllPath, 'HTC400_Order Archive DB-01-01.accdb'),
-        },
-        maxConversionThreads
-    )
-        
+    factory = ConnectionFactory(sqlDriver, sqlServerName, sqlDatabaseName, htcAllPath)
+    
+    # Instead of returning a dict of lambdas, return a dict of bound methods
+    conn_factories = {
+        'sql': factory.sql,              # Note: these are methods on a top-level class
+        'htc000': factory.htc000,
+        'htc010': factory.htc010,
+        'htc300': factory.htc300,
+        'htc320': factory.htc320,
+        'htc350': factory.htc350,
+        'htc400Archive': factory.htc400Archive, 
+        'htc400': factory.htc400
+    }
+    
+    return conn_factories, maxConversionThreads

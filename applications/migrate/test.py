@@ -5,7 +5,7 @@ from rich.console import Console
 import traceback
 
 from src.utils.conversionHelpers import createSqlTables
-from src.utils.richTableOutput import logSqlCreationProgress
+from src.utils.loggingProcesses import logSqlCreationProgress, logErrors
 from src.utils.sqlServerSetup import setupSqlServer
 
 from .definitions import *
@@ -20,46 +20,54 @@ def main():
         autoResetDatabase=True,
         useMaxConversionThreads=True
     )
-    sqlConnFactory = connFactories['sql']
-    
     sqlTableDefinitions, accessConversionDefinitions = getMigrationDefinitions(connFactories)
-    sqlTableCreationData = {
-        tableName : SqlCreationDetails("Incomplete", "Incomplete")
-         for tableName in sqlTableDefinitions.keys()
-    }
+    # ADD CHECKER TO SEE IF LOG FILE EXISTS
+    # IF IT DOES, READ IT AND USE IT TO POPULATE THE SQL CREATION DATA
+    #     IF THERE ARE CREATED TABLES, ASK USER IF THEY WANT TO OVERWRITE THEM. IF SO, 
+    # IF IT DOESN'T, CREATE A NEW LOG FILE AND USE INCOMPLETE FOR THE STATUS
+    if (False):
+        pass
+    else:
+        sqlTableCreationData = {
+            tableName : SqlCreationDetails("Incomplete", "Incomplete")
+            for tableName in sqlTableDefinitions.keys()
+        }
     
     console = Console()
     sqlCreationLogQueue = Queue()
-    logThread = Thread(
+    errorLogQueue = Queue()
+    sqlCreationProgressLogger = Thread(
         target=logSqlCreationProgress,
-        args=(sqlCreationLogQueue, sqlTableCreationData, "bla bla work done"),
+        args=(sqlCreationLogQueue, sqlTableCreationData),
         daemon=False
     )
-    logThread.start()
-     
+    errorLogger = Thread(
+        target=logErrors,
+        args=(errorLogQueue,),
+        daemon=False
+    )    
+    sqlCreationProgressLogger.start()
+    errorLogger.start()
     try:
-        while True:
-            pass
-    except KeyboardInterrupt:
-        sqlCreationLogQueue.put("STOP")
-        logThread.join()
-    """
-    try:
-        createSqlTables(
-            sqlConnFactory, 
-            logQueue, 
-            sqlTableDefinitions,
-            maxThreads=conversionThreads
-        )
-        logQueue.put("COMPLETE")
-    except KeyboardInterrupt:
-        logQueue.put("STOP")
-        raise KeyboardInterrupt
+        res = createSqlTables(
+                connFactories['sql'], 
+                sqlTableDefinitions,
+                conversionThreads,
+                sqlCreationLogQueue, 
+                errorLogQueue
+            ) 
+        if res:
+            sqlCreationLogQueue.put(("SUCCESS", f"SQL tables creation process has been finished."))
+        else:
+            sqlCreationLogQueue.put(("ERROR", "SQL tables creation process has been stopped."))
+            errorLogQueue.put(("sqlCreation", (None, "Keyboard interrupt during SQL tables creation process.")))
     except Exception as e:
-        console.print(f"[red]{"Error!"}: {e}\n     {traceback.format_exc()}[/red]")
+        sqlCreationLogQueue.put("ERROR", f"Critical Error: {e}\n     {traceback.format_exc()}")
+        errorLogQueue.put(("sqlCreation", (None, f"Critical Error: {e}\n     {traceback.format_exc()}")))
     finally:
-        logQueue.put("END")
-        logThread.join()
-"""    
+        sqlCreationLogQueue.put("STOP")
+        errorLogQueue.put("STOP")
+        sqlCreationProgressLogger.join()
+        errorLogQueue.join()
 if __name__ == "__main__":
     main()
