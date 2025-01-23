@@ -10,6 +10,8 @@ from src.utils.sqlServerSetup import setupSqlServer
 
 from .definitions import *
 
+from src.types.types import SqlCreationDetails
+
 def main():
     connFactories, conversionThreads = setupSqlServer(
         htcAllPath=r'C:/HTC_Apps/',
@@ -18,18 +20,30 @@ def main():
         autoResetDatabase=True,
         useMaxConversionThreads=True
     )
+    sqlConnFactory = connFactories['sql']
     
     sqlTableDefinitions, accessConversionDefinitions = getMigrationDefinitions(connFactories)
+    sqlTableCreationData = {
+        tableName : SqlCreationDetails("Incomplete", "Incomplete")
+         for tableName in sqlTableDefinitions.keys()
+    }
     
     console = Console()
-    logQueue = Queue()
+    sqlCreationLogQueue = Queue()
     logThread = Thread(
         target=logSqlCreationProgress,
-        args=(logQueue, sqlTableDefinitions, "bla bla work done"),
-        daemon=True
+        args=(sqlCreationLogQueue, sqlTableCreationData, "bla bla work done"),
+        daemon=False
     )
     logThread.start()
-    
+     
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        sqlCreationLogQueue.put("STOP")
+        logThread.join()
+    """
     try:
         createSqlTables(
             sqlConnFactory, 
@@ -46,6 +60,6 @@ def main():
     finally:
         logQueue.put("END")
         logThread.join()
-    
+"""    
 if __name__ == "__main__":
     main()

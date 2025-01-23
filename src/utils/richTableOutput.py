@@ -60,7 +60,7 @@ class ErrorCountColumn(ProgressColumn):
                 
 def logSqlCreationProgress(
     logQueue : Queue,
-    tableCreationData : Dict[str, any],
+    tableCreationData : Dict[str, SqlCreationDetails],
     successMessage : str
 ):
     """
@@ -71,51 +71,58 @@ def logSqlCreationProgress(
         successMessage - Message to display when the process is complete.
     """
     console = Console()
-    
-    with Progress(
-        "[progress.description]{task.description}",
-        StepStatusColumn("creationStatus"),
-        TextColumn("•"),
-        StepStatusColumn("indexesStatus"),
-    ) as progressBar:
-        progressIds = {}
-        for tableName, sqlCreationDetails in tableCreationData.items():
-            progressIds[tableName] = progressBar.add_task(
-                tableName,
-                creationStatus=sqlCreationDetails.creationStatus,
-                indexesStatus=sqlCreationDetails.indexesStatus
-            )
-        while True:
-            try:
-                message = logQueue.get(timeout=.1)
-            except Empty:
-                continue
-            
-            if message == "STOP":
-                progressBar.stop()
-                console.print("[red]Keyboard interrupt during SQL table creation. Stopping...[/red]")
-                break
-            
-            if message == "COMPLETE":
-                progressBar.stop()
-                console.print(f"[green]{successMessage}[/green]")
-                break
+    try:
+        progressBar = Progress(
+            "[progress.description]{task.description}",
+            StepStatusColumn("creationStatus"),
+            TextColumn("•"),
+            StepStatusColumn("indexesStatus"),
+        )
+    except Exception as err:
+        print(err)
+    progressIds = {}
+    for tableName, sqlCreationDetails in tableCreationData.items():
+        progressIds[tableName] = progressBar.add_task(
+            tableName,
+            creationStatus=sqlCreationDetails.creationStatus,
+            indexesStatus=sqlCreationDetails.indexesStatus
+        )
+    while True:
+        try:
+            message = logQueue.get(timeout=.1)
+            print(message)
+        except Empty:
+            continue
+        
+        if message == "STOP":
+            progressBar.stop()
+            console.print("[red]Keyboard interrupt during SQL table creation. Stopping...[/red]")
+            break
+        
+        if message == "COMPLETE":
+            progressBar.stop()
+            console.print(f"[green]{successMessage}[/green]")
+            break
+        
+        if message == "END":
+            [progressBar.stop()]
+            break
 
-            # Expecting 4-tuple
-            if isinstance(message, tuple) and len(message) == 3:
-                (tableName, detailName, newValue) = message
-                if tableName in tableCreationData.keys():
-                    if detailName == "creationStatus":
-                        progressBar.update(progressIds[tableName], creationStatus=newValue)
-                    elif detailName == "indexesStatus":
-                        progressBar.update(progressIds[tableName], indexesStatus=newValue)
-                    else:
-                        console.print(f"[yellow]Unknown detail: {detailName}[/yellow]")
+        # Expecting 4-tuple
+        if isinstance(message, tuple) and len(message) == 3:
+            (tableName, detailName, newValue) = message
+            if tableName in tableCreationData.keys():
+                if detailName == "creationStatus":
+                    progressBar.update(progressIds[tableName], creationStatus=newValue)
+                elif detailName == "indexesStatus":
+                    progressBar.update(progressIds[tableName], indexesStatus=newValue)
                 else:
-                    console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
+                    console.print(f"[yellow]Unknown detail: {detailName}[/yellow]")
             else:
-                console.print(f"[red]Invalid message: {message}[/red]")
-                
+                console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
+        else:
+            console.print(f"[red]Invalid message: {message}[/red]")
+            
       
 def printAccessConversionProgress(logQueue, tableData, successMessage):
     """

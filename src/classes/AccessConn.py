@@ -30,16 +30,18 @@ class AccessConn:
         htcAllPath - Path to the HTC_Apps folder.
         accessDbName - Name of the Access database.
     """
-    def __init__(self, htcAllPath : str, accessDbName : str):
+    def __init__(self, htcAllPath : str, dbName : str):
         self.console = Console()
         try:
             accessConnStr = (
                 r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
-                rf'DBQ={htcAllPath}{accessDbName};'
+                rf'DBQ={htcAllPath}{dbName};'
             )
+            
             self.conn : pyodbc.Connection = pyodbc.connect(accessConnStr)
             self.cursor = self.conn.cursor()
-            self.dbName = accessDbName
+            self.htcAllPath = htcAllPath
+            self.dbName = dbName
 
         except Exception as err:
             self.console.print(f"[red]Error creating MS Access connection[/red]")
@@ -48,6 +50,13 @@ class AccessConn:
     def __del__(self):
         self.conn.close()
 
+    def __str__(self):
+        connStr = (
+                r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+                rf'DBQ={self.htcAllPath}{self.dbName};'
+            )
+        return f"Access connection with connection string:\n    {connStr}"
+    
     def select(
         self, 
         tableName: str,
