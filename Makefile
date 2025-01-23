@@ -1,6 +1,7 @@
 PYTHON   := python
 
 init:
+	rm -rf env venv
 	python -m venv env
 	source env/Scripts/activate && \
 	pip install -r requirements.txt && \
