@@ -19,7 +19,6 @@ class SqlServerConn:
         sqlDatabaseName - Name of the SQL Server database
     """
     def __init__(self, sqlDriver : str, sqlServerName : str, sqlDatabaseName : str):
-        self.console = Console()
         try:
             sqlServerConnString = (
                 f'DRIVER={sqlDriver};'
@@ -31,7 +30,8 @@ class SqlServerConn:
             self.cursor = self.conn.cursor()
 
         except Exception as err:
-            self.console.print(f"[red]Error creating SQL Server connection[/red]")
+            console = Console()
+            console.print(f"[red]Error creating SQL Server connection[/red]")
             raise err
         
     def __del__(self):
@@ -206,9 +206,10 @@ class SqlServerConn:
           if not insertId == None:
             self.cursor.execute(f"SET IDENTITY_INSERT [{tableName}] OFF")
             
-          self.commit()
+          self.conn.commit()
         except Exception as err:
           self.handleError(
+            action='insertRow',
             info={
               'sqlStatement' : insertSql,
               'tableName' : tableName,

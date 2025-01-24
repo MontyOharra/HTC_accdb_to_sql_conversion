@@ -1,4 +1,4 @@
-from src.utils.conversionHelpers import generateAccessDbNameCache
+from src.utils.conversionHelpers import generateAccessDbNameCache, accessConversionFunction
 
 from .conversionDefinitions.tablesToMigrate import tablesToMigrate as tablesToMigrateDefault
 from typing import Dict
@@ -6,22 +6,55 @@ from src.types.types import Field
 
 from collections.abc import Callable
 
-def getMigrationDefinitions(connFactories : Dict[str, Callable], tablesToMigrate=tablesToMigrateDefault):
-    accessDbNameCache = generateAccessDbNameCache(tablesToMigrate)
-    
-    sqlTableDefinitions = {}
-    accessConversionDefinitions = {}
-    for tableName in tablesToMigrate:
-        conn = connFactories[accessDbNameCache[tableName]]()
-        sqlTableDefinitions[tableName] = (
+from pebble import ProcessPool
+from concurrent.futures import as_completed
+
+def getHelper(connFactories, tableName, accessDbNameCache):
+    try:
+        connFactory = connFactories[accessDbNameCache[tableName]]
+        conn = connFactory()
+        sqlTableDefinition = (
             getSqlTableFields(conn, tableName), 
             getSqlTableIndexes(conn, tableName), 
             getSqlTableForeignKeys(conn, tableName)
         )
-        accessConversionDefinitions[tableName] = getAccessConversionFunction(conn, tableName)
-    
-    return sqlTableDefinitions, accessConversionDefinitions
+        accessConversionDefinition = getAccessConversionFunction(conn, tableName)
+        
+        return (sqlTableDefinition, accessConversionDefinition, tableName)
+    except KeyboardInterrupt:
+        raise
 
+def getMigrationDefinitions(conversionThreads : int, connFactories : Dict[str, Callable], tablesToMigrate=tablesToMigrateDefault):
+    accessDbNameCache = generateAccessDbNameCache(tablesToMigrate)
+    try:
+        accessConversionDefinitions = {}
+        sqlTableDefinitions = {}
+        with ProcessPool(max_workers=conversionThreads) as executor:
+            futures = [
+                executor.schedule(
+                    getHelper, args=[
+                        connFactories,
+                        tableName,
+                        accessDbNameCache
+                    ]
+                )
+              for tableName in tablesToMigrate
+            ]
+            for future in as_completed(futures):
+                try:
+                    (sqlTableDefinition, accessConversionDefinition, tableName) = future.result()
+                    sqlTableDefinitions[tableName] = sqlTableDefinition
+                    accessConversionDefinitions[tableName] = accessConversionDefinition
+                except KeyboardInterrupt:
+                    for f in futures:
+                        f.cancel()
+                    raise
+                    
+        return (sqlTableDefinitions, accessConversionDefinitions)
+    except KeyboardInterrupt:
+        for f in futures:
+            f.cancel()
+        raise
 
 def getSqlTableFields(conn, accessTableName):
     structureDetails = conn.getTableStructure(accessTableName)
@@ -32,31 +65,13 @@ def getSqlTableFields(conn, accessTableName):
     
     return fields
 
-def getSqlTableIndexes(conn, accessTableName):
+def getSqlTableIndexes(connFactory, accessTableName):
     return []
 
-def getSqlTableForeignKeys(conn, accessTableName):
+def getSqlTableForeignKeys(connFactory, accessTableName):
     return []
 
 def getAccessConversionFunction(conn, accessTableName):
     columnNames = [column['name'] for column in conn.getTableStructure(accessTableName)['columnsInfo']]
-
-    def conversionFunction(sqlConn, row):
-        data = {columnNames[i] : row[i] for i in range(len(columnNames))}
-        
-        for columnName in columnNames:
-            if data[columnName] == None:
-                rowType = sqlConn.getColumnType(accessTableName, columnName)
-                if rowType in ('int', 'float', 'decimal'):
-                    data[columnName] = 0
-                elif rowType in ('nvarchar', 'varchar', 'ntext', 'text'):
-                    data[columnName] = ''
-                # elif rowType == 'datetime2':
-                #     dataValue = datetime(1970, 1, 1, 0, 0, 0, 0)
-            try:
-                data[columnName] = data[columnName].strip().lower()
-            except:
-                pass
-        sqlConn.insertRow(accessTableName, data, allowNulls=False)
-    
-    return conversionFunction
+    from functools import partial
+    return partial(accessConversionFunction, columnNames=columnNames, accessTableName=accessTableName)

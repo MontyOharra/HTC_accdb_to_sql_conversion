@@ -87,4 +87,4 @@ tablesToMigrate = [
     "HTC300_G200_T010 No Invoice Customers"
 ]
 
-tablesToMigrateSubset = tablesToMigrate[0:5]
+tablesToMigrateSubset = tablesToMigrate[0:40]

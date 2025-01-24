@@ -78,6 +78,10 @@ def createSqlTables(
         sqlCreationLogQueue - A queue to send status updates to.
         errorLogQueue - A queue to send errors to.
     """
+    
+    for tableName in sqlTableDefinitions.keys():
+        logQueue.put(("SET", tableName))
+        
     try:
         with ProcessPool(max_workers=maxThreads) as executor:
             futures = [
@@ -96,38 +100,56 @@ def createSqlTables(
                     sqlCreationData, errorLogMessages = future.result()
                     logQueue.put(('UPDATE', sqlCreationData))
                     for errorLogMessage in errorLogMessages:
-                        errorQueue.put(errorLogMessage)
+                        errorQueue.put(('sqlTableCreation', errorLogMessage))
                 except KeyboardInterrupt:
                     for f in futures:
                         f.cancel()
                     raise
                 except Exception as err:
-                    errorQueue.put(("sqlTableCreation", "UNKNOWN_TABLE", err))   
+                    errorQueue.put(("sqlTableCreation", err))   
             return True
     except KeyboardInterrupt:
         for f in futures:
             f.cancel()
         raise
-
+      
+def accessConversionFunction(row, columnNames, accessTableName, sqlConnFactory):
+    sqlConn = sqlConnFactory()
+    data = {columnNames[i] : row[i] for i in range(len(columnNames))}
+    
+    for columnName in columnNames:
+        if data[columnName] == None:
+            rowType = sqlConn.getColumnType(accessTableName, columnName)
+            if rowType in ('int', 'float', 'decimal'):
+                data[columnName] = 0
+            elif rowType in ('nvarchar', 'varchar', 'ntext', 'text'):
+                data[columnName] = ''
+            # elif rowType == 'datetime2':
+            #     dataValue = datetime(1970, 1, 1, 0, 0, 0, 0)
+        try:
+            data[columnName] = data[columnName].strip().lower()
+        except:
+            pass
+    sqlConn.insertRow(accessTableName, data, allowNulls=False)
+    
 def convertAccessRows(
     connFactory : Callable,
     tableName : str,
     rowChunk : List[Tuple],
     rowConversion : Callable
-) -> Tuple[Tuple[str, AccessConversionDetails], List[Tuple[str, str, Exception]]]:
+) -> Tuple[Tuple[str, AccessConversionDetails], List[Exception]]:
     errorLogMessages = []
     rowsConverted = 0
     rowErrors = 0
     try:
-        conn = connFactory()
         for row in rowChunk:
             try:
-                rowConversion(conn, row)
+                rowConversion(sqlConnFactory=connFactory, row=row)
                 rowsConverted += 1
             except Exception as err:
                 rowErrors += 1
                 rowsConverted += 1
-                errorLogMessages.append(("accessTableConversion", tableName, err))
+                errorLogMessages.append(err)
                 
         accessConversionDetails = {'rowsConverted' : rowsConverted, 'rowErrors' : rowErrors}   
         accessConversionData = (tableName, accessConversionDetails)          
@@ -136,31 +158,29 @@ def convertAccessRows(
         raise
       
 def convertAccessTables(    
-    accessConnFactories,             # -> returns an AccessConn
+    connFactories,             # -> returns an AccessConn
     conversionDefinitions: Dict[str, Callable],   # e.g. {tableName: rowConversionFunction, ...}
     maxThreads: int,
     chunkSize : int,
     logQueue: Queue,
     errorQueue: Queue
 ):
-    accessDbNameCache = generateAccessDbNameCache(conversionDefinitions.keys())
-    conversionStatus = "In Progress"
-    totalRows = len(rows)
+    accessDbNameCache = generateAccessDbNameCache(conversionDefinitions.keys())    
     
     allTasks = []  # each element: (tableName, rowData, rowConversionFunction)
     for tableName, rowConversionFunction in conversionDefinitions.items():
-        print(tableName)
-        rows = getRows(accessConnFactories[accessDbNameCache[tableName]], tableName)  # from your existing function
-        for i in range(0, len(rows), chunkSize):
+        rows = getRows(connFactories[accessDbNameCache[tableName]], tableName)  # from your existing function
+        numRows = len(rows)
+        for i in range(0, numRows, chunkSize):
             allTasks.append((tableName, rows[i:i+chunkSize], rowConversionFunction))
-        logQueue.put(("SET", (tableName, totalRows)))
+        logQueue.put(("SET", (tableName, numRows)))
     
     try:
         with ProcessPool(max_workers=maxThreads) as executor:
             futures = [
                 executor.schedule(
                     convertAccessRows, args=[
-                      accessConnFactories[accessDbNameCache[tableName]],
+                      connFactories['sql'],
                       tableName,
                       rowChunk,
                       rowConversionFunction
@@ -173,12 +193,14 @@ def convertAccessTables(
                     accessConversionData, errorLogMessages = future.result()
                     logQueue.put(('UPDATE', accessConversionData))
                     for errorLogMessage in errorLogMessages:
-                        errorQueue.put(errorLogMessage)
+                        errorQueue.put(("accessTableConversion", errorLogMessage))
                 except KeyboardInterrupt:
+                    for f in futures:
+                        f.cancel()
                     raise
                 except Exception as err:
-                    errorQueue.put(("sqlTableCreation", "UNKNOWN_TABLE", err))   
-        return True
+                    errorQueue.put(("sqlTableCreation", err)) 
+            return True
     except KeyboardInterrupt:
         for f in futures:
             f.cancel()

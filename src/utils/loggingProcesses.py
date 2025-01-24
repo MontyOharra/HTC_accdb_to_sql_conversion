@@ -67,15 +67,19 @@ def logErrors(errorLogQueue : Queue):
           
         if message == "STOP":
             break
-        if message == "COMPLETE":
-            break
           
         # Write error to error.log file within the same directory as the script
         # Error of the type (process, tableName, errorMessage)
         # Expecting 4-tuple
-        if isinstance(message, tuple) and len(message) == 3:        
-            with open(f"{os.path.dirname(os.path.abspath(__file__))}/error.log", "a") as errorLogFile:
-                errorLogFile.write(f"Current process: {message[0]}\n    Table: {message[1]}\n        Error: {message[2]}\n")
+        if isinstance(message, tuple) and len(message) == 2:        
+            process, exception = message
+            errorsDir = f"C:/Users/Owner/Software_Projects/HTC_accdb_to_sql_conversion/errors/"
+            if process == "sqlTableCreation":
+                with open(f"{errorsDir}sqlTableCreation.log", "a") as errorLogFile:
+                    errorLogFile.write(f"Error: {exception}\n")
+            elif process == "accessTableConversion":
+                with open(f"{errorsDir}accessTableConversion.log", "a") as errorLogFile:
+                    errorLogFile.write(f"Error: {exception}\n")
         else:
             console.print(f"[red]Invalid message: {message}[/red]")
 
@@ -113,10 +117,17 @@ def logSqlCreationProgress(
             except Empty:
                 continue
 
+            if message == "STOP":
+                progressBar.stop()
+                break
+              
             # Expecting 3-tuple
             if isinstance(message, tuple) and len(message) == 2:
                 (action, data) = message
-                if action == "UPDATE":
+                if action == "SET":
+                    (tableName) = data
+                    progressBar.update(progressIds[tableName], creationStatus="In Progress", indexesStatus="In Progress")
+                elif action == "UPDATE":
                     (tableName, sqlCreationDetails) = data
                     if tableName in tableCreationData.keys():
                         progressBar.update(progressIds[tableName], 
@@ -155,7 +166,6 @@ def logAccessConversionProgress(
         successMessage - Message to display when the process is complete.
     """
     console = Console()
-    console.print(f"Access tables conversion process has started.")
     with Progress(
         "[progress.description]{task.description}",
         StepStatusColumn("conversionStatus"),
@@ -177,11 +187,9 @@ def logAccessConversionProgress(
                 total=accessConversionDetails.totalRows,
                 errorCount=accessConversionDetails.errorCount
             )
-        console.print(f"Access tables conversion progress bar initiated.")
         while True:
             try:
                 message = logQueue.get(timeout=.1)
-                print(message)
             except Empty:
                 continue
 
@@ -194,19 +202,40 @@ def logAccessConversionProgress(
                 (action, data) = message
                 if action == "SET" or action == "RESET":
                     (tableName, total) = data
-                    progressBar.update(progressIds[tableName], conversionStatus="Not Started", completed=0, errorCount=0, total=total)
-                if action == "UPDATE":
+                    if total > 0:
+                        progressBar.update(progressIds[tableName], conversionStatus="Not Started", completed=0, errorCount=0, total=total)
+                    else:
+                        progressBar.update(progressIds[tableName], conversionStatus="Complete", completed=0, errorCount=0, total=total)
+                elif action == "UPDATE":
                     (tableName, conversionDetails) = data
                     targetProgress = progressIds[tableName]
                     if tableName in tableConversionData.keys():
-                        numRowsConverted, numErrors = conversionDetails['rowsConverted'], conversionDetails['errorCount']
-                        errorCountTotal = targetProgress.errorCount + numErrors
-                        rowsConvertedTotal = targetProgress.completed + numRowsConverted
-                        if rowsConvertedTotal == targetProgress.total:
-                            converstionStatus = "Complete"
+                        numRowsConverted, numErrors = conversionDetails['rowsConverted'], conversionDetails['rowErrors']
+                        task_obj = progressBar.tasks[targetProgress]
+
+                        # Read built-in fields (these are attributes)
+                        current_completed = task_obj.completed
+                        current_total = task_obj.total
+
+                        # Read custom fields from `fields` dict
+                        current_error_count = task_obj.fields["errorCount"]
+
+                        # Update your logic
+                        errorCountTotal = current_error_count + numErrors
+                        rowsConvertedTotal = current_completed + numRowsConverted
+
+                        if rowsConvertedTotal == current_total:
+                            conversionStatus = "Complete"
                         else:
-                            converstionStatus = "In Progress"
-                        progressBar.update(targetProgress, converstStatus=converstionStatus, errorCount=errorCountTotal, completed=rowsConvertedTotal)
+                            conversionStatus = "In Progress"
+
+                        # Finally, update the task
+                        progressBar.update(
+                            targetProgress, 
+                            conversionStatus=conversionStatus,  # custom field
+                            errorCount=errorCountTotal,         # custom field
+                            completed=rowsConvertedTotal,       # built-in field
+                        )
                     else:
                         console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
                 elif action == "ERROR":
@@ -219,11 +248,11 @@ def logAccessConversionProgress(
                     break
                 else:
                     progressBar.stop()
-                    console.print(f"[red]Invalid action: {action}[/red]")
+                    console.print(f"[red]Invalid Access conversion action: {action}[/red]")
                     break
             else:
                 progressBar.stop()
-                console.print(f"[red]Invalid message: {message}[/red]")
+                console.print(f"[red]Invalid Access conversion message: {message}[/red]")
                 break
                
       

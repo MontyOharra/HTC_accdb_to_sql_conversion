@@ -31,7 +31,6 @@ class AccessConn:
         accessDbName - Name of the Access database.
     """
     def __init__(self, htcAllPath : str, dbName : str):
-        self.console = Console()
         try:
             accessConnStr = (
                 r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
@@ -44,7 +43,8 @@ class AccessConn:
             self.dbName = dbName
 
         except Exception as err:
-            self.console.print(f"[red]Error creating MS Access connection[/red]")
+            console = Console()
+            console.print(f"[red]Error creating MS Access connection[/red]")
             raise err
         
     def __del__(self):
@@ -104,7 +104,7 @@ class AccessConn:
           whereClause = ''
 
         tableName = f'[{tableName}]' if len(tableName.split(' ')) == 1 else tableName # Handle cases where table name is a joined table
-        selectSql: str = f"SELECT {selectColumnsClause} FROM {tableName} {f'WHERE {whereClause}' if whereClause else ''}"
+        selectSql: str = f"SELECT {selectColumnsClause} FROM [{tableName}] {f'WHERE {whereClause}' if whereClause else ''}"
         try:
           self.cursor.execute(selectSql)
           return self.cursor.fetchall()
@@ -116,7 +116,7 @@ class AccessConn:
               'sqlStatement' : selectSql,
               'tableName' : tableName,
               'selectColumns' : selectDetails,
-              'whereClause' : whereDetails
+              'whereDetails' : whereDetails
             }
           )
       
