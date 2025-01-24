@@ -5,7 +5,7 @@ from queue import Queue
 from collections.abc import Callable
 from typing import Dict, List, Tuple
 
-from src.types.types import Field, Index, ForeignKey, SqlCreationDetails
+from src.types.types import Field, Index, ForeignKey, SqlCreationDetails, AccessConversionDetails
 
 def generateAccessDbNameCache(tableNames : List[str]) -> Dict[str, str]:
     accessDbNameCache = {
@@ -66,8 +66,8 @@ def createSqlTables(
     sqlConnFactory : Callable, 
     sqlTableDefinitions : Dict[str, Tuple[List[Field], List[Index], List[ForeignKey]]], 
     maxThreads : int,
-    sqlCreationLogQueue : Queue,
-    errorLogQueue : Queue
+    logQueue : Queue,
+    errorQueue : Queue
 ): 
     """
         Create SQL tables in the SQL Server database based on the table definitions.
@@ -93,21 +93,28 @@ def createSqlTables(
             ]
             for future in as_completed(futures):
                 try:
-                    sqlCreationData, errorLog = future.result()
-                    sqlCreationLogQueue.put(('UPDATE', sqlCreationData))
-                    for errorLogMessage in errorLog:
-                        errorLogQueue.put(errorLogMessage)
+                    sqlCreationData, errorLogMessages = future.result()
+                    logQueue.put(('UPDATE', sqlCreationData))
+                    for errorLogMessage in errorLogMessages:
+                        errorQueue.put(errorLogMessage)
                 except KeyboardInterrupt:
+                    for f in futures:
+                        f.cancel()
                     raise
                 except Exception as err:
-                    errorLogQueue.put(("sqlTableCreation", "UNKNOWN_TABLE", err))   
-        return True
+                    errorQueue.put(("sqlTableCreation", "UNKNOWN_TABLE", err))   
+            return True
     except KeyboardInterrupt:
         for f in futures:
             f.cancel()
-        return False
+        raise
 
-def convertAccessRows(connFactory : Callable, tableName : str, rowChunk : List[Tuple], rowConversion : Callable):
+def convertAccessRows(
+    connFactory : Callable,
+    tableName : str,
+    rowChunk : List[Tuple],
+    rowConversion : Callable
+) -> Tuple[Tuple[str, AccessConversionDetails], List[Tuple[str, str, Exception]]]:
     errorLogMessages = []
     rowsConverted = 0
     rowErrors = 0
@@ -119,57 +126,58 @@ def convertAccessRows(connFactory : Callable, tableName : str, rowChunk : List[T
                 rowsConverted += 1
             except Exception as err:
                 rowErrors += 1
+                rowsConverted += 1
                 errorLogMessages.append(("accessTableConversion", tableName, err))
-        accessConversionDetails = {'rowsConverted' : rowsConverted, 'rowErrors' : rowErrors}
-                        
-        return (tableName, (accessConversionDetails, errorLogMessages))
+                
+        accessConversionDetails = {'rowsConverted' : rowsConverted, 'rowErrors' : rowErrors}   
+        accessConversionData = (tableName, accessConversionDetails)          
+        return (accessConversionData, errorLogMessages)
     except Exception as err:
         raise
       
 def convertAccessTables(    
     accessConnFactories,             # -> returns an AccessConn
-    conversionDefinitions: dict,   # e.g. {tableName: rowConversionFunction, ...}
+    conversionDefinitions: Dict[str, Callable],   # e.g. {tableName: rowConversionFunction, ...}
     maxThreads: int,
     chunkSize : int,
     logQueue: Queue,
     errorQueue: Queue
 ):
     accessDbNameCache = generateAccessDbNameCache(conversionDefinitions.keys())
-    allTasks = []  # each element: (tableName, rowData, rowConversionFunction)
-    for tableName, rowConversionFunction in conversionDefinitions.items():
-        rows = getRows(accessConnFactories[accessDbNameCache[tableName]], tableName)  # from your existing function
-        
-        for i in range(0, len(rows), chunkSize):
-            allTasks.append((tableName, rows[], rowConversionFunction))
-        logQueue.put(("SET", (tableName, (len(rows), 0, 0))))
     conversionStatus = "In Progress"
     totalRows = len(rows)
+    
+    allTasks = []  # each element: (tableName, rowData, rowConversionFunction)
+    for tableName, rowConversionFunction in conversionDefinitions.items():
+        print(tableName)
+        rows = getRows(accessConnFactories[accessDbNameCache[tableName]], tableName)  # from your existing function
+        for i in range(0, len(rows), chunkSize):
+            allTasks.append((tableName, rows[i:i+chunkSize], rowConversionFunction))
+        logQueue.put(("SET", (tableName, totalRows)))
     
     try:
         with ProcessPool(max_workers=maxThreads) as executor:
             futures = [
                 executor.schedule(
                     convertAccessRows, args=[
-                      accessConnFactories[],
+                      accessConnFactories[accessDbNameCache[tableName]],
                       tableName,
-                      fields,
-                      indexes
+                      rowChunk,
+                      rowConversionFunction
                     ]
                 )
-              for tableName, (fields, indexes, fks) in sqlTableDefinitions.items()
+              for tableName, rowChunk, rowConversionFunction in allTasks
             ]
             for future in as_completed(futures):
                 try:
-                    sqlCreationData, errorLog = future.result()
-                    sqlCreationLogQueue.put(('UPDATE', sqlCreationData))
-                    for errorLogMessage in errorLog:
-                        errorLogQueue.put(errorLogMessage)
+                    accessConversionData, errorLogMessages = future.result()
+                    logQueue.put(('UPDATE', accessConversionData))
+                    for errorLogMessage in errorLogMessages:
+                        errorQueue.put(errorLogMessage)
                 except KeyboardInterrupt:
-                    for f in futures:
-                        f.cancel()
                     raise
                 except Exception as err:
-                    errorLogQueue.put(("sqlTableCreation", "UNKNOWN_TABLE", err))   
+                    errorQueue.put(("sqlTableCreation", "UNKNOWN_TABLE", err))   
         return True
     except KeyboardInterrupt:
         for f in futures:

@@ -78,13 +78,12 @@ def logErrors(errorLogQueue : Queue):
                 errorLogFile.write(f"Current process: {message[0]}\n    Table: {message[1]}\n        Error: {message[2]}\n")
         else:
             console.print(f"[red]Invalid message: {message}[/red]")
-    
-        
+
         
 def logSqlCreationProgress(
     logQueue : Queue,
     tableCreationData : Dict[str, SqlCreationDetails]
-) -> bool:
+):
     """
         Listens for messages sent in from a Queue object.
         Returns true if the process is complete., false otherwise.
@@ -114,10 +113,6 @@ def logSqlCreationProgress(
             except Empty:
                 continue
 
-            if message == "STOP":
-                progressBar.stop()
-                break
-
             # Expecting 3-tuple
             if isinstance(message, tuple) and len(message) == 2:
                 (action, data) = message
@@ -133,7 +128,7 @@ def logSqlCreationProgress(
                 elif action == "ERROR":
                     progressBar.stop()
                     console.print(f"[red]{data}[/red]")
-                    break
+                    break   
                 elif action == "SUCCESS":
                     progressBar.stop()
                     console.print(f"[green]{data}[/green]")
@@ -145,8 +140,8 @@ def logSqlCreationProgress(
             else:
                 progressBar.stop()
                 console.print(f"[red]Invalid message: {message}[/red]")
-                break
-         
+                break   
+        
 def logAccessConversionProgress(
     logQueue : Queue,
     tableConversionData : Dict[str, AccessConversionDetails]
@@ -160,6 +155,7 @@ def logAccessConversionProgress(
         successMessage - Message to display when the process is complete.
     """
     console = Console()
+    console.print(f"Access tables conversion process has started.")
     with Progress(
         "[progress.description]{task.description}",
         StepStatusColumn("conversionStatus"),
@@ -181,9 +177,11 @@ def logAccessConversionProgress(
                 total=accessConversionDetails.totalRows,
                 errorCount=accessConversionDetails.errorCount
             )
+        console.print(f"Access tables conversion progress bar initiated.")
         while True:
             try:
                 message = logQueue.get(timeout=.1)
+                print(message)
             except Empty:
                 continue
 
@@ -196,14 +194,19 @@ def logAccessConversionProgress(
                 (action, data) = message
                 if action == "SET" or action == "RESET":
                     (tableName, total) = data
-                    progressBar.update(progressIds[tableName], completed=0, errorCount=0, total=total)
+                    progressBar.update(progressIds[tableName], conversionStatus="Not Started", completed=0, errorCount=0, total=total)
                 if action == "UPDATE":
-                    (tableName, sqlCreationDetails) = data
+                    (tableName, conversionDetails) = data
+                    targetProgress = progressIds[tableName]
                     if tableName in tableConversionData.keys():
-                        progressBar.update(progressIds[tableName], 
-                                           creationStatus=sqlCreationDetails.creationStatus, 
-                                           indexesStatus=sqlCreationDetails.indexesStatus
-                                          )
+                        numRowsConverted, numErrors = conversionDetails['rowsConverted'], conversionDetails['errorCount']
+                        errorCountTotal = targetProgress.errorCount + numErrors
+                        rowsConvertedTotal = targetProgress.completed + numRowsConverted
+                        if rowsConvertedTotal == targetProgress.total:
+                            converstionStatus = "Complete"
+                        else:
+                            converstionStatus = "In Progress"
+                        progressBar.update(targetProgress, converstStatus=converstionStatus, errorCount=errorCountTotal, completed=rowsConvertedTotal)
                     else:
                         console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
                 elif action == "ERROR":
