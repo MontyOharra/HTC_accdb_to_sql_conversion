@@ -84,7 +84,17 @@ tablesToMigrate = [
     "HTC300_G101_T010 Certification Tests",
     "HTC300_G101_T012 Certification Tests Change History",
     "HTC300_G101_T014 Copmleted Tests",
-    "HTC300_G200_T010 No Invoice Customers"
+    "HTC300_G200_T010 No Invoice Customers",
+    "HTC320_G010_T005 Valid Test Type Names",
+    "HTC320_G010_T010 Test Types",
+    "HTC301_G990_T000 Change Log",
+    "HTC320_G010_T010H Form Change History",
+    "HTC320_G020_T020 Completed Docs",
+    "HTC320_G020_T020H Completed Docs History",
+    "HTC320_Security Coordinators",
+    "HTC320_ThisCoBr",
+    "HTC350D_G020_T020 NameSwap_ChgHistory"
 ]
 
-tablesToMigrateSubset = tablesToMigrate[0:40]
+tablesToMigrateSubset = tablesToMigrate[0:20]
+tablesToMigrateEnd = tablesToMigrate[-11:]

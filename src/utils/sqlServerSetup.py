@@ -200,6 +200,8 @@ def setupSqlServer(
             resetSqlDatabaseAnswer = Confirm.ask("Would you like to reset the SQL Server database?")
             if resetSqlDatabaseAnswer == 'y':
                 resetDatabase = True
+            else:
+                resetDatabase = False
         else:
             resetDatabase = True
         if resetDatabase:
@@ -229,7 +231,9 @@ def setupSqlServer(
         'htc000': factory.htc000,
         'htc010': factory.htc010,
         'htc300': factory.htc300,
+        'htc301': factory.htc301,
         'htc320': factory.htc320,
+        'htc321': factory.htc321,
         'htc350': factory.htc350,
         'htc400Archive': factory.htc400Archive, 
         'htc400': factory.htc400

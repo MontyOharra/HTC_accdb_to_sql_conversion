@@ -12,6 +12,7 @@ def generateAccessDbNameCache(tableNames : List[str]) -> Dict[str, str]:
         tableName : tableName[0:6].lower() for tableName in tableNames
     }
     accessDbNameCache['HTC400_G900_T010 Archive Event Log'] = 'htc400archive'
+    accessDbNameCache['HTC320_ThisCoBr'] = 'htc321'
     return accessDbNameCache
 
 def getRows(accessConnFactory : Callable, tableName : str):
@@ -174,6 +175,7 @@ def convertAccessTables(
         for i in range(0, numRows, chunkSize):
             allTasks.append((tableName, rows[i:i+chunkSize], rowConversionFunction))
         logQueue.put(("SET", (tableName, numRows)))
+        
     
     try:
         with ProcessPool(max_workers=maxThreads) as executor:

@@ -3,28 +3,29 @@ from queue import Queue
 from rich.console import Console
 
 import traceback
-
+import time
 from src.utils.conversionHelpers import createSqlTables, convertAccessTables
 from src.utils.loggingProcesses import logSqlCreationProgress, logAccessConversionProgress,logErrors
 from src.utils.sqlServerSetup import setupSqlServer
 
 from .definitions import *
-from .conversionDefinitions.tablesToMigrate import tablesToMigrateSubset
+from .conversionDefinitions.tablesToMigrate import tablesToMigrateSubset, tablesToMigrateEnd
 
 from src.types.types import SqlCreationDetails, AccessConversionDetails
 
 def main():
     connFactories, conversionThreads = setupSqlServer(
-        htcAllPath=r'C:/HTC_Apps/',
+        htcAllPath=r'D:/HTC_Apps/',
         sqlDriver=r'ODBC Driver 17 for SQL Server',
         sqlDatabaseName=r'HTC_Test',
-        autoResetDatabase=True,
+        autoResetDatabase=False,
         useMaxConversionThreads=True
     )
     try:
         console = Console()
         console.print("[yellow]Getting migration definitions...[/yellow]")
-        (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories, tablesToMigrate=tablesToMigrateSubset)
+        (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories, tablesToMigrate=tablesToMigrateEnd)
+        console.print("[yellow]Beginning migration process[/yellow]")
     except KeyboardInterrupt:
         exit() 
         
@@ -123,7 +124,8 @@ def main():
         sqlCreationLogQueue.put(("ERROR", f"Keyboard interrupt during SQL tables creation process."))
         errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
         
-    chunkSize = 10
+    time.sleep(1)
+    chunkSize = 100
     try:
         accessConversionProgressLogger.start()
         accessConversionSucceeded = convertAccessTables(
