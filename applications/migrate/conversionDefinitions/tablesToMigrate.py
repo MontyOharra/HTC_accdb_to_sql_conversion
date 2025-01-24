@@ -93,8 +93,12 @@ tablesToMigrate = [
     "HTC320_G020_T020H Completed Docs History",
     "HTC320_Security Coordinators",
     "HTC320_ThisCoBr",
-    "HTC350D_G020_T020 NameSwap_ChgHistory"
+    "HTC350D_G020_T020 NameSwap_ChgHistory",
+    'HTC350_G060_T010 Airline Freight Codes',
+    'HTC350_G060_T100 Address Name Swaps',
+    'HTC350_G060_T900 Data Change History',
+    'HTC350_G800_T010 ETOLog',
 ]
 
 tablesToMigrateSubset = tablesToMigrate[0:20]
-tablesToMigrateEnd = tablesToMigrate[-11:]
+tablesToMigrateEnd = tablesToMigrate[-16:]

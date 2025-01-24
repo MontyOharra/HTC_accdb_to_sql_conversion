@@ -13,6 +13,7 @@ def generateAccessDbNameCache(tableNames : List[str]) -> Dict[str, str]:
     }
     accessDbNameCache['HTC400_G900_T010 Archive Event Log'] = 'htc400archive'
     accessDbNameCache['HTC320_ThisCoBr'] = 'htc321'
+    accessDbNameCache['HTC350D_G020_T020 NameSwap_ChgHistory'] = 'htc350d'
     return accessDbNameCache
 
 def getRows(accessConnFactory : Callable, tableName : str):

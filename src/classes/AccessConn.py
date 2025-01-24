@@ -31,12 +31,11 @@ class AccessConn:
         accessDbName - Name of the Access database.
     """
     def __init__(self, htcAllPath : str, dbName : str):
-        try:
-            accessConnStr = (
-                r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
-                rf'DBQ={htcAllPath}{dbName};'
-            )
-            
+        accessConnStr = (
+            r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
+            rf'DBQ={htcAllPath}{dbName};'
+        )
+        try:            
             self.conn : pyodbc.Connection = pyodbc.connect(accessConnStr)
             self.cursor = self.conn.cursor()
             self.htcAllPath = htcAllPath
@@ -44,7 +43,7 @@ class AccessConn:
 
         except Exception as err:
             console = Console()
-            console.print(f"[red]Error creating MS Access connection[/red]")
+            console.print(f"[red]Error creating MS Access connection: {accessConnStr}[/red]")
             raise err
         
     def __del__(self):
@@ -103,7 +102,6 @@ class AccessConn:
         else:
           whereClause = ''
 
-        tableName = f'[{tableName}]' if len(tableName.split(' ')) == 1 else tableName # Handle cases where table name is a joined table
         selectSql: str = f"SELECT {selectColumnsClause} FROM [{tableName}] {f'WHERE {whereClause}' if whereClause else ''}"
         try:
           self.cursor.execute(selectSql)

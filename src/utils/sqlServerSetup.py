@@ -235,6 +235,7 @@ def setupSqlServer(
         'htc320': factory.htc320,
         'htc321': factory.htc321,
         'htc350': factory.htc350,
+        'htc350d': factory.htc350d,
         'htc400Archive': factory.htc400Archive, 
         'htc400': factory.htc400
     }

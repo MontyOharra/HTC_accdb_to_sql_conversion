@@ -22,7 +22,7 @@ class ConnFactory:
         return AccessConn(self.htcAllPath, 'HTC300_Data-01-01.accdb')
 
     def htc301(self):
-        return AccessConn(self.htcAllPath, 'HTC301_Data_Change_Log')
+        return AccessConn(self.htcAllPath, 'HTC301_Data_Change_Log.accdb')
 
     def htc320(self):
         return AccessConn(self.htcAllPath, 'HTC320_TSA_Data-01-01.accdb')
@@ -30,8 +30,11 @@ class ConnFactory:
     def htc321(self):
         return AccessConn(self.htcAllPath, 'HTC321_TSA Data Change Log.accdb')
 
-    def htc350(self):
+    def htc350d(self):
         return AccessConn(self.htcAllPath, 'HTC350D ETO Parameters.accdb')
+
+    def htc350(self):
+        return AccessConn(self.htcAllPath, 'HTC350D_Database.accdb')
 
     def htc400Archive(self):
         return AccessConn(self.htcAllPath, 'HTC400_Order Archives.accdb')
