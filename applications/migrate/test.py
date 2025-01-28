@@ -5,7 +5,7 @@ from rich.console import Console
 import traceback
 import time
 from src.utils.conversionHelpers import createSqlTables, convertAccessTables
-from src.utils.loggingProcesses import logSqlCreationProgress, logAccessConversionProgress,logErrors
+from src.utils.logging import logSqlCreationProgress, logAccessConversionProgress,logErrors
 from src.utils.sqlServerSetup import setupSqlServer
 
 from .definitions import *
@@ -14,28 +14,25 @@ from .conversionDefinitions.tablesToMigrate import tablesToMigrateSubset, tables
 from src.types.types import SqlCreationDetails, AccessConversionDetails
 
 def main():
+    console = Console()
     connFactories, conversionThreads = setupSqlServer(
-        htcAllPath=r'D:/HTC_Apps/',
+        htcAllPath=r'C:/HTC_Apps/',
         sqlDriver=r'ODBC Driver 17 for SQL Server',
         sqlDatabaseName=r'HTC_Test',
-        autoResetDatabase=False,
+        autoResetDatabase=True,
         useMaxConversionThreads=True
     )
-    try:
-        console = Console()
-        console.print("[yellow]Getting migration definitions...[/yellow]")
-        (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories, tablesToMigrate=tablesToMigrateEnd)
-        console.print("[yellow]Beginning migration process[/yellow]")
-    except KeyboardInterrupt:
-        exit() 
+    
+    (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories)
+
         
 
     # ADD CHECKER TO SEE IF LOG FILE EXISTS
     # IF IT DOES, READ IT AND USE IT TO POPULATE THE SQL CREATION DATA
     #     IF THERE ARE CREATED TABLES, ASK USER IF THEY WANT TO OVERWRITE THEM. IF SO, 
     # IF IT DOESN'T, CREATE A NEW LOG FILE AND USE INCOMPLETE FOR THE STATUS
-    if (False):
-        pass
+    if (logFileExists()):
+        
     else:
         sqlTableCreationData = {
             tableName : SqlCreationDetails("Not Started", "Not Started")

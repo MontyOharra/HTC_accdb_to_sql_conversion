@@ -1,16 +1,19 @@
-from src.utils.conversionHelpers import generateAccessDbNameCache, accessConversionFunction
 
 from .conversionDefinitions.tablesToMigrate import tablesToMigrate as tablesToMigrateDefault
 from typing import Dict
 from src.types.types import Field
+from src.utils.conversionHelpers import generateAccessDbNameCache, accessConversionFunction
 
 from collections.abc import Callable
 
 from pebble import ProcessPool
 from concurrent.futures import as_completed
+from rich.console import Console
 
 def getHelper(connFactories, tableName, accessDbNameCache):
     try:
+        console = Console()
+        console.print("[yellow]Getting migration definitions...[/yellow]")
         connFactory = connFactories[accessDbNameCache[tableName]]
         conn = connFactory()
         sqlTableDefinition = (
