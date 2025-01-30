@@ -81,6 +81,7 @@ def createSqlTables(
         errorLogQueue - A queue to send errors to.
     """
     
+    
     for tableName in sqlTableDefinitions.keys():
         logQueue.put(("SET", tableName))
         

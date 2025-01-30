@@ -12,8 +12,6 @@ from rich.console import Console
 
 def getHelper(connFactories, tableName, accessDbNameCache):
     try:
-        console = Console()
-        console.print("[yellow]Getting migration definitions...[/yellow]")
         connFactory = connFactories[accessDbNameCache[tableName]]
         conn = connFactory()
         sqlTableDefinition = (
@@ -29,6 +27,8 @@ def getHelper(connFactories, tableName, accessDbNameCache):
 
 def getMigrationDefinitions(conversionThreads : int, connFactories : Dict[str, Callable], tablesToMigrate=tablesToMigrateDefault):
     accessDbNameCache = generateAccessDbNameCache(tablesToMigrate)
+    console = Console()
+    console.print("[yellow]Getting migration definitions...[/yellow]")
     try:
         accessConversionDefinitions = {}
         sqlTableDefinitions = {}
@@ -43,9 +43,10 @@ def getMigrationDefinitions(conversionThreads : int, connFactories : Dict[str, C
                 )
               for tableName in tablesToMigrate
             ]
-            for future in as_completed(futures):
+            for index, future in enumerate(as_completed(futures)):
                 try:
                     (sqlTableDefinition, accessConversionDefinition, tableName) = future.result()
+                    console.print(f"[yellow]Gotten {index} out of {len(tablesToMigrate)}[/yellow]")
                     sqlTableDefinitions[tableName] = sqlTableDefinition
                     accessConversionDefinitions[tableName] = accessConversionDefinition
                 except KeyboardInterrupt:

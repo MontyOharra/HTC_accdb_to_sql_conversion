@@ -7,14 +7,15 @@ import time
 from src.utils.conversionHelpers import createSqlTables, convertAccessTables
 from src.utils.logging import logSqlCreationProgress, logAccessConversionProgress,logErrors
 from src.utils.sqlServerSetup import setupSqlServer
+from src.utils.helpers import getLogDir
 
 from .definitions import *
-from .conversionDefinitions.tablesToMigrate import tablesToMigrateSubset, tablesToMigrateEnd
 
 from src.types.types import SqlCreationDetails, AccessConversionDetails
 
 def main():
-    console = Console()
+    logDir = getLogDir()
+    print(logDir)
     connFactories, conversionThreads = setupSqlServer(
         htcAllPath=r'C:/HTC_Apps/',
         sqlDriver=r'ODBC Driver 17 for SQL Server',
@@ -26,13 +27,13 @@ def main():
     (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories)
 
         
-
     # ADD CHECKER TO SEE IF LOG FILE EXISTS
     # IF IT DOES, READ IT AND USE IT TO POPULATE THE SQL CREATION DATA
     #     IF THERE ARE CREATED TABLES, ASK USER IF THEY WANT TO OVERWRITE THEM. IF SO, 
     # IF IT DOESN'T, CREATE A NEW LOG FILE AND USE INCOMPLETE FOR THE STATUS
-    if (logFileExists()):
-        
+    
+    if (False):
+        pass        
     else:
         sqlTableCreationData = {
             tableName : SqlCreationDetails("Not Started", "Not Started")
@@ -100,6 +101,7 @@ def main():
         sqlCreationProgressLogger.join()
         tablesCreated += len(chunk)
     '''
+    
     try:
         sqlCreationProgressLogger.start()
         sqlTablesCreationSucceeded = createSqlTables(
@@ -153,3 +155,5 @@ def main():
         errorLogQueue.join()        
 if __name__ == "__main__":
     main()
+
+

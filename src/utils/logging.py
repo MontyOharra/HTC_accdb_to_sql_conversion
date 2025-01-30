@@ -103,7 +103,8 @@ def logSqlCreationProgress(
             StepStatusColumn("creationStatus"),
             TextColumn("•"),
             StepStatusColumn("indexesStatus"),
-            refresh_per_second=10
+            refresh_per_second=10,
+            transient=False
     ) as progressBar:
         progressIds = {}
         for tableName, sqlCreationDetails in tableCreationData.items():
@@ -167,6 +168,7 @@ def logAccessConversionProgress(
         successMessage - Message to display when the process is complete.
     """
     console = Console()
+    console.print("[yellow]Starting conversion...[/yellow]")
     with Progress(
         "[progress.description]{task.description}",
         StepStatusColumn("conversionStatus"),
