@@ -118,32 +118,24 @@ class AccessConn:
             }
           )
       
-    def getTableStructure(self, tableName: str) -> Dict[str, List[Dict[str, Any]] | List[str]]:
+    def getTableStructure(self, tableName: str) -> Tuple[Dict[str, str], List[str]]:
         """
-        Fetches the table structure (column names, data types, nullability, primary key, and auto-increment info)
-        from an Access table.
-
-        Args:
-            tableName (str): Name of the table to retrieve structure from.
-
-        Returns:
-            List[Dict[str, Any]]: A list of dictionaries containing column metadata.
+            tableName - Name of the table to retrieve structure from.
+            
+            Returns a tuple containing the following:
+                columnsInfo - A dictionary of column names and their details.
+                primaryKeyColumns - A list of primary key column names.
         """
-        columnsInfo = []
-
         try:
             # Execute a dummy query to get metadata
             self.cursor.execute(f"SELECT TOP 1 * FROM [{tableName}]")
             # Fetch column metadata from cursor description
             columnDescriptions = self.cursor.description
-            for columnDescription in columnDescriptions:
-                columnsInfo.append({
-                    "name": columnDescription[0],
-                    "details": self.getColumnDetails(columnDescription)
-                })
+            columnsInfo = {columnDescription[0] : self.getColumnDetails(columnDescription) for columnDescription in columnDescriptions}
+            # Get primary key columns
             primaryKeyColumns = [row[8] for row in self.cursor.statistics(tableName) if row[5]=='PrimaryKey']
 
-            return {'columnsInfo': columnsInfo, 'primaryKeyColumns': primaryKeyColumns}
+            return (columnsInfo, primaryKeyColumns) 
 
         except Exception as err:
             self.handleError(
@@ -156,9 +148,12 @@ class AccessConn:
                       
     def getColumnDetails(self, columnDescription : Tuple[any]) -> str:
         """
-            Get the column details from a column description.
-            
             columnDescription - A tuple containing information about the column.
+            
+            Get the column details from a column description.
+            Edit within the if block to add or remove column details.
+      
+            Returns a string containing the column details.
         """
         typeCode : any = columnDescription[1]
         displaySize : int = columnDescription[2]
@@ -176,6 +171,7 @@ class AccessConn:
                 columnDetails += 'INTEGER'
             else:
                 columnDetails += f'DECIMAL({precision},{scale})'
+        # Case strings to be NTEXT or NVARCHAR
         elif typeCode == str:
             if columnDescription[3] == 1073741823:
                 columnDetails += 'NTEXT'
