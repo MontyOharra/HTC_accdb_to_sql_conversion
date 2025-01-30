@@ -2,60 +2,67 @@ from concurrent.futures import as_completed
 from pebble import ProcessPool
 from queue import Queue
 
+from src.classes.SqlServerConn import SqlServerConn
+
 from collections.abc import Callable
 from typing import Dict, List, Tuple
-
 from src.types.types import Field, Index, ForeignKey, SqlCreationDetails, AccessConversionDetails
 
-def generateAccessDbNameCache(tableNames : List[str]) -> Dict[str, str]:
-    accessDbNameCache = {
-        tableName : tableName[0:6].lower() for tableName in tableNames
-    }
-    accessDbNameCache['HTC400_G900_T010 Archive Event Log'] = 'htc400archive'
-    accessDbNameCache['HTC320_ThisCoBr'] = 'htc321'
-    accessDbNameCache['HTC350D_G020_T020 NameSwap_ChgHistory'] = 'htc350d'
-    return accessDbNameCache
-
-def getRows(accessConnFactory : Callable, tableName : str):
+def getRows(
+    accessConnFactory : Callable,
+    tableName : str
+) -> Tuple[any]:
+    '''
+        accessConnFactory - A function that returns an AccessConn object.
+        tableName - Name of the table to get the rows for.
+        
+        Returns a tuple containing all rows for the table of tableName.
+    '''
     conn = accessConnFactory()
     return conn.select(tableName)
+  
 
 def createSqlTable(
-    sqlConnFactory : Callable, 
+    sqlConnFactory : Callable[[], SqlServerConn], 
     tableName : str, 
     tableFields : List[Field], 
     tableIndexes : List[Index],
 ) -> Tuple[Tuple[str, str, str], List[Tuple[str, str, Exception]]]:
     """
-        Create a table in the SQL Server database.
-        Send status updates to the sqlCreationLogQueue.
-        Send errors to the errorLogQueue.
-        
         sqlConnFactory - A function that returns a SQL Server connection.
         tableName - Name of the table to create.
         tableFields - List of Field objects representing the fields in the table.
         tableIndexes - List of Index objects representing the indexes on the table.
+      
+        Create a table in the SQL Server database.
+        Send status updates to the sqlCreationLogQueue.
+        Send errors to the errorLogQueue.
     """
     # Mark table in progress
     creationStatus = "In Progress"
     indexesStatus = "In Progress"
     errorLogMessages = []
     try:
-        conn = sqlConnFactory()
+        sqlConn = sqlConnFactory()
         try:
-            conn.createTable(tableName, tableFields)
+            # Create table
+            sqlConn.createTable(tableName, tableFields)
             creationStatus = "Complete"
         except Exception as err:
+            # If there is an error, set creation status to "Failure" and add the error to the error log
             creationStatus = "Failure"
             errorLogMessages.append(("sqlTableCreation", tableName, err))
         try:
+            # Add indexes
             for index in tableIndexes:
-                conn.addIndex(tableName, index.indexType, index.indexFields, index.indexName, index.isUnique)
+                sqlConn.addIndex(tableName, index.indexType, index.indexFields, index.indexName, index.isUnique)
             indexesStatus = "Complete"
         except Exception as err:
+            # If there is an error, set indexes status to "Failure" and add the error to the error log
             indexesStatus = "Failure"
             errorLogMessages.append(("sqlTableCreation", tableName, err))
             
+        # Create a SqlCreationDetails object with the creation and indexes status
         sqlCreationDetails : SqlCreationDetails = SqlCreationDetails(creationStatus, indexesStatus)
         sqlCreationData = (tableName, sqlCreationDetails)
         
@@ -70,23 +77,27 @@ def createSqlTables(
     maxThreads : int,
     logQueue : Queue,
     errorQueue : Queue
-): 
+) -> bool: 
     """
-        Create SQL tables in the SQL Server database based on the table definitions.
-        
         sqlConnFactory - A function that returns a SQL Server connection.
         sqlTableDefinitions - A dictionary of table names and their definitions.
         maxThreads - The maximum number of threads to use for the creation process.
         sqlCreationLogQueue - A queue to send status updates to.
         errorLogQueue - A queue to send errors to.
+        
+        Uses a multiprocessing pool to create the tables in parallel.
+        SQL tables are created in the SQL Server database based on sqlTableDefinitions.
+        
+        Returns True if the process is complete, False if it is interrupted.
     """
-    
-    
     for tableName in sqlTableDefinitions.keys():
         logQueue.put(("SET", tableName))
         
     try:
         with ProcessPool(max_workers=maxThreads) as executor:
+            # Create a list of futures for each table
+            # Loops through each table in sqlTableDefinitions
+            # Schedules a function to create the table
             futures = [
                 executor.schedule(
                     createSqlTable, args=[
@@ -100,54 +111,47 @@ def createSqlTables(
             ]
             for future in as_completed(futures):
                 try:
+                    # As futures complete, get their creation results
                     sqlCreationData, errorLogMessages = future.result()
+                    # Send the creation result to the log queue
                     logQueue.put(('UPDATE', sqlCreationData))
                     for errorLogMessage in errorLogMessages:
+                        # Send any errors to the error queue
                         errorQueue.put(('sqlTableCreation', errorLogMessage))
                 except KeyboardInterrupt:
+                    # Cancel all futures if the process is interrupted
                     for f in futures:
                         f.cancel()
                     raise
                 except Exception as err:
+                    # If any other error occurs, send it to the error queue
                     errorQueue.put(("sqlTableCreation", err))   
+            # Return True to indicate that the process has completed
             return True
     except KeyboardInterrupt:
+        # Cancel all futures if the process is interrupted
+        # Return False to indicate that the process has been interrupted
         for f in futures:
             f.cancel()
-        raise
+        return False
       
-def accessConversionFunction(row, columnNames, accessTableName, sqlConnFactory):
-    sqlConn = sqlConnFactory()
-    data = {columnNames[i] : row[i] for i in range(len(columnNames))}
-    
-    for columnName in columnNames:
-        if data[columnName] == None:
-            rowType = sqlConn.getColumnType(accessTableName, columnName)
-            if rowType in ('int', 'float', 'decimal'):
-                data[columnName] = 0
-            elif rowType in ('nvarchar', 'varchar', 'ntext', 'text'):
-                data[columnName] = ''
-            # elif rowType == 'datetime2':
-            #     dataValue = datetime(1970, 1, 1, 0, 0, 0, 0)
-        try:
-            data[columnName] = data[columnName].strip().lower()
-        except:
-            pass
-    sqlConn.insertRow(accessTableName, data, allowNulls=False)
     
 def convertAccessRows(
-    connFactory : Callable,
+    sqlConnFactory : Callable[[], SqlServerConn],
     tableName : str,
     rowChunk : List[Tuple],
-    rowConversion : Callable
+    rowConversionFunction : Callable[
+                              [Callable[[], SqlServerConn], List[any]], 
+                              None
+                            ]
 ) -> Tuple[Tuple[str, AccessConversionDetails], List[Exception]]:
-    errorLogMessages = []
     rowsConverted = 0
     rowErrors = 0
+    errorLogMessages = []
     try:
         for row in rowChunk:
             try:
-                rowConversion(sqlConnFactory=connFactory, row=row)
+                rowConversionFunction(sqlConnFactory, row)
                 rowsConverted += 1
             except Exception as err:
                 rowErrors += 1
@@ -157,7 +161,7 @@ def convertAccessRows(
         accessConversionDetails = {'rowsConverted' : rowsConverted, 'rowErrors' : rowErrors}   
         accessConversionData = (tableName, accessConversionDetails)          
         return (accessConversionData, errorLogMessages)
-    except Exception as err:
+    except KeyboardInterrupt as err:
         raise
       
 def convertAccessTables(    

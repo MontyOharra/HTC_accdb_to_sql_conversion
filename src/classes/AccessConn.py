@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Tuple, NoReturn
 import pyodbc
 
 from ..types.types import Field, ValidIndexType
@@ -59,9 +59,9 @@ class AccessConn:
     def select(
         self, 
         tableName: str,
-        selectDetails : List[str | Dict[str, str]] | str | None = None,
-        whereDetails : Dict[str, any] | str | None = None
-    ) -> List[Any]:
+        selectDetails : list[str | dict[str, str]] | str | None = None,
+        whereDetails : dict[str, Any] | str | None = None
+    ) -> list[Any] | None:
         """
             Select data from a table.
             
@@ -71,9 +71,18 @@ class AccessConn:
         """
         # Create column selection string
         selectColumnsClause : str
-        if type(selectDetails) == list: # Columns can be a single string, or a dictionary, with the key being the column name and value being its alias
-            selectColumnsClause = ', '.join([column if type(column) == str else f"{list(column.keys())[0]} AS {list(column.values())[0]}" for column in selectDetails])
-        elif type(selectDetails) == str: # If column is single string
+        if isinstance(selectDetails, list): # Columns can be a single string, or a dictionary, with the key being the column name and value being its alias
+            columns = []
+            for col in selectDetails:
+                # Narrow the type inside the for-loop
+                if isinstance(col, str):
+                    columns.append(col)
+                else:
+                    # col must be a dict[str, str]
+                    key = list(col.keys())[0]
+                    val = list(col.values())[0]
+                    columns.append(f"{key} AS {val}")
+        elif isinstance(selectDetails, str): # If column is single string
             selectColumnsClause = selectDetails
         else: # Otherwise select all columns
             selectColumnsClause = '*'
@@ -146,16 +155,17 @@ class AccessConn:
                 }
             )
                       
-    def getColumnDetails(self, columnDescription : Tuple[any]) -> str:
+    def getColumnDetails(self, columnDescription : Tuple[str, Any, int, int, int, int, bool], allowNulls : bool = False) -> str:
         """
             columnDescription - A tuple containing information about the column.
+            allowNulls - If true, the column will be allowed to be null. Otherwise, it will be forced to be not null.
             
             Get the column details from a column description.
             Edit within the if block to add or remove column details.
       
             Returns a string containing the column details.
         """
-        typeCode : any = columnDescription[1]
+        typeCode : Any = columnDescription[1]
         displaySize : int = columnDescription[2]
         internalSize : int = columnDescription[3]
         precision : int = columnDescription[4]
@@ -183,12 +193,15 @@ class AccessConn:
         else:
             columnDetails += 'UNKNOWN_TYPE'
             
-        if not nullable:
+        if not allowNulls:
             columnDetails += ' NOT NULL'
+        else:
+            if nullable:
+                columnDetails += ' NULL'
           
         return columnDetails
 
-    def handleError(self, action : str, info: Optional[Dict[str, Any]] = None) -> None:
+    def handleError(self, action : str, info: Dict[str, Any]) -> NoReturn:
         """
             A function to handle errors in the SQL Server connection.
             

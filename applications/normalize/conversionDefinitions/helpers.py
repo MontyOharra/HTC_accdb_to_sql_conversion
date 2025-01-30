@@ -3,7 +3,7 @@ import re
 from isocodes import subdivisions_countries, countries
 from collections import defaultdict
 
-from src.classes.Connection import Connection
+from src.classes.SqlServerConn import SqlServerConn
 
 
 def regionGet(**kwargs: str):
@@ -30,7 +30,7 @@ def countryGet(**kwargs: str):
     except IndexError:
         return {}
 
-def getUserIdFromUsername(conn : Connection, username) -> int:
+def getUserIdFromUsername(conn : SqlServerConn, username) -> int:
     if username == None:
         return None
     if username.strip() == "":

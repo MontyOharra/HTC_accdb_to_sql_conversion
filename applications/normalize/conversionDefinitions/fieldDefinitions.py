@@ -1,5 +1,5 @@
 from typing import List
-from src.types.Field import Field
+from src.types.types import Field
 
 aciDataChangeHistoryFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),

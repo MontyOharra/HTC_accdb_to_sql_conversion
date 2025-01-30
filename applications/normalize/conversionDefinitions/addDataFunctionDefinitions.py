@@ -3,7 +3,7 @@ from .helpers import *
 from typing import List, Dict, Tuple
 
 def addAciDataChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     aciDataId : int,
     userId : int,
     dateChanged : str,
@@ -24,7 +24,7 @@ def addAciDataChangeHistory(
     return conn.sqlGetLastIdCreated('aci_data_change_history')
   
 def addAciData(
-    conn : Connection,
+    conn : SqlServerConn,
     aciDataId : int,
     cityId : int,
     postalCodeId : int,
@@ -86,7 +86,7 @@ def addAciData(
     return conn.sqlGetLastIdCreated('aci_data')
   
 def addAddress(
-    conn : Connection,
+    conn : SqlServerConn,
     addressLine1 : str,
     addressLine2 : str,
     cityName : str,
@@ -137,7 +137,7 @@ def addAddress(
     return conn.sqlGetLastIdCreated('address')
   
 def addAgentChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     agentId : int,
     userId : int,
     dateChanged : str,
@@ -156,7 +156,7 @@ def addAgentChangeHistory(
     return conn.sqlGetLastIdCreated('agent_change_history')
 
 def addAgent(
-    conn : Connection,
+    conn : SqlServerConn,
     customerId : int,
     emailAddress : str,
     firstName : str,
@@ -202,7 +202,7 @@ def addAgent(
     return conn.sqlGetLastIdCreated('agent')
   
 def addAgentCertificationTest(
-    conn : Connection,
+    conn : SqlServerConn,
     agentId : int,
     certificationTestId : int,
     dateTested : str,
@@ -235,7 +235,7 @@ def addAgentCertificationTest(
     return conn.sqlGetLastIdCreated('agent_certification_test')  
   
 def addArchiveErrorLog(
-    conn : Connection,
+    conn : SqlServerConn,
     orderId : int,
     archiveDate : str,
     userId : int,
@@ -254,7 +254,7 @@ def addArchiveErrorLog(
     return conn.sqlGetLastIdCreated('archive_error_log')
 
 def addArchiveHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     dateArchived : str,
     openOrders : int,
     openOrderAssessorials : int,
@@ -348,7 +348,7 @@ def addArchiveHistory(
     return conn.sqlGetLastIdCreated('archive_history')
   
 def addAssessorialChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     assessorialId : int,
     userId : int,
     dateChanged : str,
@@ -367,7 +367,7 @@ def addAssessorialChangeHistory(
     return conn.sqlGetLastIdCreated('assessorial_change_history')
   
 def addAssessorial(
-    conn : Connection,
+    conn : SqlServerConn,
     assessorialId : int,
     branchId : int,
     assessorialName : str,
@@ -416,7 +416,7 @@ def addAssessorial(
     return conn.sqlGetLastIdCreated('assessorial')
   
 def addBranchChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     branchId : int,
     userId : int,
     dateChanged : str,
@@ -435,7 +435,7 @@ def addBranchChangeHistory(
     return conn.sqlGetLastIdCreated('branch_change_history')
   
 def addBranch(
-    conn : Connection,
+    conn : SqlServerConn,
     branchId : int,
     branchName : str,
     companyId : int,
@@ -505,7 +505,7 @@ def addBranch(
     return conn.sqlGetLastIdCreated('branch')
 
 def addCertificationTest(
-    conn : Connection,
+    conn : SqlServerConn,
     certificationTestId : id,
     certificationName : str,
     certificationTestTrainerId : int,
@@ -534,7 +534,7 @@ def addCertificationTest(
     return conn.sqlGetLastIdCreated('certification_test')
   
 def addCertificationTestChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     certificationTestId : int,
     userId : int,
     dateChanged : str,
@@ -564,7 +564,7 @@ def addCertificationTestChangeHistory(
     return conn.sqlGetLastIdCreated('certification_test_change_history')  
 
 def addCertificationTestTrainer(
-    conn : Connection,
+    conn : SqlServerConn,
     trainerName : str,
     isActive : bool,
 ) -> int:
@@ -589,7 +589,7 @@ def addCertificationTestTrainer(
     return conn.sqlGetLastIdCreated('certification_test_trainer')
   
 def addCertificationTestTrainerChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     certificationTestTrainerId : int,
     userId : int,
     dateChanged : str,
@@ -620,7 +620,7 @@ def addCertificationTestTrainerChangeHistory(
     return conn.sqlGetLastIdCreated('certification_test_trainer_change_history')
 
 def addCityPostalCode(
-    conn : Connection,
+    conn : SqlServerConn,
     cityId : int,
     postalCodeId : int,
     lat : float,
@@ -639,7 +639,7 @@ def addCityPostalCode(
   
 
 def addCityRegion(
-    conn : Connection,
+    conn : SqlServerConn,
     cityId : int,
     regionId : int,
 ) -> int:
@@ -653,7 +653,7 @@ def addCityRegion(
     return conn.sqlGetLastIdCreated('city_region')
   
 def addCityPostalCode(
-    conn : Connection,
+    conn : SqlServerConn,
     cityName : str,
     postalCode : str,
     regionDetails : Dict[str, str],
@@ -723,7 +723,7 @@ def addCityPostalCode(
     return (cityId, postalCodeId)
   
 def addCompanyChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     companyId : int,
     userId : int,
     dateChanged : str,
@@ -742,7 +742,7 @@ def addCompanyChangeHistory(
     return conn.sqlGetLastIdCreated('company_change_history')
   
 def addCompany(
-    conn : Connection,
+    conn : SqlServerConn,
     companyId : int,
     companyName : str,
     addressId : int,
@@ -781,7 +781,7 @@ def addCompany(
     return conn.sqlGetLastIdCreated('company')
   
 def addCountry(
-    conn : Connection,
+    conn : SqlServerConn,
     countryDetails : Dict[str, str]
 ) -> int:    
     if not countryDetails:
@@ -838,7 +838,7 @@ def addCountry(
     return conn.sqlGetLastIdCreated('country')
   
 def addCustomerChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     customerId : int,
     userId : int,
     dateChanged : str,
@@ -857,7 +857,7 @@ def addCustomerChangeHistory(
     return conn.sqlGetLastIdCreated('customer_change_history')
   
 def addCustomerDefaultAssessorial(
-    conn : Connection,
+    conn : SqlServerConn,
     customerId : int,
     assessorialId : int,
 ) -> int:
@@ -882,7 +882,7 @@ def addCustomerDefaultAssessorial(
     return conn.sqlGetLastIdCreated('customer_default_assessorial')
 
 def addCustomer(
-    conn : Connection,
+    conn : SqlServerConn,
     customerId : int,
     branchId : int,
     customerName : str,
@@ -935,7 +935,7 @@ def addCustomer(
     return conn.sqlGetLastIdCreated('customer')
   
 def addFax(
-    conn : Connection,
+    conn : SqlServerConn,
     countryCode : str,
     areaCode : str,
     faxNumber : str,
@@ -963,7 +963,7 @@ def addFax(
     return conn.sqlGetLastIdCreated('fax')
   
 def addHoliday(
-    conn : Connection,
+    conn : SqlServerConn,
     holidayName : str,
     holidayDate : str,
 ) -> int:
@@ -988,7 +988,7 @@ def addHoliday(
     return conn.sqlGetLastIdCreated('holiday')
 
 def addLocationChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     locationId : int,
     userId : int,
     dateChanged : str,
@@ -1007,7 +1007,7 @@ def addLocationChangeHistory(
     return conn.sqlGetLastIdCreated('location_change_history')
   
 def addLocationDefaultAssessorial(
-    conn : Connection,
+    conn : SqlServerConn,
     locationId : int,
     assessorialId : int,
 ) -> int:
@@ -1032,7 +1032,7 @@ def addLocationDefaultAssessorial(
     return conn.sqlGetLastIdCreated('location_default_assessorial')
   
 def addLocation(
-    conn : Connection,
+    conn : SqlServerConn,
     branchId : int,
     companyName : str,
     locationName : str,
@@ -1093,7 +1093,7 @@ def addLocation(
     return conn.sqlGetLastIdCreated('location')
   
 def addOrderAssessorial(
-    conn : Connection,
+    conn : SqlServerConn,
     orderId : int,
     assessorialId : int,
     parentType : str,
@@ -1127,7 +1127,7 @@ def addOrderAssessorial(
     return conn.sqlGetLastIdCreated('order_assessorial')
   
 def addOrderAttachment(
-    conn : Connection,
+    conn : SqlServerConn,
     orderId : int,
     attachmentPath : str,
     fileSize : float,
@@ -1154,7 +1154,7 @@ def addOrderAttachment(
     return conn.sqlGetLastIdCreated('order_attachment')
   
 def addOrderChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     orderId : int,
     userId : int,
     dateChanged : str,
@@ -1172,7 +1172,7 @@ def addOrderChangeHistory(
     return conn.sqlGetLastIdCreated('order_change_history')
   
 def addOrderDim(
-    conn : Connection,
+    conn : SqlServerConn,
     orderId : int,
     unitType : str,
     unitQuantity : int,
@@ -1215,7 +1215,7 @@ def addOrderDim(
     return conn.sqlGetLastIdCreated('order_dim')
   
 def addOrderDriver(
-    conn : Connection,
+    conn : SqlServerConn,
     orderId : int,
     driverUserId : int,
     orderLeg : str,
@@ -1245,7 +1245,7 @@ def addOrderDriver(
     return conn.sqlGetLastIdCreated('order_driver')
 
 def addOrderStatusChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     orderStatusId : int,
     userId : int,
     dateChanged : str,
@@ -1264,7 +1264,7 @@ def addOrderStatusChangeHistory(
     return conn.sqlGetLastIdCreated('order_status_change_history')
   
 def addOrderStatus(
-    conn : Connection,
+    conn : SqlServerConn,
     orderStatusId : int,
     sequenceNumber : int,
     orderStatusName : str,
@@ -1300,7 +1300,7 @@ def addOrderStatus(
     return conn.sqlGetLastIdCreated('order_status')
   
 def addOrderType(
-    conn : Connection,
+    conn : SqlServerConn,
     orderTypeId : int,
     orderTypeName : str,
 ) -> int:
@@ -1323,7 +1323,7 @@ def addOrderType(
     return conn.sqlGetLastIdCreated('order_type')
 
 def addOrder(
-    conn : Connection,
+    conn : SqlServerConn,
     orderId : int,
     branchId : int,
     orderTypeId : int,
@@ -1405,7 +1405,7 @@ def addOrder(
     return conn.sqlGetLastIdCreated('order')
   
 def addOvernightMaintenanceHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     dateOvernightMaintenance : str,
     userId : int,
     openOrdersIn : int,
@@ -1480,7 +1480,7 @@ def addOvernightMaintenanceHistory(
     return conn.sqlGetLastIdCreated('overnight_maintenance_history')
   
 def addPhone(
-    conn : Connection,
+    conn : SqlServerConn,
     countryCode : str,
     areaCode : str,
     phoneNumber : str,
@@ -1511,7 +1511,7 @@ def addPhone(
     return conn.sqlGetLastIdCreated('phone')
   
 def addPositionChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     positionId : int,
     userId : int,
     dateChanged : str,
@@ -1530,7 +1530,7 @@ def addPositionChangeHistory(
     return conn.sqlGetLastIdCreated('position_change_history')
   
 def addPosition(
-    conn : Connection,
+    conn : SqlServerConn,
     positionId : int,
     positionName : str,
     securityLevel : int,
@@ -1561,7 +1561,7 @@ def addPosition(
     return conn.sqlGetLastIdCreated('position')
   
 def addPostalCodeRegion(
-    conn : Connection,
+    conn : SqlServerConn,
     postalCodeId : int,
     regionId : int,
 ) -> int:
@@ -1575,7 +1575,7 @@ def addPostalCodeRegion(
     return conn.sqlGetLastIdCreated('postal_code_region')
 
 def addRateArea(
-    conn : Connection,
+    conn : SqlServerConn,
     rateId : int,
     area : str,
     rateMin : float,
@@ -1618,7 +1618,7 @@ def addRateArea(
     return conn.sqlGetLastIdCreated('rate_area')
   
 def addRateChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     rateId : int,
     userId : int,
     dateChanged : str,
@@ -1637,7 +1637,7 @@ def addRateChangeHistory(
     return conn.sqlGetLastIdCreated('rate_change_history')
   
 def addRate(
-    conn : Connection,
+    conn : SqlServerConn,
     rateId : int,
     rateName : str,
     branchId : int,
@@ -1675,7 +1675,7 @@ def addRate(
     return conn.sqlGetLastIdCreated('rate')
   
 def addRegion(
-    conn : Connection,
+    conn : SqlServerConn,
     regionDetails : Dict[str, str],
     countryDetails : Dict[str, str]
 ) -> int : 
@@ -1723,7 +1723,7 @@ def addRegion(
     return conn.sqlGetLastIdCreated('region')
   
 def addSpecialChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     specialId : int,
     userId : int,
     dateChanged : str,
@@ -1742,7 +1742,7 @@ def addSpecialChangeHistory(
     return conn.sqlGetLastIdCreated('special_change_history')
   
 def addSpecial(
-    conn : Connection,
+    conn : SqlServerConn,
     oldId : int,
     branchId : int,
     weekday : int,
@@ -1783,7 +1783,7 @@ def addSpecial(
   
 
 def addUserChangeHistory(
-    conn : Connection,
+    conn : SqlServerConn,
     userChangedId : int,
     userId : int,
     dateChanged : str,
@@ -1802,7 +1802,7 @@ def addUserChangeHistory(
     return conn.sqlGetLastIdCreated('user_change_history')
   
 def addUser(
-    conn : Connection,
+    conn : SqlServerConn,
     userId : int,
     username : str,
     email : str,

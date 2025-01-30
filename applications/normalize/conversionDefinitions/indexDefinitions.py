@@ -1,5 +1,5 @@
 from typing import List
-from src.types.Index import Index
+from src.types.types import Index
 
 aciDataChangeHistoryIndexes: List[Index] = [
   

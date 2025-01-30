@@ -1,16 +1,21 @@
-from typing import Dict, List
 import os
 import sys
 import platform
+from rich.console import Console
+from rich.prompt import Prompt, Confirm
+
+from typing import Dict, List
 
 def isCompiled():
     return getattr(sys, 'frozen', False)
 
 def getRootDir():
+    currentFileDir = os.path.dirname(os.path.abspath(__file__))
     # Start at the current file's directory and move two levels up
-    current_file_dir = os.path.dirname(os.path.abspath(__file__))
-    root_dir = os.path.abspath(os.path.join(current_file_dir, "../../"))
-    return root_dir
+    if isCompiled():
+        return currentFileDir
+    else:
+        return os.path.abspath(os.path.join(currentFileDir, "../../"))
 
 def getLogDir():
     if isCompiled():
@@ -21,6 +26,7 @@ def getLogDir():
     else:
         # Use the root directory to construct the log directory path
         return os.path.join(getRootDir(), "logs")
+      
 
 
 def chunkDictionary(dictionary : Dict[any, any], maxChunkSize : int) -> List[Dict[any, any]]:

@@ -4,27 +4,34 @@ from rich.console import Console
 
 import traceback
 import time
-from src.utils.conversionHelpers import createSqlTables, convertAccessTables
+from src.utils.conversionProcesses import createSqlTables, convertAccessTables
 from src.utils.logging import logSqlCreationProgress, logAccessConversionProgress,logErrors
-from src.utils.sqlServerSetup import setupSqlServer
 from src.utils.helpers import getLogDir
+from src.utils.userInput import *
 
-from .definitions import *
+from .conversionDefinitions.tableConversionDefinitions import *
 
 from src.types.types import SqlCreationDetails, AccessConversionDetails
 
 def main():
-    logDir = getLogDir()
-    print(logDir)
-    connFactories, conversionThreads = setupSqlServer(
-        htcAllPath=r'C:/HTC_Apps/',
-        sqlDriver=r'ODBC Driver 17 for SQL Server',
-        sqlDatabaseName=r'HTC_Test',
-        autoResetDatabase=True,
-        useMaxConversionThreads=True
-    )
+    console = Console()
+    try:
+        logDir = getLogDir()
+        connFactories = getDatabaseConnections(
+            htcAllPath=r'C:/HTC_Apps/',
+            sqlDriver=r'ODBC Driver 17 for SQL Server',
+            sqlDatabaseName=r'HTC_Test',
+            autoResetDatabase=True
+        )
+        conversionThreads = getMaxConversionThreads(useMaxConversionThreads=True)
+        tablesToMigrate = getTargetTables(forceDefaultPath=False)
+    except Exception as err:
+        console.print(f"[red]{err}[/red]")
+        return
     
-    (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories)
+    
+    
+    (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories, tablesToMigrate)
 
         
     # ADD CHECKER TO SEE IF LOG FILE EXISTS

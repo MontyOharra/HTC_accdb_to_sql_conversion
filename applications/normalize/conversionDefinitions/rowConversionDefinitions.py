@@ -1,6 +1,11 @@
 from .addDataFunctionDefinitions import *
 
-def convert_HTC000_G010_T010_Company_Info(conn : Connection, row):
+from src.classes.SqlServerConn import SqlServerConn
+
+def convert_HTC000_G010_T010_Company_Info(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     phoneId = addPhone(
         conn,
         countryCode='1',
@@ -45,7 +50,10 @@ def convert_HTC000_G010_T010_Company_Info(conn : Connection, row):
         notes=row.CoNotes
     )
 
-def convert_HTC000_G025_T010_Positions(conn : Connection, row):
+def convert_HTC000_G025_T010_Positions(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addPosition(
         conn,
         positionId=row.Posn_ID,
@@ -55,7 +63,10 @@ def convert_HTC000_G025_T010_Positions(conn : Connection, row):
         branchId=row.Posn_BrID
     )
     
-def convert_HTC000_G090_T010_Staff(conn : Connection, row):
+def convert_HTC000_G090_T010_Staff(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     phoneMainId = addPhone(
         conn,
         '1',
@@ -123,14 +134,20 @@ def convert_HTC000_G090_T010_Staff(conn : Connection, row):
         isActive=row.Staff_Active
     )
     
-def convert_HTC010_G000_T000_OrderType_Values(conn : Connection, row):
+def convert_HTC010_G000_T000_OrderType_Values(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderType(
         conn,
         orderTypeId=row.OrdType_ID,
         orderTypeName=row.OrdType_Title
     )
     
-def convert_HTC010_G000_T000_US_Zip_Codes(conn : Connection, row):
+def convert_HTC010_G000_T000_US_Zip_Codes(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.ZipCodeType == 'MILITARY':
         return
     if row.State in [
@@ -154,7 +171,10 @@ def convert_HTC010_G000_T000_US_Zip_Codes(conn : Connection, row):
           countryDetails={'default' : ''}
       )
       
-def convert_HTC010_G100_T010_Certification_Test_Catalog(conn : Connection, row):
+def convert_HTC010_G100_T010_Certification_Test_Catalog(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addCertificationTest(
       conn,
       certificationTestId=row.TestID,
@@ -163,7 +183,10 @@ def convert_HTC010_G100_T010_Certification_Test_Catalog(conn : Connection, row):
       isActive=row.TestStatus
     )
       
-def convert_HTC300_G000_T000_Archive_Update_History(conn : Connection, row):
+def convert_HTC300_G000_T000_Archive_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addArchiveHistory(
         conn,
         dateArchived=row.ArcCnt_Date,
@@ -210,14 +233,20 @@ def convert_HTC300_G000_T000_Archive_Update_History(conn : Connection, row):
         removedOrderHawbs=int(row.ArcCnt_RmvdHAWB) if row.ArcCnt_RmvdHAWB != None else 0 ,
     )
 
-def convert_HTC300_G000_T000_Holidays(conn : Connection, row):
+def convert_HTC300_G000_T000_Holidays(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addHoliday(
         conn,
         holidayName=row.HolidayName,
         holidayDate=row.HolidayDate
     )
     
-def convert_HTC300_G000_T000_Over_Night_Update_History(conn : Connection, row):
+def convert_HTC300_G000_T000_Over_Night_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     userId = getUserIdFromUsername(conn, row.ONUser)
     
     addOvernightMaintenanceHistory(
@@ -256,7 +285,10 @@ def convert_HTC300_G000_T000_Over_Night_Update_History(conn : Connection, row):
         remainingOrderAttachmentsOut=int(row.ONRemAtOut),
     )
     
-def convert_HTC300_G000_T020_Branch_Info(conn : Connection, row):
+def convert_HTC300_G000_T020_Branch_Info(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addressId = addAddress(
         conn,
         row.BrAddrLn1,
@@ -303,7 +335,10 @@ def convert_HTC300_G000_T020_Branch_Info(conn : Connection, row):
         truckDimDivisor=row.BrDimfTruck,
     )
     
-def convert_HTC300_G000_T030_Co_Info_Chg_History(conn : Connection, row):
+def convert_HTC300_G000_T030_Co_Info_Chg_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     userId = getUserIdFromUsername(conn, row.CoInfo_LID)
     addCompanyChangeHistory(
         conn,
@@ -313,7 +348,10 @@ def convert_HTC300_G000_T030_Co_Info_Chg_History(conn : Connection, row):
         changes=row.CoInfo_Chgs
     )
     
-def convert_HTC300_G000_T040_Branch_Info_Chg_History(conn : Connection, row):
+def convert_HTC300_G000_T040_Branch_Info_Chg_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     userId = getUserIdFromUsername(conn, row.BrInfo_LID)
     addBranchChangeHistory(
         conn,
@@ -324,7 +362,10 @@ def convert_HTC300_G000_T040_Branch_Info_Chg_History(conn : Connection, row):
     )
     
 
-def convert_HTC300_G010_T010_DFW_ACI_Data(conn : Connection, row):
+def convert_HTC300_G010_T010_DFW_ACI_Data(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     cityId, postalCodeId = addCityPostalCode(
         conn,
         cityName=row.CITY_PLACE,
@@ -363,7 +404,10 @@ def convert_HTC300_G010_T010_DFW_ACI_Data(conn : Connection, row):
     )
     
 
-def convert_HTC300_G010_T030_ACI_Update_History(conn : Connection, row):
+def convert_HTC300_G010_T030_ACI_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     userId = conn.sqlGetInfo('user', 'id', f"[username] = '{row.ACI_UpdtLID}'")
     if not userId:
         userId = 0
@@ -378,7 +422,10 @@ def convert_HTC300_G010_T030_ACI_Update_History(conn : Connection, row):
         changes=row.ACI_Updates
     )
     
-def convert_HTC300_G020_T010_Status_Values(conn : Connection, row):
+def convert_HTC300_G020_T010_Status_Values(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderStatus(
       conn, 
       orderStatusId=row.Stat_Seq,
@@ -390,7 +437,10 @@ def convert_HTC300_G020_T010_Status_Values(conn : Connection, row):
       isActive=row.Stat_Active
     )
     
-def convert_HTC300_G020_T030_Status_Update_History(conn : Connection, row):
+def convert_HTC300_G020_T030_Status_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderStatusChangeHistory(
         conn,
         dateChanged=row.STAT_UpdtDate,
@@ -400,7 +450,10 @@ def convert_HTC300_G020_T030_Status_Update_History(conn : Connection, row):
     )
     
 
-def convert_HTC300_G025_T025_Positions_Change_History(conn : Connection, row):
+def convert_HTC300_G025_T025_Positions_Change_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addPositionChangeHistory(
         conn,
         dateChanged=row.PosnHist_Date,
@@ -409,7 +462,10 @@ def convert_HTC300_G025_T025_Positions_Change_History(conn : Connection, row):
         changes=row.PosnHist_Changes.strip() if not row.PosnHist_Changes.strip() == '' else 'N/A'
     )
     
-def convert_HTC300_G030_T010_Customers(conn : Connection, row):  
+def convert_HTC300_G030_T010_Customers(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None :  
     cusAddrLine1 = row.Cus_AddrLn1.strip().lower().replace(u'\xa0', u' ')
     cusAddrLine2 = row.Cus_AddrLn2.strip().lower().replace(u'\xa0', u' ')
     cusCity = row.Cus_City.strip().lower().replace(u'\xa0', u' ').replace("'", "''")
@@ -506,7 +562,10 @@ def convert_HTC300_G030_T010_Customers(conn : Connection, row):
         qbCustomerRefName=row.Cus_QBCustomerRefFullName,
     )
     
-def convert_HTC300_G030_T030_Customer_Update_History(conn : Connection, row):
+def convert_HTC300_G030_T030_Customer_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.Cust_CoID == 1 and row.Cust_BrID == 1:
       addCustomerChangeHistory(
           conn,
@@ -516,7 +575,10 @@ def convert_HTC300_G030_T030_Customer_Update_History(conn : Connection, row):
           changes=row.Cust_FldUpdts.strip() if not row.Cust_FldUpdts.strip() == '' else 'N/A'
       )
       
-def convert_HTC300_G040_T010A_Open_Orders(conn: Connection, row):
+def convert_HTC300_G040_T010A_Open_Orders(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     # Retrieve rate ID based on the tariff
     rateId = 1
     # Add the order
@@ -560,7 +622,10 @@ def convert_HTC300_G040_T010A_Open_Orders(conn: Connection, row):
         isWeightChargeCalculated=row.M_WgtChgsCalcYN
     )
     
-def convert_HTC300_G040_T010B_Invoiced_Orders(conn : Connection, row):
+def convert_HTC300_G040_T010B_Invoiced_Orders(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     # Retrieve rate ID based on the tariff
     rateId = 1
     # Add the order
@@ -604,7 +669,10 @@ def convert_HTC300_G040_T010B_Invoiced_Orders(conn : Connection, row):
         isWeightChargeCalculated=row.M_WgtChgsCalcYN
     )
     
-def convert_HTC300_G040_T010C_Remaining_Orders(conn : Connection, row):
+def convert_HTC300_G040_T010C_Remaining_Orders(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     # Retrieve rate ID based on the tariff
     rateId = 1
     # Add the order
@@ -648,7 +716,10 @@ def convert_HTC300_G040_T010C_Remaining_Orders(conn : Connection, row):
         isWeightChargeCalculated=row.M_WgtChgsCalcYN
     )
     
-def convert_HTC300_G040_T010D_Dock_Orders(conn : Connection, row):
+def convert_HTC300_G040_T010D_Dock_Orders(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     # Retrieve rate ID based on the tariff
     rateId = 1
     # Add the order
@@ -698,7 +769,10 @@ def convert_HTC300_G040_T010D_Dock_Orders(conn : Connection, row):
         isWeightChargeCalculated=row.M_WgtChgsCalcYN
     )
     
-def convert_HTC300_G040_T010E_Service_Orders(conn : Connection, row):
+def convert_HTC300_G040_T010E_Service_Orders(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     # Retrieve rate ID based on the tariff
     rateId = 1
     # Add the order
@@ -742,7 +816,10 @@ def convert_HTC300_G040_T010E_Service_Orders(conn : Connection, row):
         isWeightChargeCalculated=row.M_WgtChgsCalcYN
     )
     
-def convert_HTC300_G040_T011A_Open_Order_Assessorials(conn : Connection, row):
+def convert_HTC300_G040_T011A_Open_Order_Assessorials(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.OA_MinutesWaitTime:
         basisCount = row.OA_MinutesWaitTime
     elif row.OA_HowManyMiles:
@@ -761,7 +838,10 @@ def convert_HTC300_G040_T011A_Open_Order_Assessorials(conn : Connection, row):
         totalCharge=row.OA_TotalCharges
     )
     
-def convert_HTC300_G040_T011B_Invoiced_Order_Assessorials(conn : Connection, row):
+def convert_HTC300_G040_T011B_Invoiced_Order_Assessorials(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.OA_MinutesWaitTime:
         basisCount = row.OA_MinutesWaitTime
     elif row.OA_HowManyMiles:
@@ -781,7 +861,10 @@ def convert_HTC300_G040_T011B_Invoiced_Order_Assessorials(conn : Connection, row
     )
     
 
-def convert_HTC300_G040_T011C_Remaining_Order_Assessorials(conn : Connection, row):
+def convert_HTC300_G040_T011C_Remaining_Order_Assessorials(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.OA_MinutesWaitTime:
         basisCount = row.OA_MinutesWaitTime
     elif row.OA_HowManyMiles:
@@ -801,7 +884,10 @@ def convert_HTC300_G040_T011C_Remaining_Order_Assessorials(conn : Connection, ro
     )
     
 
-def convert_HTC300_G040_T011D_Dock_Order_Assessorials(conn : Connection, row):
+def convert_HTC300_G040_T011D_Dock_Order_Assessorials(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.OA_MinutesWaitTime:
         basisCount = row.OA_MinutesWaitTime
     elif row.OA_HowManyMiles:
@@ -820,7 +906,10 @@ def convert_HTC300_G040_T011D_Dock_Order_Assessorials(conn : Connection, row):
         totalCharge=row.OA_TotalCharges
     )
     
-def convert_HTC300_G040_T011E_Service_Order_Assessorials(conn : Connection, row):
+def convert_HTC300_G040_T011E_Service_Order_Assessorials(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.OA_MinutesWaitTime:
         basisCount = row.OA_MinutesWaitTime
     elif row.OA_HowManyMiles:
@@ -839,7 +928,10 @@ def convert_HTC300_G040_T011E_Service_Order_Assessorials(conn : Connection, row)
         totalCharge=row.OA_TotalCharges
     )
     
-def convert_HTC300_G040_T012A_Open_Order_Dims(conn : Connection, row):
+def convert_HTC300_G040_T012A_Open_Order_Dims(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDim(
         conn,
         orderId = row.OD_OrderNo,
@@ -852,7 +944,10 @@ def convert_HTC300_G040_T012A_Open_Order_Dims(conn : Connection, row):
         dimWeight=row.OD_UnitDimWeight,
     )
     
-def convert_HTC300_G040_T012B_Invoiced_Order_Dims(conn : Connection, row):
+def convert_HTC300_G040_T012B_Invoiced_Order_Dims(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDim(
         conn,
         orderId = row.OD_OrderNo,
@@ -865,7 +960,10 @@ def convert_HTC300_G040_T012B_Invoiced_Order_Dims(conn : Connection, row):
         dimWeight=row.OD_UnitDimWeight,
     )
     
-def convert_HTC300_G040_T012C_Remaining_Order_Dims(conn : Connection, row):
+def convert_HTC300_G040_T012C_Remaining_Order_Dims(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDim(
         conn,
         orderId = row.OD_OrderNo,
@@ -878,7 +976,10 @@ def convert_HTC300_G040_T012C_Remaining_Order_Dims(conn : Connection, row):
         dimWeight=row.OD_UnitDimWeight,
     )
     
-def convert_HTC300_G040_T012D_Dock_Order_Dims(conn : Connection, row):
+def convert_HTC300_G040_T012D_Dock_Order_Dims(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDim(
         conn,
         orderId = row.OD_OrderNo,
@@ -891,7 +992,10 @@ def convert_HTC300_G040_T012D_Dock_Order_Dims(conn : Connection, row):
         dimWeight=row.OD_UnitDimWeight,
     )
     
-def convert_HTC300_G040_T012E_Service_Order_Dims(conn : Connection, row):
+def convert_HTC300_G040_T012E_Service_Order_Dims(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDim(
         conn,
         orderId = row.OD_OrderNo,
@@ -904,7 +1008,10 @@ def convert_HTC300_G040_T012E_Service_Order_Dims(conn : Connection, row):
         dimWeight=row.OD_UnitDimWeight,
     )
     
-def convert_HTC300_G040_T013A_Open_Order_Drivers(conn : Connection, row):
+def convert_HTC300_G040_T013A_Open_Order_Drivers(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDriver(
       conn,
       orderId=row.ODvr_OrderNo,
@@ -913,7 +1020,10 @@ def convert_HTC300_G040_T013A_Open_Order_Drivers(conn : Connection, row):
       driverRole=row.ODvr_Role
     )
     
-def convert_HTC300_G040_T013B_Invoiced_Order_Drivers(conn : Connection, row):
+def convert_HTC300_G040_T013B_Invoiced_Order_Drivers(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDriver(
       conn,
       orderId=row.ODvr_OrderNo,
@@ -922,7 +1032,10 @@ def convert_HTC300_G040_T013B_Invoiced_Order_Drivers(conn : Connection, row):
       driverRole=row.ODvr_Role
     )
 
-def convert_HTC300_G040_T013C_Remaining_Order_Drivers(conn : Connection, row):
+def convert_HTC300_G040_T013C_Remaining_Order_Drivers(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDriver(
       conn,
       orderId=row.ODvr_OrderNo,
@@ -931,7 +1044,10 @@ def convert_HTC300_G040_T013C_Remaining_Order_Drivers(conn : Connection, row):
       driverRole=row.ODvr_Role
     )
     
-def convert_HTC300_G040_T013D_Dock_Order_Drivers(conn : Connection, row):
+def convert_HTC300_G040_T013D_Dock_Order_Drivers(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDriver(
       conn,
       orderId=row.ODvr_OrderNo,
@@ -940,7 +1056,10 @@ def convert_HTC300_G040_T013D_Dock_Order_Drivers(conn : Connection, row):
       driverRole=row.ODvr_Role
     )
     
-def convert_HTC300_G040_T013E_Service_Order_Drivers(conn : Connection, row):
+def convert_HTC300_G040_T013E_Service_Order_Drivers(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDriver(
       conn,
       orderId=row.ODvr_OrderNo,
@@ -949,7 +1068,10 @@ def convert_HTC300_G040_T013E_Service_Order_Drivers(conn : Connection, row):
       driverRole=row.ODvr_Role
     )
     
-def convert_HTC300_G040_T014A_Open_Order_Attachments(conn : Connection, row):
+def convert_HTC300_G040_T014A_Open_Order_Attachments(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderAttachment(
       conn,
       orderId=row.Att_OrderNo,
@@ -957,7 +1079,10 @@ def convert_HTC300_G040_T014A_Open_Order_Attachments(conn : Connection, row):
       fileSize=row.ATT_Size
     )
     
-def convert_HTC300_G040_T014B_Invoiced_Order_Attachments(conn : Connection, row):
+def convert_HTC300_G040_T014B_Invoiced_Order_Attachments(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderAttachment(
       conn,
       orderId=row.Att_OrderNo,
@@ -965,7 +1090,10 @@ def convert_HTC300_G040_T014B_Invoiced_Order_Attachments(conn : Connection, row)
       fileSize=row.ATT_Size
     )
     
-def convert_HTC300_G040_T014C_Remaining_Order_Attachments(conn : Connection, row):
+def convert_HTC300_G040_T014C_Remaining_Order_Attachments(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderAttachment(
       conn,
       orderId=row.Att_OrderNo,
@@ -973,7 +1101,10 @@ def convert_HTC300_G040_T014C_Remaining_Order_Attachments(conn : Connection, row
       fileSize=row.ATT_Size
     )
     
-def convert_HTC300_G040_T014D_Dock_Order_Attachments(conn : Connection, row):
+def convert_HTC300_G040_T014D_Dock_Order_Attachments(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderAttachment(
       conn,
       orderId=row.Att_OrderNo,
@@ -981,7 +1112,10 @@ def convert_HTC300_G040_T014D_Dock_Order_Attachments(conn : Connection, row):
       fileSize=row.Att_Size
     )
     
-def convert_HTC300_G040_T014E_Service_Order_Attachments(conn : Connection, row):
+def convert_HTC300_G040_T014E_Service_Order_Attachments(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderAttachment(
       conn,
       orderId=row.Att_OrderNo,
@@ -989,7 +1123,10 @@ def convert_HTC300_G040_T014E_Service_Order_Attachments(conn : Connection, row):
       fileSize=row.Att_Size
     )
     
-def convert_HTC300_G040_T030_Orders_Update_History(conn : Connection, row):
+def convert_HTC300_G040_T030_Orders_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if not row.Orders_OrderNbr:
         return
     addOrderChangeHistory(
@@ -1000,7 +1137,10 @@ def convert_HTC300_G040_T030_Orders_Update_History(conn : Connection, row):
         changes=row.Orders_Changes.strip() if not row.Orders_Changes.strip() == '' else 'N/A'
     )
     
-def convert_HTC300_G050_T010_Accessorials(conn : Connection, row):
+def convert_HTC300_G050_T010_Accessorials(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.AccType.lower() == 'asrl':
         if row.AccBasis.lower() == 'lb':
             basisType = 'weight'
@@ -1036,7 +1176,10 @@ def convert_HTC300_G050_T010_Accessorials(conn : Connection, row):
             amountCharged
         )'''
         
-def convert_HTC300_G050_T030_Accessorials_Update_History(conn : Connection, row):
+def convert_HTC300_G050_T030_Accessorials_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     assessorialType = conn.accessGetTableInfo('htc300', 'HTC300_G050_T010 Accessorials', 'AccType', whereDetails={'AccID': row.Acc_AccID})[0].AccType
     
     if assessorialType.lower() == 'asrl':
@@ -1056,7 +1199,10 @@ def convert_HTC300_G050_T030_Accessorials_Update_History(conn : Connection, row)
             changes=row.Acc_Changes.strip() if not row.Acc_Changes.strip() == '' else 'N/A'
         )
         
-def convert_HTC300_G060_T010_Addresses(conn : Connection, row):
+def convert_HTC300_G060_T010_Addresses(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addressId = addAddress(
         conn,
         addressLine1=row.FavAddrLn1,
@@ -1101,7 +1247,10 @@ def convert_HTC300_G060_T010_Addresses(conn : Connection, row):
         
     )
     
-def convert_HTC300_G060_T030_Addresses_Update_History(conn : Connection, row):
+def convert_HTC300_G060_T030_Addresses_Update_History(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addLocationChangeHistory(
         conn,
         locationId=row.Addr_ID,
@@ -1110,61 +1259,64 @@ def convert_HTC300_G060_T030_Addresses_Update_History(conn : Connection, row):
         changes=row.Addr_Chgs.strip() if not row.Addr_Chgs.strip() == '' else 'N/A'
     )
     
-def convert_HTC300_G070_T010_Rates(conn : Connection):
+def convert_HTC300_G070_T010_Rates(conn : SqlServerConn):
     rate_areaInfo = conn.accessGetTableInfo('htc300', 'HTC300_G070_T010 Rates')
     for row in rate_areaInfo:
         pass
     print('Completed [HTC300_G070_T010 Rates] Conversion.')
 
-def convert_HTC300_G070_T030_Rates_Update_History(conn : Connection):
+def convert_HTC300_G070_T030_Rates_Update_History(conn : SqlServerConn):
     rate_change_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G070_T030 Rates Update History')
     for row in rate_change_historyInfo:
         pass
     print('Completed [HTC300_G070_T030 Rates Update History] Conversion.')
     
-def convert_HTC300_G080_T010_Agents(conn : Connection):
+def convert_HTC300_G080_T010_Agents(conn : SqlServerConn):
     agentInfo = conn.accessGetTableInfo('htc300', 'HTC300_G080_T010 Agents')
     for row in agentInfo:
         pass
     print('Completed [HTC300_G080_T010 Agents] Conversion.')
     
-def convert_HTC300_G080_T020_Agent_Certifications(conn : Connection):
+def convert_HTC300_G080_T020_Agent_Certifications(conn : SqlServerConn):
     agent_certificationInfo = conn.accessGetTableInfo('htc300', 'HTC300_G080_T020 Agent Certifications')
     for row in agent_certificationInfo:
         pass
     print('Completed [HTC300_G080_T020 Agent Certifications] Conversion.')    
     
-def convert_HTC300_G080_T030_Agents_Change_History(conn : Connection):
+def convert_HTC300_G080_T030_Agents_Change_History(conn : SqlServerConn):
     agent_change_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G080_T030 Agents Change History')
     for row in agent_change_historyInfo:
         pass
     print('Completed [HTC300_G080_T030 Agents Change History] Conversion.')
     
-def convert_HTC300_G090_T030_Staff_Chg_History(conn : Connection):
+def convert_HTC300_G090_T030_Staff_Chg_History(conn : SqlServerConn):
     user_change_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G090_T030 Staff Chg History')
     for row in user_change_historyInfo:
         pass
     print('Completed [HTC300_G090_T030 Staff Chg History] Conversion.') 
     
-def convert_HTC300_G100_T020_Certification_Trainers(conn : Connection):
+def convert_HTC300_G100_T020_Certification_Trainers(conn : SqlServerConn):
     certification_test_trainerInfo = conn.accessGetTableInfo('htc300', 'HTC300_G100_T020 Certification Trainers')
     for row in certification_test_trainerInfo:
         pass
     print('Completed [HTC300_G100_T020 Certification Trainers] Conversion.')    
 
-def convert_HTC300_G100_T021_Certifaction_Trainer_Change_History(conn : Connection):
+def convert_HTC300_G100_T021_Certifaction_Trainer_Change_History(conn : SqlServerConn):
     certification_trainer_change_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G100_T021 Certifaction Trainer Change History')
     for row in certification_trainer_change_historyInfo:
         pass
     print('Completed [HTC300_G100_T021 Certifaction Trainer Change History] Conversion.')    
 
-def convert_HTC300_G100_T030_CertificationTestCatalogChgHistory(conn : Connection):
+def convert_HTC300_G100_T030_CertificationTestCatalogChgHistory(conn : SqlServerConn):
     certification_test_change_historyInfo = conn.accessGetTableInfo('htc300', 'HTC300_G100_T030 CertificationTestCatalogChgHistory')
     for row in certification_test_change_historyInfo:
         pass
     print('Completed [HTC300_G100_T030 CertificationTestCatalogChgHistory] Conversion.')    
     
-def convert_HTC400_G040_T010A_Orders(conn : Connection, row):
+def convert_HTC400_G040_T010A_Orders(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     rateId = 1    
     
     if row.M_Driver:
@@ -1212,7 +1364,10 @@ def convert_HTC400_G040_T010A_Orders(conn : Connection, row):
         isWeightChargeCalculated=row.M_WgtChgsCalcYN
     )
   
-def convert_HTC400_G040_T011A_Assessorials(conn : Connection, row):
+def convert_HTC400_G040_T011A_Assessorials(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     if row.OA_MinutesWaitTime:
         basisCount = row.OA_MinutesWaitTime
     elif row.OA_HowManyMiles:
@@ -1231,7 +1386,10 @@ def convert_HTC400_G040_T011A_Assessorials(conn : Connection, row):
         totalCharge=row.OA_TotalCharges
     )
     
-def convert_HTC400_G040_T012A_Dims(conn : Connection, row):
+def convert_HTC400_G040_T012A_Dims(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDim(
         conn,
         orderId = row.OD_OrderNo,
@@ -1245,7 +1403,10 @@ def convert_HTC400_G040_T012A_Dims(conn : Connection, row):
     )
     
 
-def convert_HTC400_G040_T013A_Drivers(conn : Connection, row):
+def convert_HTC400_G040_T013A_Drivers(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderDriver(
       conn,
       orderId=row.ODvr_OrderNo,
@@ -1254,7 +1415,10 @@ def convert_HTC400_G040_T013A_Drivers(conn : Connection, row):
       driverRole=row.ODvr_Role
     )
     
-def convert_HTC400_G040_T014A_Attachments(conn : Connection, row):
+def convert_HTC400_G040_T014A_Attachments(
+    conn : SqlServerConn, 
+    row : Tuple[any]
+) -> None:
     addOrderAttachment(
       conn,
       orderId=row.Att_OrderNo,
@@ -1262,7 +1426,7 @@ def convert_HTC400_G040_T014A_Attachments(conn : Connection, row):
       fileSize=row.Att_Size
     )
     
-def convert_HTC400_G900_T010_Archive_Event_Log(conn : Connection):
+def convert_HTC400_G900_T010_Archive_Event_Log(conn : SqlServerConn):
     archive_error_logInfo = conn.accessGetTableInfo('htc400', 'HTC400_G900_T010 Archive Event Log')
     for row in archive_error_logInfo:
         pass

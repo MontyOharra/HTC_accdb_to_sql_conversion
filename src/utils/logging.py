@@ -57,7 +57,7 @@ class ErrorCountColumn(ProgressColumn):
         style = "green" if errors == 0 else "red"
         return Text(f"Errors: {errors}", style=style)
       
-def logErrors(errorLogQueue : Queue):
+def logErrors(logDir : str, errorLogQueue : Queue):
     console = Console()
     while True:
         try:
@@ -69,17 +69,12 @@ def logErrors(errorLogQueue : Queue):
             break
           
         # Write error to error.log file within the same directory as the script
-        # Error of the type (process, tableName, errorMessage)
-        # Expecting 4-tuple
+        # Error of the type (process, errorMessage)
         if isinstance(message, tuple) and len(message) == 2:        
             process, exception = message
-            errorsDir = f"C:/Users/Owner/Software_Projects/HTC_accdb_to_sql_conversion/errors/"
-            if process == "sqlTableCreation":
-                with open(f"{errorsDir}sqlTableCreation.log", "a") as errorLogFile:
-                    errorLogFile.write(f"Error: {exception}\n")
-            elif process == "accessTableConversion":
-                with open(f"{errorsDir}accessTableConversion.log", "a") as errorLogFile:
-                    errorLogFile.write(f"Error: {exception}\n")
+            errorsLogPath = os.path.join(logDir, f"{process}Errors.log")
+            with open(errorsLogPath, "a") as errorLogFile:
+                errorLogFile.write(f"Error: {exception}\n")
         else:
             console.print(f"[red]Invalid message: {message}[/red]")
 

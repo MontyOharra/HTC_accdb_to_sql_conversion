@@ -162,60 +162,74 @@ class SqlServerConn:
             }
           )
 
-    def insertRow(self, tableName : str, fields: Dict[str, Any], insertId : int = None, allowNulls : bool = True) -> None:
+    def getFixedInsertValue(self, value: Any, setNull : bool) -> str:
+        if type(value) == str:
+            value = value.strip().lower()
+            if value == "":
+                # If the value is empty, set it to NULL is setNull is true, otherwise empty string
+                return "NULL" if setNull else "''"
+            else:
+                # Replace single apostrophe with two in order to escape it in SQL
+                return f"'{value.replace("'", "''")}'"
+        elif type(value) == int or type(value) == float:
+            return value
+        elif type(value) == bool:
+            # Convert boolean to readable string for SQL
+            if value == True:
+                return '1'
+            else:
+                return '0'
+        elif value == None:
+            return "NULL" if setNull else "''"
+        else:
+            return f"'{value}'"
+                
+    def insertRow(
+        self, 
+        tableName : str, 
+        data: Dict[str, Any], 
+        insertId : int = None, 
+        setNulls : bool = True
+    ) -> None:
         """
             Insert a row into a table.
             
             tableName - Name of the table to insert the row into.
-            fields - Dictionary of field names and values to insert into the table.
+            data - Dictionary of field names and values to insert into the table.
             insertId - Optional ID to insert into the table. If not provided, the database will generate an ID.
             allowNulls - Whether to allow null values in the insert. Default is True.
         """
-        fieldNames: List[str] = list(fields.keys())
-        fieldValues: List[Any] = []
+        columnNames: List[str] = list(data.keys())
+        columnValues: List[Any] = [self.getFixedInsertValue(value, setNulls) for value in list(data.values())]
+        
         if not insertId == None: # If insertId is provided, add it to the beginning of the field list
-            fieldNames.insert(0, 'id')
-            fieldValues.insert(0, insertId)
+            columnValues.insert(0, 'id')
+            columnValues.insert(0, insertId)
           
-        for value in fields.values():
-            if type(value) == str:
-                value = value.strip()
-                if value == "":
-                    fieldValues.append("NULL" if allowNulls else "''")
-                else:
-                    fieldValues.append(f"'{value.replace("'", "''")}'")
-            elif type(value) == int or type(value) == float:
-                fieldValues.append(value)
-            elif type(value) == bool:
-                if value == True:
-                    fieldValues.append('1')
-                else:
-                    fieldValues.append('0')
-            elif value == None:
-                fieldValues.append("NULL" if allowNulls else "''")
-            else:
-                fieldValues.append(f"'{value}'")
-        fieldNamesString: str = ', '.join(f'[{name}]' for name in fieldNames)
-        insertValuesString: str = ', '.join(f"{value}" for value in fieldValues)
+        columnNamesString: str = ', '.join(f'[{name}]' for name in columnNames)
+        columnValuesString: str = ', '.join(f"{value}" for value in columnValues)
           
-        insertSql: str = f"INSERT INTO [{tableName}] ({fieldNamesString}) VALUES ({insertValuesString})"
+        insertSql: str = f"INSERT INTO [{tableName}] ({columnNamesString}) VALUES ({columnValuesString})"
+        
         try:
-          if not insertId == None:
-            self.cursor.execute(f"SET IDENTITY_INSERT [{tableName}] ON")
-          self.cursor.execute(insertSql)
-          if not insertId == None:
-            self.cursor.execute(f"SET IDENTITY_INSERT [{tableName}] OFF")
+            # IDENTITY_INSERT must be on in order to insert a row with an identity column
+            if insertId == None:
+                self.cursor.execute(insertSql)
+            else: 
+                self.cursor.execute(f"SET IDENTITY_INSERT [{tableName}] ON")
+                self.cursor.execute(insertSql)
+                self.cursor.execute(f"SET IDENTITY_INSERT [{tableName}] OFF")
             
-          self.conn.commit()
+            self.conn.commit()
         except Exception as err:
-          self.handleError(
-            action='insertRow',
-            info={
-              'sqlStatement' : insertSql,
-              'tableName' : tableName,
-              'fields': fields,
-            }
-          )
+            self.handleError(
+                action='insertRow',
+                info={
+                    'sqlStatement' : insertSql,
+                    'tableName' : tableName,
+                    'data': data,
+                }
+            )
         
     def select(
         self,
@@ -324,7 +338,7 @@ class SqlServerConn:
           errorMessage += f'Error getting column type from table: [{info['tableName']}], column: [{info['columnName']}].\n'
         elif action == 'insertRow':
           errorMessage += f'Error inserting row into [{info['tableName']}].\n    Details:\n'
-          for fieldName, fieldValue in info['fields'].items():
+          for fieldName, fieldValue in info['data'].items():
             errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
         elif action == f"select":
           errorMessage += f'Error selecting data from [{info['tableName']}].\n    Details:\n'

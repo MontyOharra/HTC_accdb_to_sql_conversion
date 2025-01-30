@@ -3,7 +3,7 @@ from threading import Thread
 from queue import Queue
 from rich.console import Console
 
-from src.utils.conversionHelpers import convertAccessTables, createSqlTables
+from src.utils.conversionProcesses import convertAccessTables, createSqlTables
 from src.utils.logging import outputLoggingTable
 from src.utils.sqlServerSetup import setupSqlServer
 
