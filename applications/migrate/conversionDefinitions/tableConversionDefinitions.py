@@ -7,7 +7,7 @@ from rich.progress import (
     MofNCompleteColumn,
     TextColumn
 )
-from .helpers import generateAccessDbNameCache
+
 from .foreignKeyDefinitions import *
 from .indexDefinitions import *
 from .fieldDefinitions import *
@@ -22,7 +22,7 @@ def getMigrationDefinition(
     connFactories : Dict[str, Callable[[], AccessConn]], 
     tableName : str, 
     accessDbNameCache : Dict[str, str]
-) -> Tuple[Tuple[List[Field], List[Index], List[ForeignKey]], Callable, str]:
+) -> Tuple[Tuple[List[Field], List[Index], List[ForeignKey]], Callable[[Callable[[], SqlServerConn], list[Any]], None], str]:
     '''
         connFactories - Dictionary of connection factories for each database. The keys are the database names.
         tableName - Name of the table to get the definition for.
@@ -34,14 +34,14 @@ def getMigrationDefinition(
             tableName - The name of the table.
     '''
     try:
-        connFactory = connFactories[accessDbNameCache[tableName]]
-        conn = connFactory()
+        accessConnFactory = connFactories[accessDbNameCache[tableName]]
+        accessConn = accessConnFactory()
         sqlTableDefinition = (
-            getSqlTableFields(conn, tableName), 
-            getSqlTableIndexes(conn, tableName), 
-            getSqlTableForeignKeys(conn, tableName)
+            getSqlTableFields(accessConn, tableName), 
+            getSqlTableIndexes(accessConn, tableName), 
+            getSqlTableForeignKeys(accessConn, tableName)
         )
-        rowConversionDefinition = getRowConversionFunction(conn, tableName)
+        rowConversionDefinition = getRowConversionFunction(accessConn, tableName)
         
         return (sqlTableDefinition, rowConversionDefinition, tableName)
     except KeyboardInterrupt:
@@ -50,10 +50,11 @@ def getMigrationDefinition(
 def getMigrationDefinitions(
     conversionThreads : int,
     connFactories : Dict[str, Callable[[], AccessConn]], 
-    tablesToMigrate : List[str]
+    tablesToMigrate : List[str],
+    accessDbNameCache : Dict[str, str]
 ) -> Tuple[
         Dict[str, Tuple[List[Field], List[Index], List[ForeignKey]]], 
-        Dict[str, Callable[[], AccessConn]] 
+        Dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], AccessConn]] 
       ]:
     '''
         conversionThreads - Number of threads to use for conversion.
@@ -65,7 +66,7 @@ def getMigrationDefinitions(
             sqlTableDefinitions - Dictionary of table definitions for each table.
             accessConversionDefinitions - Dictionary of access conversion functions for each table. The keys are the table names.
     '''
-    accessDbNameCache = generateAccessDbNameCache(tablesToMigrate)
+    
     try:
         # Setup progress bar like "Getting migration definitions... [{completed} of {total}]"
         with Progress(

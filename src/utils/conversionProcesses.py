@@ -5,13 +5,17 @@ from queue import Queue
 from src.classes.SqlServerConn import SqlServerConn
 
 from collections.abc import Callable
-from typing import Dict, List, Tuple
-from src.types.types import Field, Index, ForeignKey, SqlCreationDetails, AccessConversionDetails
+from typing import Any
+from src.types.types import Field, Index, ForeignKey, SqlCreationDetails
+
+from .helpers import generateAccessDbNameCache
+
+from rich.console import Console
 
 def getRows(
     accessConnFactory : Callable,
     tableName : str
-) -> Tuple[any]:
+) -> tuple[Any]:
     '''
         accessConnFactory - A function that returns an AccessConn object.
         tableName - Name of the table to get the rows for.
@@ -21,13 +25,12 @@ def getRows(
     conn = accessConnFactory()
     return conn.select(tableName)
   
-
 def createSqlTable(
     sqlConnFactory : Callable[[], SqlServerConn], 
     tableName : str, 
-    tableFields : List[Field], 
-    tableIndexes : List[Index],
-) -> Tuple[Tuple[str, str, str], List[Tuple[str, str, Exception]]]:
+    tableFields : list[Field], 
+    tableIndexes : list[Index],
+) -> tuple[tuple[str, SqlCreationDetails], list[tuple[str, str, Exception]]]:
     """
         sqlConnFactory - A function that returns a SQL Server connection.
         tableName - Name of the table to create.
@@ -55,7 +58,7 @@ def createSqlTable(
         try:
             # Add indexes
             for index in tableIndexes:
-                sqlConn.addIndex(tableName, index.indexType, index.indexFields, index.indexName, index.isUnique)
+                sqlConn.addIndex(tableName, index.indexName, index.indexType, index.indexFields, index.isUnique)
             indexesStatus = "Complete"
         except Exception as err:
             # If there is an error, set indexes status to "Failure" and add the error to the error log
@@ -68,12 +71,12 @@ def createSqlTable(
         
         return sqlCreationData, errorLogMessages
 
-    except Exception as err:
+    except Exception:
         raise
 
 def createSqlTables(
     sqlConnFactory : Callable, 
-    sqlTableDefinitions : Dict[str, Tuple[List[Field], List[Index], List[ForeignKey]]], 
+    sqlTableDefinitions : dict[str, tuple[list[Field], list[Index], list[ForeignKey]]], 
     maxThreads : int,
     logQueue : Queue,
     errorQueue : Queue
@@ -91,7 +94,7 @@ def createSqlTables(
         Returns True if the process is complete, False if it is interrupted.
     """
     for tableName in sqlTableDefinitions.keys():
-        logQueue.put(("SET", tableName))
+        logQueue.put(("BEGIN", tableName))
         
     try:
         with ProcessPool(max_workers=maxThreads) as executor:
@@ -139,12 +142,12 @@ def createSqlTables(
 def convertAccessRows(
     sqlConnFactory : Callable[[], SqlServerConn],
     tableName : str,
-    rowChunk : List[Tuple],
+    rowChunk : list[tuple],
     rowConversionFunction : Callable[
-                              [Callable[[], SqlServerConn], List[any]], 
+                              [Callable[[], SqlServerConn], tuple[Any]], 
                               None
                             ]
-) -> Tuple[Tuple[str, AccessConversionDetails], List[Exception]]:
+) -> tuple[tuple[str, dict[str, int]], list[Exception]]:
     rowsConverted = 0
     rowErrors = 0
     errorLogMessages = []
@@ -166,14 +169,14 @@ def convertAccessRows(
       
 def convertAccessTables(    
     connFactories,             # -> returns an AccessConn
-    conversionDefinitions: Dict[str, Callable],   # e.g. {tableName: rowConversionFunction, ...}
+    conversionDefinitions: dict[str, Callable],   # e.g. {tableName: rowConversionFunction, ...}
     maxThreads: int,
     chunkSize : int,
     logQueue: Queue,
     errorQueue: Queue
 ):
-    accessDbNameCache = generateAccessDbNameCache(conversionDefinitions.keys())    
-    
+    accessDbNameCache = generateAccessDbNameCache(list(conversionDefinitions.keys()))     
+    console = Console()
     allTasks = []  # each element: (tableName, rowData, rowConversionFunction)
     for tableName, rowConversionFunction in conversionDefinitions.items():
         rows = getRows(connFactories[accessDbNameCache[tableName]], tableName)  # from your existing function

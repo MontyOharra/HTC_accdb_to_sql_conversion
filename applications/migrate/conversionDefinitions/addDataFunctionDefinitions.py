@@ -6,10 +6,10 @@ from collections.abc import Callable
 from typing import Any
 
 def migrateAccessRow(
-    columnNames : list[str],
-    accessTableName : str,
     sqlConnFactory : Callable[[], SqlServerConn], 
     row : list[Any], 
+    columnNames : list[str],
+    accessTableName : str,
 ) -> None: 
     '''
         sqlConnFactory - A function that returns a SQL Server connection.
@@ -29,4 +29,4 @@ def migrateAccessRow(
             rowType = sqlConn.getColumnType(accessTableName, columnName)
             data[columnName] = getNullReplacement(rowType) 
             
-    sqlConn.insertRow(accessTableName, data)
+    sqlConn.insertRow(accessTableName, data, setNulls=False)

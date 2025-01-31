@@ -1,8 +1,5 @@
-from threading import Thread
 from queue import Queue, Empty
-from typing import Dict
 import os
-import traceback
 
 from rich.console import Console
 from rich.text import Text
@@ -64,7 +61,7 @@ def logErrors(logDir : str, errorLogQueue : Queue):
             message = errorLogQueue.get(timeout=.1)
         except Empty:
             continue
-          
+            
         if message == "STOP":
             break
           
@@ -73,23 +70,23 @@ def logErrors(logDir : str, errorLogQueue : Queue):
         if isinstance(message, tuple) and len(message) == 2:        
             process, exception = message
             errorsLogPath = os.path.join(logDir, f"{process}Errors.log")
+            
             with open(errorsLogPath, "a") as errorLogFile:
                 errorLogFile.write(f"Error: {exception}\n")
         else:
             console.print(f"[red]Invalid message: {message}[/red]")
 
-        
 def logSqlCreationProgress(
     logQueue : Queue,
-    tableCreationData : Dict[str, SqlCreationDetails]
+    tableCreationData : dict[str, SqlCreationDetails]
 ):
     """
         Listens for messages sent in from a Queue object.
         Returns true if the process is complete., false otherwise.
         
         logQueue - Queue object to listen for messages from.
-        tableData - Dictionary of table names and their status.
-        successMessage - Message to display when the process is complete.
+        tableCreationData - Dictionary of table names and their status.
+        logDir - Directory to log the progress to.
     """
     console = Console()
     console.print("[yellow]Creating SQL tables...[/yellow]")
@@ -121,12 +118,13 @@ def logSqlCreationProgress(
             # Expecting 3-tuple
             if isinstance(message, tuple) and len(message) == 2:
                 (action, data) = message
-                if action == "SET":
+                if action == "BEGIN":
                     (tableName) = data
                     progressBar.update(progressIds[tableName], creationStatus="In Progress", indexesStatus="In Progress")
                 elif action == "UPDATE":
                     (tableName, sqlCreationDetails) = data
                     if tableName in tableCreationData.keys():
+                        tableCreationData[tableName] = sqlCreationDetails
                         progressBar.update(progressIds[tableName], 
                                            creationStatus=sqlCreationDetails.creationStatus, 
                                            indexesStatus=sqlCreationDetails.indexesStatus
@@ -149,11 +147,12 @@ def logSqlCreationProgress(
                 progressBar.stop()
                 console.print(f"[red]Invalid message: {message}[/red]")
                 break   
+          
         
 def logAccessConversionProgress(
     logQueue : Queue,
-    tableConversionData : Dict[str, AccessConversionDetails]
-) -> bool:
+    tableConversionData : dict[str, AccessConversionDetails]
+) -> None:
     """
         Listens for messages sent in from a Queue object.
         Returns true if the process is complete., false otherwise.

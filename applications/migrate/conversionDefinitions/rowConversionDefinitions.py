@@ -7,7 +7,7 @@ from functools import partial
 from typing import Any
 
 def getRowConversionFunction(
-    conn : AccessConn, 
+    accessConn : AccessConn, 
     accessTableName : str
 ) -> Callable[[Callable[[], SqlServerConn], list[Any]], None]:
     '''
@@ -19,7 +19,7 @@ def getRowConversionFunction(
         Partial function is needed for multiprocessing compatible use.
     '''
     try:
-        columnNames = list(conn.getTableStructure(accessTableName)[0].keys())
+        columnNames = list(accessConn.getTableStructure(accessTableName)[0].keys())
         return partial(migrateAccessRow, columnNames=columnNames, accessTableName=accessTableName)
     except Exception as err:
         raise err

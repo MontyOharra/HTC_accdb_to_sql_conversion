@@ -3,26 +3,8 @@ import winreg
 import socket
 
 from rich.console import Console
-from rich.prompt import Prompt
 
-from typing import Dict, List, Tuple
-from collections.abc import Callable
-
-from src.classes.SqlServerConn import SqlServerConn
-from src.classes.AccessConn import AccessConn
-from src.classes.ConnFactory import ConnFactory
-    
-def createSqlServerConn(sqlDriver, sqlServerName, sqlDatabaseName) -> SqlServerConn:
-    def getSqlServerConn():
-        return SqlServerConn(sqlDriver, sqlServerName, sqlDatabaseName)
-    return getSqlServerConn
-
-def createAccessConn(htcAllPath, filename) -> AccessConn:
-    def getAccessConn():
-        return AccessConn(htcAllPath, filename)
-    return getAccessConn
-
-def getSqlServerInstanceNames() -> List[str]:
+def getSqlServerInstanceNames() -> list[str]:
     """ 
         Returns a list of local SQL Server instances.
     """
@@ -81,9 +63,9 @@ def checkIfDatabaseExists(sqlCursor : pyodbc.Cursor, databaseName : str) -> bool
     try:
         sqlCursor.execute(checkDbExistsSql)
         return sqlCursor.fetchone() is not None
-    except Exception as err:
-        console.print(f"[red]There was an error checking if the database {databaseName} exists.[/red]")
-        raise err
+    except:
+        err = f"There was an error checking if the database {databaseName} exists."
+        raise Exception(err)
 
 def createDatabase(sqlCursor : pyodbc.Cursor, databaseName : str) -> None:
     """
@@ -97,9 +79,7 @@ def createDatabase(sqlCursor : pyodbc.Cursor, databaseName : str) -> None:
     createDbSql = f"CREATE DATABASE [{databaseName}]"
     try:
         sqlCursor.execute(createDbSql)
-        console.print(f"[green]Database: '{databaseName}' created successfully.[/green]")
-    except Exception as err:
-        console.print(f"[red]Failed to create database: '{databaseName}'.[/red]")
-        exit(1)
-        raise err
+    except Exception:
+        err = f"Failed to create database: '{databaseName}'."
+        raise Exception(err)
       

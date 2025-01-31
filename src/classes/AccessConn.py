@@ -1,7 +1,6 @@
-from typing import Dict, Any, List, Tuple, NoReturn
+from typing import Any, NoReturn
 import pyodbc
 
-from ..types.types import Field, ValidIndexType
 from datetime import datetime
 from decimal import Decimal
 
@@ -116,7 +115,7 @@ class AccessConn:
           self.cursor.execute(selectSql)
           return self.cursor.fetchall()
         
-        except Exception as err:
+        except Exception:
           self.handleError(
             action='select',
             info={
@@ -127,7 +126,7 @@ class AccessConn:
             }
           )
       
-    def getTableStructure(self, tableName: str) -> Tuple[Dict[str, str], List[str]]:
+    def getTableStructure(self, tableName: str) -> tuple[dict[str, str], list[str]]:
         """
             tableName - Name of the table to retrieve structure from.
             
@@ -146,7 +145,7 @@ class AccessConn:
 
             return (columnsInfo, primaryKeyColumns) 
 
-        except Exception as err:
+        except Exception:
             self.handleError(
                 action='getTableStructure',
                 info={
@@ -155,7 +154,7 @@ class AccessConn:
                 }
             )
                       
-    def getColumnDetails(self, columnDescription : Tuple[str, Any, int, int, int, int, bool], allowNulls : bool = False) -> str:
+    def getColumnDetails(self, columnDescription : tuple[str, Any, int, int, int, int, bool], allowNulls : bool = False) -> str:
         """
             columnDescription - A tuple containing information about the column.
             allowNulls - If true, the column will be allowed to be null. Otherwise, it will be forced to be not null.
@@ -201,7 +200,7 @@ class AccessConn:
           
         return columnDetails
 
-    def handleError(self, action : str, info: Dict[str, Any]) -> NoReturn:
+    def handleError(self, action : str, info: dict[str, Any]) -> NoReturn:
         """
             A function to handle errors in the SQL Server connection.
             

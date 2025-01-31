@@ -1,12 +1,11 @@
 from src.classes.AccessConn import AccessConn
 
-from typing import List
 from src.types.types import ForeignKey
 
 def getSqlTableForeignKeys(
     conn : AccessConn, 
     accessTableName : str
-) -> List[ForeignKey]:
+) -> list[ForeignKey]:
     '''
         conn - Access connection object.
         accessTableName - Name of the table to get the foreign keys for. 

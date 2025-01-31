@@ -1,12 +1,11 @@
 from src.classes.AccessConn import AccessConn
 
-from typing import List
 from src.types.types import Field
 
 def getSqlTableFields(
     conn : AccessConn, 
     accessTableName : str
-) -> List[Field]:
+) -> list[Field]:
     '''
         conn - Access connection object.
         accessTableName - Name of the table to get the fields for.

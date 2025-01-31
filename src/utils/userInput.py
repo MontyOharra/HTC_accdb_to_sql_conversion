@@ -8,7 +8,6 @@ from rich.prompt import Prompt, Confirm
 
 from src.classes.ConnFactory import ConnFactory
 
-from typing import Dict
 from collections.abc import Callable
 
 def getDatabaseConnections(
@@ -16,7 +15,7 @@ def getDatabaseConnections(
     sqlDriver : str | None = None, 
     sqlDatabaseName : str | None = None,
     autoResetDatabase : bool = False
-) -> Dict[str, Callable] :    
+) -> dict[str, Callable] :    
     
     """ 
         Setup SQL Server connection and create database if it does not exist.
@@ -140,7 +139,7 @@ def getMaxConversionThreads(useMaxConversionThreads : bool = False) -> int:
         
     return maxConversionThreads
         
-def getTargetTables(forceDefaultPath : bool = False) -> List[str]:
+def getTargetTables(forceDefaultPath : bool = False) -> list[str]:
     '''
         forceDefaultPath - A boolean value that determines whether the user has
                             input to the target tables text file path. Defaults
@@ -156,10 +155,10 @@ def getTargetTables(forceDefaultPath : bool = False) -> List[str]:
         if os.path.exists(defaultTargetTablesPath):
             useDefaultTargetTables = Confirm.ask(f"[blue]Found tables.txt file at '{defaultTargetTablesPath}'. Would you like to use this file[/blue]")
             # User selects the default path
-            if (useDefaultTargetTables == 'y'):
+            if (useDefaultTargetTables == True):
                 targetTablesPath = defaultTargetTablesPath
             # User defines their own path
-            elif (useDefaultTargetTables == 'n'):
+            elif (useDefaultTargetTables == False):
                 targetTablesPath = Prompt.ask("[blue]Please enter the filepath for the tables you could like to convert[/blue]")
         # No default path found, user must supply one
         else:

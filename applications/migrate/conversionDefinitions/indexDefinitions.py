@@ -1,12 +1,11 @@
 from src.classes.AccessConn import AccessConn
 
-from typing import List
 from src.types.types import Index
 
 def getSqlTableIndexes(
     conn : AccessConn, 
     accessTableName : str
-) -> List[Index]:
+) -> list[Index]:
     '''
         conn - Access connection object.
         accessTableName - Name of the table to get the indexes for.

@@ -27,14 +27,14 @@ class SqlServerConn:
                 'Trusted_Connection=yes;'
             )
             self.conn : pyodbc.Connection = pyodbc.connect(sqlServerConnString)
-            self.cursor = self.conn.cursor()
+            self.cursor : pyodbc.Cursor= self.conn.cursor()
 
         except Exception as err:
             console = Console()
             console.print(f"[red]Error creating SQL Server connection[/red]")
             raise err
         
-    def __del__(self):
+    def __del__(self) -> None:
         self.conn.close()
 
     def dropTable(self, tableName : str) -> None:

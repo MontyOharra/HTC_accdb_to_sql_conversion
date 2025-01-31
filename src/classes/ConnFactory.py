@@ -2,11 +2,11 @@ from .AccessConn import AccessConn
 from .SqlServerConn import SqlServerConn
 
 class ConnFactory:
-    def __init__(self, sqlDriver, sqlServerName, sqlDatabaseName, htcAllPath):
-        self.sqlDriver = sqlDriver
-        self.sqlServerName = sqlServerName
-        self.sqlDatabaseName = sqlDatabaseName
-        self.htcAllPath = htcAllPath
+    def __init__(self, sqlDriver : str, sqlServerName : str, sqlDatabaseName : str, htcAllPath : str):
+        self.sqlDriver : str = sqlDriver
+        self.sqlServerName : str = sqlServerName
+        self.sqlDatabaseName : str = sqlDatabaseName
+        self.htcAllPath : str = htcAllPath
 
     def sql(self):
         """Return a new SqlServerConn."""

@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any, Literal
+from typing import Literal
 
 ValidIndexType = Literal['clustered', 'nonclustered']
 
 @dataclass
 class Index:
     indexName: str
-    indexFields: str | List[str]
+    indexFields: str | list[str]
     indexType: ValidIndexType
     isUnique: bool
     
