@@ -1,16 +1,21 @@
 import traceback
 import time
+import os
 
 from threading import Thread
 from queue import Queue
 
 from src.utils.conversionProcesses import createSqlTables, convertAccessTables
-from src.utils.logging import logSqlCreationProgress, logAccessConversionProgress,logErrors
+from src.utils.logging import (logSqlCreationProgress, logAccessConversionProgress, logErrors, 
+                              readSqlCreationLog, readAccessConversionLog, 
+                              )
 
 from src.types.types import SqlCreationDetails, AccessConversionDetails
 
 def runConversion(connFactories, conversionThreads, logDir, sqlTableDefinitions, accessConversionDefinitions,):
-    if (False):
+    htcConversionLogPath = os.path.join(logDir, "htcConversion.log")
+    if (os.path.exists(htcConversionLogPath)):
+        sqlTableCreationData = readSqlCreationLog(htcConversionLogPath)
         pass        
     else:
         sqlTableCreationData = {
@@ -28,13 +33,13 @@ def runConversion(connFactories, conversionThreads, logDir, sqlTableDefinitions,
     errorLogQueue = Queue()
     errorLogger = Thread(
         target=logErrors,
-        args=(logDir,errorLogQueue,),
+        args=(errorLogQueue, logDir),
         daemon=False
     )  
     sqlCreationLogQueue = Queue()
     sqlCreationProgressLogger = Thread(
         target=logSqlCreationProgress,
-        args=(sqlCreationLogQueue, sqlTableCreationData),
+        args=(sqlCreationLogQueue, sqlTableCreationData, logDir),
         daemon=False
     )
     accessConversionLogQueue = Queue()

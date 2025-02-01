@@ -1,5 +1,6 @@
 from queue import Queue, Empty
 import os
+import json
 
 from rich.console import Console
 from rich.text import Text
@@ -14,6 +15,32 @@ from rich.progress import (
 )
 
 from src.types.types import SqlCreationDetails, AccessConversionDetails, status
+    
+def readSqlCreationLog(htcConversionLogPath : str) -> dict[str, SqlCreationDetails] | None:
+    '''
+        logDir - The directory where the logs are stored.
+        
+        Returns a dictionary of the logs, where the key is the table name and the value is the log details.
+        If the log file does not exist, returns None.
+    '''
+    # Log file does not exist
+    if not os.path.exists(htcConversionLogPath):
+        return None
+    with open(htcConversionLogPath) as htcConversionLogFile:        
+        data = json.load(htcConversionLogFile)
+        # There is not sqlCreation data
+        if not data['sqlCreation']:
+            return None
+        sqlCreationLogs = data["sqlCreation"]
+        for tableName, sqlCreationDetails in sqlCreationLogs.items():
+            sqlCreationLogs[tableName] = SqlCreationDetails(
+                sqlCreationDetails['creationStatus'],
+                sqlCreationDetails['indexesStatus']
+            )
+        return sqlCreationLogs
+
+def readAccessConversionLog(logDir):
+    pass
     
 class StepStatusColumn(ProgressColumn):
     """
@@ -54,7 +81,7 @@ class ErrorCountColumn(ProgressColumn):
         style = "green" if errors == 0 else "red"
         return Text(f"Errors: {errors}", style=style)
       
-def logErrors(logDir : str, errorLogQueue : Queue):
+def logErrors(errorLogQueue : Queue, logDir : str):
     console = Console()
     while True:
         try:
@@ -76,9 +103,32 @@ def logErrors(logDir : str, errorLogQueue : Queue):
         else:
             console.print(f"[red]Invalid message: {message}[/red]")
 
+def writeSqlCreationLog(htcConversionLogPath : str, newSqlCreationData : dict[str, SqlCreationDetails]) -> None:
+    oldSqlCreationData = readSqlCreationLog(htcConversionLogPath)
+    if not os.path.exists(htcConversionLogPath):
+        # Log new data into json file
+        with open(htcConversionLogPath, "w+") as logFile:
+            json.dump({"sqlCreation": newSqlCreationData}, logFile)
+        return
+    if not oldSqlCreationData:
+        # No old data exists
+        # Log new data into json file
+        json.dump({"sqlCreation": newSqlCreationData}, open(htcConversionLogPath, "w"))
+        return
+    
+    htcConversionLogPath = os.path.join(htcConversionLogPath, "htcConversion.json")
+    for tableName, newSqlCreationDetails in newSqlCreationData.items():
+        # Update old values with new values if they are in the same table
+        oldSqlCreationData[tableName] = newSqlCreationDetails
+        
+    with open(htcConversionLogPath, "w") as htcConversionLogFile:
+        json.dump({"sqlCreation": oldSqlCreationData}, htcConversionLogFile)
+    
+            
 def logSqlCreationProgress(
     logQueue : Queue,
-    tableCreationData : dict[str, SqlCreationDetails]
+    tableCreationData : dict[str, SqlCreationDetails],
+    logDir : str
 ):
     """
         Listens for messages sent in from a Queue object.
@@ -146,8 +196,9 @@ def logSqlCreationProgress(
             else:
                 progressBar.stop()
                 console.print(f"[red]Invalid message: {message}[/red]")
-                break   
-          
+                break 
+              
+    writeSqlCreationLog(os.path.join(logDir, "htcConversion.log"), tableCreationData)
         
 def logAccessConversionProgress(
     logQueue : Queue,
