@@ -1,6 +1,6 @@
 from src.classes.AccessConn import AccessConn
 
-from src.types.types import ForeignKey
+from ...types import ForeignKey
 
 def getSqlTableForeignKeys(
     conn : AccessConn, 

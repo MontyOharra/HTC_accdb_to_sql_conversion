@@ -7,107 +7,112 @@ from queue import Queue
 
 from src.utils.conversionProcesses import createSqlTables, convertAccessTables
 from src.utils.logging import (logSqlCreationProgress, logAccessConversionProgress, logErrors, 
-                              readSqlCreationLog, readAccessConversionLog, 
+                              readSqlCreationLog, readAccessConversionLog, createLogFile
                               )
+from src.utils.helpers import getLogDir, chunkDictionary
 
-from src.types.types import SqlCreationDetails, AccessConversionDetails
+from src.classes.AccessConn import AccessConn
+from src.classes.SqlServerConn import SqlServerConn
 
-def runConversion(connFactories, conversionThreads, logDir, sqlTableDefinitions, accessConversionDefinitions,):
-    htcConversionLogPath = os.path.join(logDir, "htcConversion.log")
+
+from collections.abc import Callable
+from typing import Any
+from src.types import SqlCreationDetails, AccessConversionDetails, Field, Index, ForeignKey
+
+def runConversion(
+    connFactories : dict[str, Callable[[], AccessConn] | Callable[[], SqlServerConn]], 
+    conversionThreads : int,
+    sqlTableDefinitions : dict[str, tuple[list[Field], list[Index], list[ForeignKey]]],
+    accessConversionDefinitions : dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], None]]
+) -> None:
+    '''
+        connFactories - Dictionary of connection factories for each database. The keys are the database names.
+        conversionThreads - Number of threads to use for conversion.
+        logDir - Directory to store logs in.
+        sqlTableDefinitions - Dictionary of table definitions for each table.
+                              Each tuple contains the fields, indexes, and foreign keys for the table.
+        accessConversionDefinitions - Dictionary of access conversion functions for each table. The keys are the table names.
+                                      Each function takes a connection factory and a list of fields to convert, and returns a list of rows.
+    '''
+
+    # Setup logging file
+    logDir = getLogDir()
+    htcConversionLogPath = os.path.join(logDir, f"htcConversion-{time.time()}.json")  
+    # If the log file exists, read the data from it
+    # then ask the user if they want to overwrite the 
+    # already processes data
     if (os.path.exists(htcConversionLogPath)):
         sqlTableCreationData = readSqlCreationLog(htcConversionLogPath)
-        pass        
+        accessTableConversionData = readAccessConversionLog(htcConversionLogPath) 
+    # If the log file does not exist, create it and set the data to empty
     else:
-        sqlTableCreationData = {
+        sqlTableCreationLogData = {
             tableName : SqlCreationDetails("Not Started", "Not Started")
             for tableName in sqlTableDefinitions.keys()
         }
-    if (False):
-        pass
-    else:
-        accessTableConversionData = {
+        accessTableConversionLogData = {
             tableName : AccessConversionDetails("Not Started", 0, 0, 0)
             for tableName in accessConversionDefinitions.keys()
         }
+        createLogFile(htcConversionLogPath)
+    
               
     errorLogQueue = Queue()
+    sqlCreationLogQueue = Queue()
+    accessConversionLogQueue = Queue()
+    
     errorLogger = Thread(
         target=logErrors,
-        args=(errorLogQueue, logDir),
+        args=(errorLogQueue, htcConversionLogPath),
         daemon=False
     )  
-    sqlCreationLogQueue = Queue()
-    sqlCreationProgressLogger = Thread(
-        target=logSqlCreationProgress,
-        args=(sqlCreationLogQueue, sqlTableCreationData, logDir),
-        daemon=False
-    )
-    accessConversionLogQueue = Queue()
+    errorLogger.start()
+    
     accessConversionProgressLogger = Thread(
         target=logAccessConversionProgress,
-        args=(accessConversionLogQueue, accessTableConversionData),
+        args=(accessConversionLogQueue, accessTableConversionLogData, htcConversionLogPath),
         daemon=False
     )
-    '''
-    def chunk_dict(d, n):
-        items = list(d.items())  # Convert dict items into a list of (key, value) tuples
-        return [dict(items[i:i+n]) for i in range(0, len(items), n)]
     
-    tablesCreated = 0
-    splitsSize = 10
-    errorLogger.start()
-    for chunk in chunk_dict(sqlTableDefinitions, splitsSize):
-        sqlCreationProgressLogger.start()
-        if len(chunk) + tablesCreated == len(sqlTableDefinitions):
-            successMessage = "SQL tables creation process has been finished."
-        else:
-            successMessage = f"SQL tables creation progress: {tablesCreated} of {len(sqlTableDefinitions)} tables created."
+    chunkSize = 20
+    sqlTableDefinitionsChunked = chunkDictionary(sqlTableDefinitions, chunkSize)
+    sqlCreationLogDataChunked = chunkDictionary(sqlTableCreationLogData, chunkSize)
+    numTablesCreated = 0
+    for idx, _ in enumerate(sqlTableDefinitionsChunked):  
+        print(sqlTableDefinitionsChunked[idx].keys())
+        print(sqlCreationLogDataChunked[idx].keys())
+        sqlCreationProgressLogger = Thread(
+            target=logSqlCreationProgress,
+            args=(sqlCreationLogQueue, sqlCreationLogDataChunked[idx], htcConversionLogPath),
+            daemon=False
+        )
         try:
+            sqlCreationProgressLogger.start()
             sqlTablesCreationSucceeded = createSqlTables(
-                    connFactories['sql'], 
-                    chunk,
-                    conversionThreads,
-                    sqlCreationLogQueue, 
-                    errorLogQueue
-                ) 
+                        connFactories['sql'], 
+                        sqlTableDefinitionsChunked[idx],
+                        conversionThreads,
+                        sqlCreationLogQueue, 
+                        errorLogQueue
+                    ) 
             if sqlTablesCreationSucceeded:
-                sqlCreationLogQueue.put(("SUCCESS", successMessage))
+                sqlCreationLogQueue.put(("SUCCESS", f"{numTablesCreated} out of {len(sqlTableDefinitions)} tables have been created."))
             else:
                 sqlCreationLogQueue.put(("ERROR", "SQL tables creation process has been stopped."))
                 errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
+                break
+
         except Exception as e:
             sqlCreationLogQueue.put(("ERROR", f"Critical Error: {e}\n     {traceback.format_exc()}"))
             errorLogQueue.put(("sqlCreation", f"Critical Error: {e}\n     {traceback.format_exc()}"))
         except KeyboardInterrupt:
             sqlCreationLogQueue.put(("ERROR", f"Keyboard interrupt during SQL tables creation process."))
             errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
-        sqlCreationProgressLogger.join()
-        tablesCreated += len(chunk)
-    '''
-    
-    try:
-        sqlCreationProgressLogger.start()
-        errorLogger.start()
-        sqlTablesCreationSucceeded = createSqlTables(
-                    connFactories['sql'], 
-                    sqlTableDefinitions,
-                    conversionThreads,
-                    sqlCreationLogQueue, 
-                    errorLogQueue
-                ) 
-        if sqlTablesCreationSucceeded:
-            sqlCreationLogQueue.put(("SUCCESS", "SQL tables creation process has been finished."))
-        else:
-            sqlCreationLogQueue.put(("ERROR", "SQL tables creation process has been stopped."))
-            errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
-    except Exception as e:
-        sqlCreationLogQueue.put(("ERROR", f"Critical Error: {e}\n     {traceback.format_exc()}"))
-        errorLogQueue.put(("sqlCreation", f"Critical Error: {e}\n     {traceback.format_exc()}"))
-    except KeyboardInterrupt:
-        sqlCreationLogQueue.put(("ERROR", f"Keyboard interrupt during SQL tables creation process."))
-        errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
-        
-    time.sleep(1)
+        finally:
+            sqlCreationLogQueue.put("STOP")
+            sqlCreationProgressLogger.join()
+            
+    time.sleep(.1)
     chunkSize = 100
     try:
         accessConversionProgressLogger.start()
@@ -135,5 +140,4 @@ def runConversion(connFactories, conversionThreads, logDir, sqlTableDefinitions,
         errorLogQueue.put("STOP")
         sqlCreationLogQueue.put("STOP")
         accessConversionProgressLogger.join()
-        sqlCreationLogQueue.join()
         errorLogger.join()  

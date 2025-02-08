@@ -1,6 +1,6 @@
 from src.classes.AccessConn import AccessConn
 
-from src.types.types import Field
+from ...types import Field
 
 def getSqlTableFields(
     conn : AccessConn, 

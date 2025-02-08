@@ -1,12 +1,14 @@
 import os
 
-from .sqlServerSetup import *
-from .helpers import getRootDir
+from src.utils.sqlServerSetup import *
+from src.utils.helpers import getRootDir
 
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
 from src.classes.ConnFactory import ConnFactory
+from src.classes.AccessConn import AccessConn
+from src.classes.SqlServerConn import SqlServerConn
 
 from collections.abc import Callable
 
@@ -15,7 +17,7 @@ def getDatabaseConnections(
     sqlDriver : str | None = None, 
     sqlDatabaseName : str | None = None,
     autoResetDatabase : bool = False
-) -> dict[str, Callable] :    
+) -> dict[str, Callable[[], AccessConn] | Callable[[], SqlServerConn]] :    
     
     """ 
         Setup SQL Server connection and create database if it does not exist.
@@ -49,7 +51,7 @@ def getDatabaseConnections(
         useDefaultDriver = Confirm.ask("[blue]Would you like to use the default ODBC driver [ODBC Driver 17 for SQL Server]?[/blue]")
         if useDefaultDriver == False:
             sqlDriver = Prompt.ask("[blue]Enter the name of the driver[/blue]")
-        elif useDefaultDriver == True:
+        else:
             sqlDriver = r'ODBC Driver 17 for SQL Server'
     if sqlDatabaseName == None:
         sqlDatabaseName = Prompt.ask("[blue]Enter the what you want the SQL Server database name to be[/blue]")

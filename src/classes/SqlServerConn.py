@@ -1,7 +1,7 @@
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Any, NoReturn
 import pyodbc
 
-from ..types.types import Field, ValidIndexType
+from ..types import Field, ValidIndexType
 from datetime import datetime
 from decimal import Decimal
 
@@ -56,7 +56,7 @@ class SqlServerConn:
                 }
             )
 
-    def createTable(self, tableName: str, tableFields: List[Field], primaryKeys: List[str] = None) -> None:
+    def createTable(self, tableName: str, tableFields: list[Field], primaryKeys: list[str] | None = None) -> None:
         """
             Create a table in the database.
           
@@ -83,7 +83,7 @@ class SqlServerConn:
             )
             
         
-    def addIndex(self, tableName : str, indexName: str, indexType: ValidIndexType, indexFields: str | List[str], isUnique: bool = False) -> None:
+    def addIndex(self, tableName : str, indexName: str, indexType: ValidIndexType, indexFields: str | list[str], isUnique: bool = False) -> None:
       """
           Add an index to a table.
           
@@ -94,13 +94,13 @@ class SqlServerConn:
           isUnique - Whether the index is unique.
       """
       uniqueClause: str = " UNIQUE " if isUnique else " "
-      if type(indexFields) == str:
+      if isinstance(indexFields, str):
         indexFieldClause = f'[indexFields]'
-      elif type(indexFields) == List:
+      elif isinstance(indexFields, list):
         indexFieldClause = ', '.join(f'[{indexField}]' for indexField in indexFields)
       addIndexSql: str = f"CREATE{uniqueClause}{indexType.upper()} INDEX [{indexName}] ON [{tableName}] ({indexFieldClause})"
       try:
-        self.sqlCursor.execute(addIndexSql)
+        self.cursor.execute(addIndexSql)
         self.conn.commit()
       except Exception as err:
         self.handleError(
@@ -126,7 +126,7 @@ class SqlServerConn:
       """
       addForeignKeySql: str = f"ALTER TABLE [{fromTableName}] ADD FOREIGN KEY ([{fromTableField}]) REFERENCES [{toTableName}] ([{toTableField}])"
       try:
-        self.sqlCursor.execute(addForeignKeySql)
+        self.cursor.execute(addForeignKeySql)
         self.conn.commit()
       except Exception as err:
         self.handleError(
@@ -162,7 +162,7 @@ class SqlServerConn:
             }
           )
 
-    def getFixedInsertValue(self, value: Any, setNull : bool) -> str:
+    def getFixedInsertValue(self, value: Any, setNull : bool) -> Any:
         if type(value) == str:
             value = value.strip().lower()
             if value == "":
@@ -187,8 +187,8 @@ class SqlServerConn:
     def insertRow(
         self, 
         tableName : str, 
-        data: Dict[str, Any], 
-        insertId : int = None, 
+        data: dict[str, Any], 
+        insertId : int | None = None, 
         setNulls : bool = True
     ) -> None:
         """
@@ -199,8 +199,8 @@ class SqlServerConn:
             insertId - Optional ID to insert into the table. If not provided, the database will generate an ID.
             allowNulls - Whether to allow null values in the insert. Default is True.
         """
-        columnNames: List[str] = list(data.keys())
-        columnValues: List[Any] = [self.getFixedInsertValue(value, setNulls) for value in list(data.values())]
+        columnNames: list[str] = list(data.keys())
+        columnValues: list[Any] = [self.getFixedInsertValue(value, setNulls) for value in list(data.values())]
         
         if not insertId == None: # If insertId is provided, add it to the beginning of the field list
             columnValues.insert(0, 'id')
@@ -234,9 +234,9 @@ class SqlServerConn:
     def select(
         self,
         tableName: str,
-        selectDetails : List[str | Dict[str, str]] | str | None = None,
-        whereDetails : Dict[str, any] | str | None = None
-    ) -> List[Any]:
+        selectDetails : list[str | dict[str, str]] | str | None = None,
+        whereDetails : dict[str, Any] | str | None = None
+    ) -> list[Any]:
         """
             Select data from a table.
             
@@ -302,8 +302,8 @@ class SqlServerConn:
         """
         selectSql = f"SELECT IDENT_CURRENT('{tableName}') AS current_id"
         try:
-            self.sqlCursor.execute(selectSql)
-            rows = self.sqlCursor.fetchall()
+            self.cursor.execute(selectSql)
+            rows = self.cursor.fetchall()
             return rows[0].current_id
         except Exception as err:
             self.handleError(
@@ -314,7 +314,7 @@ class SqlServerConn:
                 }
             )
 
-    def handleError(self, action : str, info: Optional[Dict[str, Any]] = None) -> None:
+    def handleError(self, action : str, info: dict[str, Any]) -> NoReturn:
         """
             A function to handle errors in the SQL Server connection.
             

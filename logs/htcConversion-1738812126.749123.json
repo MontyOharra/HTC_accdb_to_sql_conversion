@@ -1,0 +1,217 @@
+{
+    "sqlCreation": {
+        "HTC000_G000_T010 Servers": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000_G090_T010 Staff": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000_G010_T010 Company Info": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000_G025_T010 Positions": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 All State Abbrev": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000 WhosLoggedIn": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 OrderType Values": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 Canadian Provinces to include": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 US Zip Codes": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G100_T010 CertificationTestCatalog": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Error Log": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Archive Update History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Holidays": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Last QB RefNumber Assigned": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G010_T010 ACI_Data": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Over Night Update History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T020 Branch Info": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G010_T010 DFW_ACI_Data": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T030 Co Info Chg History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T040 Branch Info Chg History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        }
+    },
+    "accessConversion": {
+        "HTC000_G000_T010 Servers": {
+            "conversionStatus": "Complete",
+            "totalRows": 1,
+            "rowsConverted": 1,
+            "errorCount": 0
+        },
+        "HTC000_G090_T010 Staff": {
+            "conversionStatus": "Complete",
+            "totalRows": 65,
+            "rowsConverted": 65,
+            "errorCount": 0
+        },
+        "HTC000_G010_T010 Company Info": {
+            "conversionStatus": "Complete",
+            "totalRows": 1,
+            "rowsConverted": 1,
+            "errorCount": 0
+        },
+        "HTC000_G025_T010 Positions": {
+            "conversionStatus": "Complete",
+            "totalRows": 11,
+            "rowsConverted": 11,
+            "errorCount": 0
+        },
+        "HTC010_G000_T000 All State Abbrev": {
+            "conversionStatus": "Complete",
+            "totalRows": 63,
+            "rowsConverted": 63,
+            "errorCount": 0
+        },
+        "HTC000 WhosLoggedIn": {
+            "conversionStatus": "Complete",
+            "totalRows": 4,
+            "rowsConverted": 4,
+            "errorCount": 0
+        },
+        "HTC010_G000_T000 OrderType Values": {
+            "conversionStatus": "Complete",
+            "totalRows": 10,
+            "rowsConverted": 10,
+            "errorCount": 0
+        },
+        "HTC010_G000_T000 Canadian Provinces to include": {
+            "conversionStatus": "Complete",
+            "totalRows": 2,
+            "rowsConverted": 2,
+            "errorCount": 0
+        },
+        "HTC010_G000_T000 US Zip Codes": {
+            "conversionStatus": "Complete",
+            "totalRows": 558946,
+            "rowsConverted": 558946,
+            "errorCount": 0
+        },
+        "HTC010_G100_T010 CertificationTestCatalog": {
+            "conversionStatus": "Complete",
+            "totalRows": 4,
+            "rowsConverted": 4,
+            "errorCount": 0
+        },
+        "HTC300_G000_T000 Error Log": {
+            "conversionStatus": "Complete",
+            "totalRows": 34,
+            "rowsConverted": 34,
+            "errorCount": 0
+        },
+        "HTC300_G000_T000 Archive Update History": {
+            "conversionStatus": "Complete",
+            "totalRows": 59,
+            "rowsConverted": 59,
+            "errorCount": 0
+        },
+        "HTC300_G000_T000 Holidays": {
+            "conversionStatus": "Complete",
+            "totalRows": 46,
+            "rowsConverted": 46,
+            "errorCount": 0
+        },
+        "HTC300_G000_T000 Last QB RefNumber Assigned": {
+            "conversionStatus": "Complete",
+            "totalRows": 1,
+            "rowsConverted": 1,
+            "errorCount": 0
+        },
+        "HTC010_G010_T010 ACI_Data": {
+            "conversionStatus": "Complete",
+            "totalRows": 661,
+            "rowsConverted": 661,
+            "errorCount": 0
+        },
+        "HTC300_G000_T000 Over Night Update History": {
+            "conversionStatus": "Complete",
+            "totalRows": 28,
+            "rowsConverted": 28,
+            "errorCount": 0
+        },
+        "HTC300_G000_T020 Branch Info": {
+            "conversionStatus": "Complete",
+            "totalRows": 1,
+            "rowsConverted": 1,
+            "errorCount": 0
+        },
+        "HTC300_G010_T010 DFW_ACI_Data": {
+            "conversionStatus": "Complete",
+            "totalRows": 838,
+            "rowsConverted": 838,
+            "errorCount": 0
+        },
+        "HTC300_G000_T030 Co Info Chg History": {
+            "conversionStatus": "Complete",
+            "totalRows": 2,
+            "rowsConverted": 2,
+            "errorCount": 0
+        },
+        "HTC300_G000_T040 Branch Info Chg History": {
+            "conversionStatus": "Complete",
+            "totalRows": 22,
+            "rowsConverted": 22,
+            "errorCount": 0
+        }
+    },
+    "errors": {
+        "sqlCreation": [
+            []
+        ],
+        "accessConversion": [
+            []
+        ],
+        "other": [
+            []
+        ]
+    }
+}

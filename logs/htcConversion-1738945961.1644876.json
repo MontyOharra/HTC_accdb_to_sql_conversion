@@ -1,0 +1,406 @@
+{
+    "sqlCreation": {
+        "HTC000_G010_T010 Company Info": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000_G025_T010 Positions": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000 WhosLoggedIn": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000_G090_T010 Staff": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC000_G000_T010 Servers": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 Canadian Provinces to include": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 OrderType Values": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 All State Abbrev": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G000_T000 US Zip Codes": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G010_T010 ACI_Data": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Last QB RefNumber Assigned": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC010_G100_T010 CertificationTestCatalog": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Holidays": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Archive Update History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Error Log": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T000 Over Night Update History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T020 Branch Info": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T030 Co Info Chg History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G000_T040 Branch Info Chg History": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G020_T010 Status Values": {
+            "creationStatus": "Complete",
+            "indexesStatus": "Complete"
+        },
+        "HTC300_G010_T030 ACI Update History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G010_T020 DFW_ACI_Data Updates": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G020_T010 Status Values Updates": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G010_T010 DFW_ACI_Data": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G020_T030 Status Update History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G025_T025 Positions Change History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G030_T010 Customers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G030_T010 Customers Updates": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G030_T030 Customer Update History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T000 Last OrderNo Assigned": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T010B Invoiced Orders": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T005 Orders In Work": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T010A Open Orders": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T010C Remaining Orders": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T010D Dock Orders": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T010E Service Orders": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T011A Open Order Assessorials": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC400_G040_T010A Orders": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T011B Invoiced Order Assessorials": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T011C Remaining Order Assessorials": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T011D Dock Order Assessorials": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T011E Service Order Assessorials": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC400_G040_T011A Assessorials": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T012A Open Order Dims": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T012B Invoiced Order Dims": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T012C Remaining Order Dims": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC400_G040_T012A Dims": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T012D Dock Order Dims": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T013A Open Order Drivers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T013B Invoiced Order Drivers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T013C Remaining Order Drivers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T012E Service Order Dims": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T013D Dock Order Drivers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T013E Service Order Drivers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC400_G040_T013A Drivers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T014A Open Order Attachments": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T014E Service Order Attachments": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T014D Dock Order Attachments": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC400_G040_T014A Attachments": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T014B Invoiced Order Attachments": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T030 Orders Update History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T014C Remaining Order Attachments": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G040_T040 HAWB Values": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G050_T010 Accessorials": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G050_T010 Accessorials Updates": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G050_T030 Accessorials Update History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G060_T011 FavKeyChrCounts": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G060_T030 Addresses Update History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G060_T010 Addresses Updates": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G070_T010 Rates": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G060_T010 Addresses": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G070_T020 Rates Update": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G070_T030 Rates Update History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G080_T010 Agents": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G080_T020 Agent Certifications": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G090_T020 Staff Certifications": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G090_T030 Staff Chg History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G100_T020 Certification Trainers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G100_T030 CertificationTestCatalogChgHistory": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G100_T021 Certifaction Trainer Change History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G090_T040 Staff Role Values": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G080_T030 Agents Change History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G101_T010 Certification Tests": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G101_T014 Copmleted Tests": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G101_T012 Certification Tests Change History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC300_G200_T010 No Invoice Customers": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC320_G010_T010 Test Types": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC320_G010_T010H Form Change History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC301_G990_T000 Change Log": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC320_G010_T005 Valid Test Type Names": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC320_G020_T020 Completed Docs": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC320_G020_T020H Completed Docs History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC320_Security Coordinators": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC350D_G020_T020 NameSwap_ChgHistory": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC320_ThisCoBr": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC350_G060_T100 Address Name Swaps": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC350_G060_T010 Airline Freight Codes": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC350_G060_T900 Data Change History": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        },
+        "HTC350_G800_T010 ETOLog": {
+            "creationStatus": "Not Started",
+            "indexesStatus": "Not Started"
+        }
+    },
+    "accessConversion": {},
+    "errors": {
+        "sqlCreation": [],
+        "accessConversion": [],
+        "other": []
+    }
+}

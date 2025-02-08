@@ -6,7 +6,7 @@ from src.classes.SqlServerConn import SqlServerConn
 
 from collections.abc import Callable
 from typing import Any
-from src.types.types import Field, Index, ForeignKey, SqlCreationDetails
+from src.types import Field, Index, ForeignKey, SqlCreationDetails
 
 from .helpers import generateAccessDbNameCache
 
@@ -183,7 +183,7 @@ def convertAccessTables(
         numRows = len(rows)
         for i in range(0, numRows, chunkSize):
             allTasks.append((tableName, rows[i:i+chunkSize], rowConversionFunction))
-        logQueue.put(("SET", (tableName, numRows)))
+        logQueue.put(("BEGIN", (tableName, numRows)))
         
     
     try:

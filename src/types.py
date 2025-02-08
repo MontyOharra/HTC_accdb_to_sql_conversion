@@ -22,7 +22,7 @@ class Field:
     fieldName: str
     fieldDetails: str
     
-status = Literal["In Progress", "Complete", "Failure", "Not Started"]
+status = Literal["In Progress", "Complete", "Failure", "Not Started", "Empty Table"]
 @dataclass
 class SqlCreationDetails:
     creationStatus: status

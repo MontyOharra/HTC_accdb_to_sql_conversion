@@ -1,4 +1,3 @@
-from typing import Dict, Tuple, List
 from pebble import ProcessPool
 from concurrent.futures import as_completed
 from rich.console import Console
@@ -12,17 +11,18 @@ from .foreignKeyDefinitions import *
 from .indexDefinitions import *
 from .fieldDefinitions import *
 from .rowConversionDefinitions import *
+from ..helpers import generateAccessDbNameCache
 
 from src.classes.AccessConn import AccessConn
 
-from src.types.types import Field, Index, ForeignKey
+from src.types import Field, Index, ForeignKey
 from collections.abc import Callable
 
 def getMigrationDefinition(
-    connFactories : Dict[str, Callable[[], AccessConn]], 
+    connFactories : dict[str, Callable[[], AccessConn]], 
     tableName : str, 
-    accessDbNameCache : Dict[str, str]
-) -> Tuple[Tuple[List[Field], List[Index], List[ForeignKey]], Callable[[Callable[[], SqlServerConn], list[Any]], None], str]:
+    accessDbNameCache : dict[str, str]
+) -> tuple[tuple[list[Field], list[Index], list[ForeignKey]], Callable[[Callable[[], SqlServerConn], list[Any]], None], str]:
     '''
         connFactories - Dictionary of connection factories for each database. The keys are the database names.
         tableName - Name of the table to get the definition for.
@@ -49,12 +49,11 @@ def getMigrationDefinition(
 
 def getMigrationDefinitions(
     conversionThreads : int,
-    connFactories : Dict[str, Callable[[], AccessConn]], 
-    tablesToMigrate : List[str],
-    accessDbNameCache : Dict[str, str]
-) -> Tuple[
-        Dict[str, Tuple[List[Field], List[Index], List[ForeignKey]]], 
-        Dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], AccessConn]] 
+    connFactories : dict[str, Callable[[], AccessConn] | Callable[[], SqlServerConn]],
+    tablesToMigrate : list[str]
+) -> tuple[
+        dict[str, tuple[list[Field], list[Index], list[ForeignKey]]], 
+        dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], None]] 
       ]:
     '''
         conversionThreads - Number of threads to use for conversion.
@@ -69,6 +68,8 @@ def getMigrationDefinitions(
     
     try:
         # Setup progress bar like "Getting migration definitions... [{completed} of {total}]"
+        
+        accessDbNameCache = generateAccessDbNameCache(tablesToMigrate)
         with Progress(
             TextColumn("[progress.description]{task.description}"),
             MofNCompleteColumn(),

@@ -1,6 +1,8 @@
+from collections import defaultdict
 from queue import Queue, Empty
 import os
 import json
+from dataclasses import asdict
 
 from rich.console import Console
 from rich.text import Text
@@ -14,33 +16,8 @@ from rich.progress import (
     ProgressColumn
 )
 
-from src.types.types import SqlCreationDetails, AccessConversionDetails, status
-    
-def readSqlCreationLog(htcConversionLogPath : str) -> dict[str, SqlCreationDetails] | None:
-    '''
-        logDir - The directory where the logs are stored.
-        
-        Returns a dictionary of the logs, where the key is the table name and the value is the log details.
-        If the log file does not exist, returns None.
-    '''
-    # Log file does not exist
-    if not os.path.exists(htcConversionLogPath):
-        return None
-    with open(htcConversionLogPath) as htcConversionLogFile:        
-        data = json.load(htcConversionLogFile)
-        # There is not sqlCreation data
-        if not data['sqlCreation']:
-            return None
-        sqlCreationLogs = data["sqlCreation"]
-        for tableName, sqlCreationDetails in sqlCreationLogs.items():
-            sqlCreationLogs[tableName] = SqlCreationDetails(
-                sqlCreationDetails['creationStatus'],
-                sqlCreationDetails['indexesStatus']
-            )
-        return sqlCreationLogs
-
-def readAccessConversionLog(logDir):
-    pass
+from typing import Any
+from src.types import SqlCreationDetails, AccessConversionDetails, status
     
 class StepStatusColumn(ProgressColumn):
     """
@@ -79,56 +56,127 @@ class ErrorCountColumn(ProgressColumn):
     def render(self, task) -> Text:
         errors = task.fields.get(self.step_name, 0)
         style = "green" if errors == 0 else "red"
-        return Text(f"Errors: {errors}", style=style)
+        return Text(f"Errors: {errors}", style=style) 
+
+def createLogFile(htcConversionLogPath : str) -> None:
+    with open(htcConversionLogPath, "w") as logFile:
+        json.dump({
+            "sqlCreation": {}, 
+            "accessConversion": {}, 
+            "errors" : {
+              "sqlCreation": [], 
+              "accessConversion": [], 
+              "other": []
+            }},
+            logFile)
+    
+def readSqlCreationLog(htcConversionLogPath : str) -> dict[str, SqlCreationDetails] | None:
+    '''
+        logDir - The directory where the logs are stored.
+        
+        Returns a dictionary of the logs, where the key is the table name and the value is the log details.
+        If the log file does not exist, returns None.
+    '''
+    # Log file does not exist
+    with open(htcConversionLogPath) as htcConversionLogFile:        
+        data = json.load(htcConversionLogFile)
+        # There is not sqlCreation data
+        if not data['sqlCreation']:
+            return None
+        sqlCreationLogs = data["sqlCreation"]
+        for tableName, sqlCreationDetails in sqlCreationLogs.items():
+            sqlCreationLogs[tableName] = SqlCreationDetails(
+                sqlCreationDetails['creationStatus'],
+                sqlCreationDetails['indexesStatus']
+            )
+        return sqlCreationLogs
+
+def readAccessConversionLog(htcConversionLogPath : str) -> dict[str, AccessConversionDetails] | None:
+    if not os.path.exists(htcConversionLogPath):
+        return None
+    with open(htcConversionLogPath) as htcConversionLogFile:        
+        data = json.load(htcConversionLogFile)
+        # There is not sqlCreation data
+        if not data['accessConversion']:
+            return None
+        accessConversionLogs = data["accessConversion"]
+        for tableName, accessConversionDetails in accessConversionLogs.items():
+            accessConversionLogs[tableName] = AccessConversionDetails(
+                accessConversionDetails['conversionStatus'],
+                accessConversionDetails['totalRows'],
+                accessConversionDetails['rowsConverted'],
+                accessConversionDetails['errorCount']
+            )
+        return accessConversionLogs
+
+def writeErrorLog(logPath : str, errors : dict[str, list[str]]) -> None:
+    '''
+        logPath - The path to the log file.
+        errors - A dictionary of errors, where the keys are the process names and the values are the error messages.
+    '''
+    with open(logPath, "r") as f:
+        data = json.load(f)
+    errorData = data['errors']
+    for process, error in errors.items():
+        errorData[process].append(error)
+        
+    with open(logPath, "w") as htcConversionLogFile:
+        json.dump({
+          "sqlCreation": data['sqlCreation'],
+          "accessConversion": data['accessConversion'],
+          "errors": errorData
+        }, htcConversionLogFile, indent=4)
       
-def logErrors(errorLogQueue : Queue, logDir : str):
+        
+def logErrors(errorLogQueue: Queue, logPath: str):
     console = Console()
+
+    with open(logPath, "r") as f:
+        data = json.load(f)
+
+    errors = {
+      'sqlCreation': [],
+      'accessConversion': [],
+      'other': []
+    }
     while True:
         try:
-            message = errorLogQueue.get(timeout=.1)
+            message = errorLogQueue.get(timeout=0.1)
         except Empty:
             continue
-            
         if message == "STOP":
             break
-          
-        # Write error to error.log file within the same directory as the script
-        # Error of the type (process, errorMessage)
+
+        # Expecting a tuple: (process, exception).
         if isinstance(message, tuple) and len(message) == 2:        
             process, exception = message
-            errorsLogPath = os.path.join(logDir, f"{process}Errors.log")
-            
-            with open(errorsLogPath, "a") as errorLogFile:
-                errorLogFile.write(f"Error: {exception}\n")
+            errors[process].append(str(exception))
         else:
             console.print(f"[red]Invalid message: {message}[/red]")
 
-def writeSqlCreationLog(htcConversionLogPath : str, newSqlCreationData : dict[str, SqlCreationDetails]) -> None:
-    oldSqlCreationData = readSqlCreationLog(htcConversionLogPath)
-    if not os.path.exists(htcConversionLogPath):
-        # Log new data into json file
-        with open(htcConversionLogPath, "w+") as logFile:
-            json.dump({"sqlCreation": newSqlCreationData}, logFile)
-        return
-    if not oldSqlCreationData:
-        # No old data exists
-        # Log new data into json file
-        json.dump({"sqlCreation": newSqlCreationData}, open(htcConversionLogPath, "w"))
-        return
-    
-    htcConversionLogPath = os.path.join(htcConversionLogPath, "htcConversion.json")
-    for tableName, newSqlCreationDetails in newSqlCreationData.items():
-        # Update old values with new values if they are in the same table
-        oldSqlCreationData[tableName] = newSqlCreationDetails
+    writeErrorLog(logPath, errors)
+  
+def writeSqlCreationLog(logPath : str, newSqlCreationData : dict[str, SqlCreationDetails]) -> None:
+    with open(logPath, "r") as f:
+        data = json.load(f)
+    sqlCreationData = data['sqlCreation']
         
-    with open(htcConversionLogPath, "w") as htcConversionLogFile:
-        json.dump({"sqlCreation": oldSqlCreationData}, htcConversionLogFile)
-    
+    for tableName, sqlCreationDetails in newSqlCreationData.items():
+        # Update old values with new values if they are in the same table
+        sqlCreationDict = asdict(sqlCreationDetails)
+        sqlCreationData[tableName] = sqlCreationDict
+        
+    with open(logPath, "w") as htcConversionLogFile:
+        json.dump({
+          "sqlCreation": sqlCreationData,
+          "accessConversion": data['accessConversion'],
+          "errors": data['errors']
+        }, htcConversionLogFile, indent=4)
             
 def logSqlCreationProgress(
     logQueue : Queue,
     tableCreationData : dict[str, SqlCreationDetails],
-    logDir : str
+    logPath : str
 ):
     """
         Listens for messages sent in from a Queue object.
@@ -170,7 +218,7 @@ def logSqlCreationProgress(
                 (action, data) = message
                 if action == "BEGIN":
                     (tableName) = data
-                    progressBar.update(progressIds[tableName], creationStatus="In Progress", indexesStatus="In Progress")
+                    progressBar.update(progressIds[tableName], creationStatus="Not Started", indexesStatus="Not Started")
                 elif action == "UPDATE":
                     (tableName, sqlCreationDetails) = data
                     if tableName in tableCreationData.keys():
@@ -182,13 +230,13 @@ def logSqlCreationProgress(
                     else:
                         console.print(f"[yellow]Unknown table: {tableName}[/yellow]")
                 elif action == "ERROR":
-                    progressBar.stop()
                     console.print(f"[red]{data}[/red]")
                     break   
                 elif action == "SUCCESS":
-                    progressBar.stop()
                     console.print(f"[green]{data}[/green]")
                     break
+                elif action == "END":
+                    progressBar.stop()
                 else:
                     progressBar.stop()
                     console.print(f"[red]Invalid action: {action}[/red]")
@@ -198,11 +246,30 @@ def logSqlCreationProgress(
                 console.print(f"[red]Invalid message: {message}[/red]")
                 break 
               
-    writeSqlCreationLog(os.path.join(logDir, "htcConversion.log"), tableCreationData)
+    writeSqlCreationLog(logPath, tableCreationData)
+        
+def writeAccessConversionLog(logPath : str, newAccessConversionData : dict[str, AccessConversionDetails]) -> None:
+    with open(logPath, "r") as f:
+        data = json.load(f)
+    
+    accessConversionData = data['accessConversion']
+        
+    for tableName, accessConversionDetails in newAccessConversionData.items():
+        # Update old values with new values if they are in the same table
+        accessConversionDict = asdict(accessConversionDetails)
+        accessConversionData[tableName] = accessConversionDict
+        
+    with open(logPath, "w") as htcConversionLogFile:
+        json.dump({
+          "sqlCreation": data['sqlCreation'],
+          "accessConversion": accessConversionData,
+          "errors": data['errors']
+        }, htcConversionLogFile, indent=4)
         
 def logAccessConversionProgress(
     logQueue : Queue,
-    tableConversionData : dict[str, AccessConversionDetails]
+    tableConversionData : dict[str, AccessConversionDetails],
+    logPath : str
 ) -> None:
     """
         Listens for messages sent in from a Queue object.
@@ -248,34 +315,34 @@ def logAccessConversionProgress(
             # Expecting 3-tuple
             if isinstance(message, tuple) and len(message) == 2:
                 (action, data) = message
-                if action == "SET" or action == "RESET":
+                if action == "BEGIN":
                     (tableName, total) = data
                     if total > 0:
-                        progressBar.update(progressIds[tableName], conversionStatus="Not Started", completed=0, errorCount=0, total=total)
+                        conversionDetails = AccessConversionDetails("Not Started", total, 0, 0)
                     else:
-                        progressBar.update(progressIds[tableName], conversionStatus="Complete", completed=0, errorCount=0, total=total)
+                        conversionDetails = AccessConversionDetails("Empty Table", total, 0, 0)
+                    tableConversionData[tableName] = conversionDetails
+                    progressBar.update(progressIds[tableName], conversionStatus=conversionDetails.conversionStatus, completed=0, errorCount=0, total=total)
                 elif action == "UPDATE":
-                    (tableName, conversionDetails) = data
+                    (tableName, conversionProgress) = data
                     targetProgress = progressIds[tableName]
                     if tableName in tableConversionData.keys():
-                        numRowsConverted, numErrors = conversionDetails['rowsConverted'], conversionDetails['rowErrors']
                         task_obj = progressBar.tasks[targetProgress]
 
-                        # Read built-in fields (these are attributes)
                         current_completed = task_obj.completed
                         current_total = task_obj.total
-
-                        # Read custom fields from `fields` dict
                         current_error_count = task_obj.fields["errorCount"]
 
-                        # Update your logic
-                        errorCountTotal = current_error_count + numErrors
-                        rowsConvertedTotal = current_completed + numRowsConverted
+                        errorCountTotal = current_error_count + conversionProgress['rowErrors']
+                        rowsConvertedTotal = current_completed + conversionProgress['rowsConverted']
 
                         if rowsConvertedTotal == current_total:
                             conversionStatus = "Complete"
                         else:
                             conversionStatus = "In Progress"
+                        tableConversionData[tableName].conversionStatus = conversionStatus
+                        tableConversionData[tableName].rowsConverted = rowsConvertedTotal
+                        tableConversionData[tableName].errorCount = errorCountTotal
 
                         # Finally, update the task
                         progressBar.update(
@@ -302,3 +369,5 @@ def logAccessConversionProgress(
                 progressBar.stop()
                 console.print(f"[red]Invalid Access conversion message: {message}[/red]")
                 break
+              
+    writeAccessConversionLog(logPath, tableConversionData)

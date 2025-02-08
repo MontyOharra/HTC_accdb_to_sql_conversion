@@ -1,6 +1,6 @@
 from src.classes.AccessConn import AccessConn
 
-from src.types.types import Index
+from ...types import Index
 
 def getSqlTableIndexes(
     conn : AccessConn, 
