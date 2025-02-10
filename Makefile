@@ -11,3 +11,8 @@ cli-test:
 	source env/Scripts/activate && \
 	python -u -m applications.cli.test && \
 	deactivate
+
+cli:
+	source env/Scripts/activate && \
+	python -u -m applications.cli.main && \
+	deactivate

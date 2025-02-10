@@ -6,14 +6,9 @@ from src.utils.migrationConversionDefinitions.tableConversionDefinitions import 
 
 def main():
     try:
-        connFactories = getDatabaseConnections(
-            htcAllPath=r'C:/HTC_Apps/',
-            sqlDriver=r'ODBC Driver 17 for SQL Server',
-            sqlDatabaseName=r'HTC_Test',
-            autoResetDatabase=True
-        )
-        conversionThreads = getMaxConversionThreads(useMaxConversionThreads=True)
-        tablesToMigrate = getTargetTables(forceDefaultPath=True)
+        connFactories = getDatabaseConnections()
+        conversionThreads = getMaxConversionThreads()
+        tablesToMigrate = getTargetTables()
     except Exception as err:
         raise err
     
@@ -23,9 +18,14 @@ def main():
 
 if __name__ == "__main__":
     console = Console()
+    from multiprocessing import freeze_support
+    freeze_support()    
+    
     try:
-        main()
+      main()
     except Exception as err:
         console.print(f"[red]Critical Error: {err}")
+    finally:
+        input("Press Enter to exit...")
 
 

@@ -16,11 +16,11 @@ def getRootDir():
         If the application is compiled, returns the directory of the compiled file.
         Otherwise, returns the directory of the current file two levels up.
     '''
-    currentFileDir = os.path.dirname(os.path.abspath(__file__))
     # Start at the current file's directory and move two levels up
     if isCompiled():
-        return currentFileDir
+        return os.path.dirname(sys.executable)
     else:
+        currentFileDir = os.path.dirname(os.path.abspath(__file__))
         return os.path.abspath(os.path.join(currentFileDir, "../../"))
 
 def getLogDir():
@@ -28,19 +28,29 @@ def getLogDir():
         Returns the log directory for the application.
         If the application is compiled, it uses the LOCALAPPDATA environment variable to determine the log directory.
         Otherwise, it uses the root directory of the application.
+        On first run, if the log directory does not exist, it will be created.
     '''
     if isCompiled():
         if platform.system() == "Windows":
             appDataDir = os.getenv("LOCALAPPDATA")
             if appDataDir is None:
-                err = f"LOCALAPPDATA environment variable not found. Please set it to the directory where your application's data files are stored."
+                err = ("LOCALAPPDATA environment variable not found. "
+                       "Please set it to the directory where your application's data files are stored.")
                 raise Exception(err)
-            return os.path.join(appDataDir, "YourAppName", "logs")
+            log_dir = os.path.join(appDataDir, "HTC_Conversion", "logs")
         else:
-            return os.path.join(os.path.expanduser("~"), ".local", "share", "YourAppName", "logs")
+            log_dir = os.path.join(os.path.expanduser("~"), ".local", "share", "HTC_Conversion", "logs")
     else:
-        # Use the root directory to construct the log directory path
-        return os.path.join(getRootDir(), "logs")
+        log_dir = os.path.join(getRootDir(), "logs")
+    
+    # Create the directory if it does not exist.
+    if not os.path.exists(log_dir):
+        try:
+            os.makedirs(log_dir, exist_ok=True)
+        except Exception as e:
+            raise Exception(f"Could not create log directory at '{log_dir}': {e}")
+    
+    return log_dir
       
 
 def chunkDictionary(dictionary : dict[Any, Any], maxChunkSize : int) -> list[dict[Any, Any]]:

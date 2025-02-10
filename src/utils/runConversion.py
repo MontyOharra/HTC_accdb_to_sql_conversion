@@ -55,53 +55,41 @@ def runConversion(
             for tableName in accessConversionDefinitions.keys()
         }
         createLogFile(htcConversionLogPath)
-    
               
     errorLogQueue = Queue()
-    sqlCreationLogQueue = Queue()
-    accessConversionLogQueue = Queue()
-    
     errorLogger = Thread(
         target=logErrors,
         args=(errorLogQueue, htcConversionLogPath),
         daemon=False
     )  
     errorLogger.start()
-    
-    accessConversionProgressLogger = Thread(
-        target=logAccessConversionProgress,
-        args=(accessConversionLogQueue, accessTableConversionLogData, htcConversionLogPath),
-        daemon=False
-    )
-    
+
     chunkSize = 20
+    sqlTableCreationLogDataChunked = chunkDictionary(sqlTableCreationLogData, chunkSize)
     sqlTableDefinitionsChunked = chunkDictionary(sqlTableDefinitions, chunkSize)
-    sqlCreationLogDataChunked = chunkDictionary(sqlTableCreationLogData, chunkSize)
-    numTablesCreated = 0
-    for idx, _ in enumerate(sqlTableDefinitionsChunked):  
-        print(sqlTableDefinitionsChunked[idx].keys())
-        print(sqlCreationLogDataChunked[idx].keys())
-        sqlCreationProgressLogger = Thread(
-            target=logSqlCreationProgress,
-            args=(sqlCreationLogQueue, sqlCreationLogDataChunked[idx], htcConversionLogPath),
-            daemon=False
-        )
+    tablesCreated = 0
+    for idx, _ in enumerate(sqlTableCreationLogDataChunked):
         try:
+            sqlCreationLogQueue = Queue()
+            sqlCreationProgressLogger = Thread(
+                target=logSqlCreationProgress,
+                args=(sqlCreationLogQueue, sqlTableCreationLogDataChunked[idx], htcConversionLogPath),
+                daemon=False
+            )
             sqlCreationProgressLogger.start()
             sqlTablesCreationSucceeded = createSqlTables(
-                        connFactories['sql'], 
-                        sqlTableDefinitionsChunked[idx],
-                        conversionThreads,
-                        sqlCreationLogQueue, 
-                        errorLogQueue
-                    ) 
+                connFactories['sql'], 
+                sqlTableDefinitionsChunked[idx],
+                conversionThreads,
+                sqlCreationLogQueue, 
+                errorLogQueue
+            ) 
             if sqlTablesCreationSucceeded:
-                sqlCreationLogQueue.put(("SUCCESS", f"{numTablesCreated} out of {len(sqlTableDefinitions)} tables have been created."))
+                tablesCreated += len(sqlTableDefinitionsChunked[idx].keys())
+                sqlCreationLogQueue.put(("SUCCESS", f"{tablesCreated} out of {len(sqlTableDefinitions)} SQL tables have been created."))
             else:
                 sqlCreationLogQueue.put(("ERROR", "SQL tables creation process has been stopped."))
                 errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
-                break
-
         except Exception as e:
             sqlCreationLogQueue.put(("ERROR", f"Critical Error: {e}\n     {traceback.format_exc()}"))
             errorLogQueue.put(("sqlCreation", f"Critical Error: {e}\n     {traceback.format_exc()}"))
@@ -114,30 +102,41 @@ def runConversion(
             
     time.sleep(.1)
     chunkSize = 100
-    try:
-        accessConversionProgressLogger.start()
-        accessConversionSucceeded = convertAccessTables(
-                connFactories, 
-                accessConversionDefinitions,
-                conversionThreads,
-                chunkSize,
-                accessConversionLogQueue, 
-                errorLogQueue
-            ) 
-        if accessConversionSucceeded:
-            accessConversionLogQueue.put(("SUCCESS", f"Access tables conversion process has been finished."))
-        else:
-            accessConversionLogQueue.put(("ERROR", "Access tables conversion process has been stopped."))
-            errorLogQueue.put(("accessConversion", "Keyboard interrupt during Access tables conversion process."))
-    except Exception as e:
-        accessConversionLogQueue.put(("ERROR", f"Critical Error: {e}\n     {traceback.format_exc()}"))
-        errorLogQueue.put(("accessConversion", f"Critical Error: {e}\n     {traceback.format_exc()}"))
-    except KeyboardInterrupt:
-        accessConversionLogQueue.put(("ERROR", f"Keyboard interrupt during Access tables conversion creation process."))
-        errorLogQueue.put(("accessConversion", "Keyboard interrupt during Access tables conversion creation process."))
-    finally:
-        accessConversionLogQueue.put("STOP")
-        errorLogQueue.put("STOP")
-        sqlCreationLogQueue.put("STOP")
-        accessConversionProgressLogger.join()
-        errorLogger.join()  
+    
+    accessTableConversionLogDataChunked = chunkDictionary(accessTableConversionLogData, chunkSize)
+    accessConversionDefinitionsChunked = chunkDictionary(accessConversionDefinitions, chunkSize)
+    tablesConverted = 0
+    for idx, _ in enumerate(accessTableConversionLogDataChunked):
+        try:
+            accessConversionLogQueue = Queue()
+            accessConversionProgressLogger = Thread(
+                target=logAccessConversionProgress,
+                args=(accessConversionLogQueue, accessTableConversionLogDataChunked[idx], htcConversionLogPath),
+                daemon=False
+            )    
+            accessConversionProgressLogger.start()
+            accessConversionSucceeded = convertAccessTables(
+                    connFactories, 
+                    accessConversionDefinitionsChunked[idx],
+                    conversionThreads,
+                    chunkSize,
+                    accessConversionLogQueue, 
+                    errorLogQueue
+                ) 
+            if accessConversionSucceeded:                
+                tablesConverted += len(accessConversionDefinitionsChunked[idx].keys())
+                accessConversionLogQueue.put(("SUCCESS", f"{tablesConverted} out of {len(accessConversionDefinitions)} Access tables have been converted."))
+            else:
+                accessConversionLogQueue.put(("ERROR", "Access tables conversion process has been stopped."))
+                errorLogQueue.put(("accessConversion", "Keyboard interrupt during Access tables conversion process."))
+        except Exception as e:
+            accessConversionLogQueue.put(("ERROR", f"Critical Error: {e}\n     {traceback.format_exc()}"))
+            errorLogQueue.put(("accessConversion", f"Critical Error: {e}\n     {traceback.format_exc()}"))
+        except KeyboardInterrupt:
+            accessConversionLogQueue.put(("ERROR", f"Keyboard interrupt during Access tables conversion creation process."))
+            errorLogQueue.put(("accessConversion", "Keyboard interrupt during Access tables conversion creation process."))
+        finally:
+            accessConversionLogQueue.put("STOP")
+            errorLogQueue.put("STOP")
+            accessConversionProgressLogger.join()
+            errorLogger.join()  

@@ -47,6 +47,8 @@ def getDatabaseConnections(
     # ALlow user input if parameters are not provided
     if htcAllPath == None:
         htcAllPath = Prompt.ask("[blue]Enter the path to the HTC_Apps folder[/blue]")
+        if not htcAllPath.endswith('/'):
+            htcAllPath += '/'
     if sqlDriver == None:
         useDefaultDriver = Confirm.ask("[blue]Would you like to use the default ODBC driver [ODBC Driver 17 for SQL Server]?[/blue]")
         if useDefaultDriver == False:
@@ -150,7 +152,6 @@ def getTargetTables(forceDefaultPath : bool = False) -> list[str]:
         Returns a list of strings representing the tables to convert
     '''
     defaultTargetTablesPath = os.path.join(getRootDir(), 'tables.txt')
-    
     if forceDefaultPath:
         targetTablesPath = defaultTargetTablesPath
     else:

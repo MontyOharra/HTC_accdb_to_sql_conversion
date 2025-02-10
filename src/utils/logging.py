@@ -187,7 +187,6 @@ def logSqlCreationProgress(
         logDir - Directory to log the progress to.
     """
     console = Console()
-    console.print("[yellow]Creating SQL tables...[/yellow]")
     with Progress(
             "[progress.description]{task.description}",
             StepStatusColumn("creationStatus"),
@@ -235,8 +234,6 @@ def logSqlCreationProgress(
                 elif action == "SUCCESS":
                     console.print(f"[green]{data}[/green]")
                     break
-                elif action == "END":
-                    progressBar.stop()
                 else:
                     progressBar.stop()
                     console.print(f"[red]Invalid action: {action}[/red]")
@@ -280,7 +277,6 @@ def logAccessConversionProgress(
         successMessage - Message to display when the process is complete.
     """
     console = Console()
-    console.print("[yellow]Starting conversion...[/yellow]")
     with Progress(
         "[progress.description]{task.description}",
         StepStatusColumn("conversionStatus"),
@@ -291,7 +287,9 @@ def logAccessConversionProgress(
         TextColumn("•"),
         TimeElapsedColumn(),
         TextColumn("•"),
-        ErrorCountColumn("errorCount")
+        ErrorCountColumn("errorCount"),                
+        refresh_per_second=10,
+        transient=False
     ) as progressBar:
         progressIds = {}
         for tableName, accessConversionDetails in tableConversionData.items():
