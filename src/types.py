@@ -21,6 +21,7 @@ class ForeignKey:
 class Field:
     fieldName: str
     fieldDetails: str
+    isPrimaryKey: bool
     
 status = Literal["In Progress", "Complete", "Failure", "Not Started", "Empty Table"]
 @dataclass

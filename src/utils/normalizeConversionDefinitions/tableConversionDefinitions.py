@@ -62,13 +62,9 @@ sqlTableDefinitions = {
 accessConversionDefinitions = {
     "HTC000_G010_T010 Company Info": convert_HTC000_G010_T010_Company_Info,
     "HTC000_G025_T010 Positions": convert_HTC000_G025_T010_Positions,
-    #"HTC000_G090_T010 Staff": convert_HTC000_G090_T010_Staff,
-    #   Fix password salt and hash functions
-    #
+    "HTC000_G090_T010 Staff": convert_HTC000_G090_T010_Staff,
     "HTC010_G000_T000 OrderType Values": convert_HTC010_G000_T000_OrderType_Values,
-    #"HTC010_G000_T000 US Zip Codes": convert_HTC010_G000_T000_US_Zip_Codes,
-    #   Make more efficient
-    #
+    "HTC010_G000_T000 US Zip Codes": convert_HTC010_G000_T000_US_Zip_Codes,
     "HTC010_G100_T010 Certification Test Catalog": convert_HTC010_G100_T010_Certification_Test_Catalog,
     "HTC300_G000_T000 Archive Update History": convert_HTC300_G000_T000_Archive_Update_History,
     "HTC300_G000_T000 Holidays": convert_HTC300_G000_T000_Holidays,

@@ -56,7 +56,7 @@ class SqlServerConn:
                 }
             )
 
-    def createTable(self, tableName: str, tableFields: list[Field], primaryKeys: list[str] | None = None) -> None:
+    def createTable(self, tableName: str, tableFields: list[Field]) -> None:
         """
             Create a table in the database.
           
@@ -67,8 +67,9 @@ class SqlServerConn:
         
         # Example: [field1] field1Details, [field2] field2Details, ...
         tableFieldsString = ', '.join([f'[{field.fieldName}] {field.fieldDetails}' for field in tableFields])
+        primaryKeyString = ', '.join([f'[{field.fieldName}]' for field in tableFields if field.isPrimaryKey])
         # Example: CREATE TABLE [tableName] ([field1] field1Details, [field2] field2Details, ..., PRIMARY KEY ([field1], [field2], ...))
-        createSql: str = f"CREATE TABLE [{tableName}] ({tableFieldsString}{f", PRIMARY KEY ({', '.join(primaryKeys)})" if primaryKeys else ''})"
+        createSql: str = f"CREATE TABLE [{tableName}] ({tableFieldsString}{f", PRIMARY KEY ({primaryKeyString})" if primaryKeyString else ''})"
         try:
             self.dropTable(tableName)
             self.cursor.execute(createSql)
@@ -164,7 +165,7 @@ class SqlServerConn:
 
     def getFixedInsertValue(self, value: Any, setNull : bool) -> Any:
         if type(value) == str:
-            value = value.strip().lower()
+            value = value.strip()
             if value == "":
                 # If the value is empty, set it to NULL is setNull is true, otherwise empty string
                 return "NULL" if setNull else "''"
@@ -189,7 +190,8 @@ class SqlServerConn:
         tableName : str, 
         data: dict[str, Any], 
         insertId : int | None = None, 
-        setNulls : bool = True
+        setNulls : bool = True,
+        isPasswordColumn : bool = False
     ) -> None:
         """
             Insert a row into a table.
@@ -200,7 +202,15 @@ class SqlServerConn:
             allowNulls - Whether to allow null values in the insert. Default is True.
         """
         columnNames: list[str] = list(data.keys())
-        columnValues: list[Any] = [self.getFixedInsertValue(value, setNulls) for value in list(data.values())]
+        columnValues = []
+        if isPasswordColumn:
+            for columnName, columnValue in data.items():
+                if columnName == 'Staff_Password':
+                    columnValues.append(f"'{columnValue}'")
+                else:
+                    columnValues.append(self.getFixedInsertValue(columnValue, setNulls))
+        else:
+            columnValues: list[Any] = [self.getFixedInsertValue(value, setNulls) if not isPasswordColumn else value for value in list(data.values())]
         
         if not insertId == None: # If insertId is provided, add it to the beginning of the field list
             columnValues.insert(0, 'id')
@@ -230,13 +240,13 @@ class SqlServerConn:
                     'data': data,
                 }
             )
-        
+    
     def select(
-        self,
+        self, 
         tableName: str,
         selectDetails : list[str | dict[str, str]] | str | None = None,
         whereDetails : dict[str, Any] | str | None = None
-    ) -> list[Any]:
+    ) -> list[Any] | None:
         """
             Select data from a table.
             
@@ -246,14 +256,22 @@ class SqlServerConn:
         """
         # Create column selection string
         selectColumnsClause : str
-        if type(selectDetails) == list: # Columns can be a single string, or a dictionary, with the key being the column name and value being its alias
-            selectColumnsClause = ', '.join([column if type(column) == str else f"{list(column.keys())[0]} AS {list(column.values())[0]}" for column in selectDetails])
-        elif type(selectDetails) == str: # If column is single string
+        if isinstance(selectDetails, list): # Columns can be a single string, or a dictionary, with the key being the column name and value being its alias
+            columns = []
+            for col in selectDetails:
+                # Narrow the type inside the for-loop
+                if isinstance(col, str):
+                    columns.append(col)
+                else:
+                    # col must be a dict[str, str]
+                    key = list(col.keys())[0]
+                    val = list(col.values())[0]
+                    columns.append(f"{key} AS {val}")
+        elif isinstance(selectDetails, str): # If column is single string
             selectColumnsClause = selectDetails
         else: # Otherwise select all columns
             selectColumnsClause = '*'
         
-        # Create where clause
         if type(whereDetails) == dict:  
             whereArgs = []
             for tableField, fieldValue in whereDetails.items():
@@ -278,20 +296,20 @@ class SqlServerConn:
         else:
           whereClause = ''
 
-        tableName = f'[{tableName}]' if len(tableName.split(' ')) == 1 else tableName # Handle cases where table name is a joined table
-        selectSql: str = f"SELECT {selectColumnsClause} FROM {tableName} {f'WHERE {whereClause}' if whereClause else ''}"
+        selectSql: str = f"SELECT {selectColumnsClause} FROM [{tableName}] {f'WHERE {whereClause}' if whereClause else ''}"
         try:
-            self.cursor.execute(selectSql)
-            return self.cursor.fetchall()
-        except Exception as err:
-            self.handleError(
-                action='getInfo',
-                info={
-                    'sqlStatement' : selectSql,
-                    'tableName' : tableName,
-                    'selectColumns' : selectDetails,
-                    'whereDetails': whereDetails,
-              }
+          self.cursor.execute(selectSql)
+          return self.cursor.fetchall()
+        
+        except Exception:
+          self.handleError(
+            action='select',
+            info={
+              'sqlStatement' : selectSql,
+              'tableName' : tableName,
+              'selectColumns' : selectDetails,
+              'whereDetails' : whereDetails
+            }
           )
     
     def getLastIdCreated(self, tableName : str) -> int:

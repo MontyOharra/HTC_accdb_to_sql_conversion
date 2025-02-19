@@ -4,6 +4,8 @@ import platform
 
 from typing import Any
 
+import bcrypt
+
 def isCompiled():
     '''
         Returns True if the application is compiled, False otherwise.
@@ -84,3 +86,19 @@ def generateAccessDbNameCache(
     accessDbNameCache['HTC320_ThisCoBr'] = 'htc321'
     accessDbNameCache['HTC350D_G020_T020 NameSwap_ChgHistory'] = 'htc350d'
     return accessDbNameCache
+
+
+def generatePasswordSalt(saltLength : int) -> str:
+    return bcrypt.gensalt(saltLength)
+
+def generatePasswordHash(password : str, passwordSalt : str) -> str:
+    # Convert strings to bytes
+    password_bytes = password.encode('utf-8')
+    salt_bytes = passwordSalt.encode('utf-8')
+    
+    # Generate the hash (this returns a bytes object)
+    hashed = bcrypt.hashpw(password_bytes, salt_bytes)
+    
+    # Optionally, decode the bytes to a string if needed
+    return hashed.decode('utf-8')
+  

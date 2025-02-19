@@ -8,6 +8,8 @@ from rich.console import Console
 
 import traceback
 
+from src.types import Field
+
 def connectToAccessDatabase(accessDbPath):
     try:
         accessConnStr = (
@@ -126,7 +128,7 @@ class AccessConn:
             }
           )
       
-    def getTableStructure(self, tableName: str) -> tuple[dict[str, str], list[str]]:
+    def getTableStructure(self, tableName: str) -> list[Field]:
         """
             tableName - Name of the table to retrieve structure from.
             
@@ -139,11 +141,16 @@ class AccessConn:
             self.cursor.execute(f"SELECT TOP 1 * FROM [{tableName}]")
             # Fetch column metadata from cursor description
             columnDescriptions = self.cursor.description
-            columnsInfo = {columnDescription[0] : self.getColumnDetails(columnDescription) for columnDescription in columnDescriptions}
-            # Get primary key columns
             primaryKeyColumns = [row[8] for row in self.cursor.statistics(tableName) if row[5]=='PrimaryKey']
+            columnsInfo = [Field(
+              fieldName=columnDescription[0],
+              fieldDetails=self.getColumnDetails(columnDescription),
+              isPrimaryKey=columnDescription[0] in primaryKeyColumns
+            )
+              for columnDescription in columnDescriptions
+            ]
 
-            return (columnsInfo, primaryKeyColumns) 
+            return columnsInfo
 
         except Exception:
             self.handleError(

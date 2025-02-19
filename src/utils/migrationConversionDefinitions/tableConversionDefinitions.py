@@ -36,8 +36,11 @@ def getMigrationDefinition(
     try:
         accessConnFactory = connFactories[accessDbNameCache[tableName]]
         accessConn = accessConnFactory()
+        tableFields = getSqlTableFields(accessConn, tableName)
+        if True not in [field.isPrimaryKey for field in tableFields]:
+            tableFields.append(Field(fieldName='temp_id', fieldDetails='INT NOT NULL IDENTITY(1,1)', isPrimaryKey=True))
         sqlTableDefinition = (
-            getSqlTableFields(accessConn, tableName), 
+            tableFields, 
             getSqlTableIndexes(accessConn, tableName), 
             getSqlTableForeignKeys(accessConn, tableName)
         )

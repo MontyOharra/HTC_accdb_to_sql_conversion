@@ -6,31 +6,29 @@ from collections import defaultdict
 from src.classes.SqlServerConn import SqlServerConn
 
 
-def regionGet(**kwargs: str):
+def regionGet(**kwargs : str) -> list[dict[str, str]]: 
     try:
         key: str = next(iter(kwargs))
         return [
             element
             for element in subdivisions_countries.data
-            if key in element and kwargs[key].lower() == element[key].lower()
+            if key in element and kwargs[key] in element[key]
         ]
     except IndexError:
-        return {}
+        return []
       
-def countryGet(**kwargs: str):
+def countryGet(**kwargs : str) -> list[dict[str, str]]:
     try:
         key: str = next(iter(kwargs))
-        res = [
+        return [
             element
             for element in countries.data
-            if key in element and kwargs[key].lower() == element[key].lower()
+            if key in element and kwargs[key] in element[key]
         ]
-        return res
-        
     except IndexError:
-        return {}
-
-def getUserIdFromUsername(conn : SqlServerConn, username) -> int:
+        return []
+      
+def getUserIdFromUsername(conn : SqlServerConn, username) -> int | None:
     if username == None:
         return None
     if username.strip() == "":
@@ -38,7 +36,7 @@ def getUserIdFromUsername(conn : SqlServerConn, username) -> int:
       
     username = username.strip()
     
-    userRow = conn.sqlGetInfo('user', 'id', f"[username] = '{username}'")
+    userRow = conn.select('user', 'id', f"[username] = '{username}'")
     if not userRow:
         return None
     
@@ -249,10 +247,3 @@ def getAssessorialIds(assessorialIdString):
             ids.append(index + 1)
             
     return ids
-
-def generatePasswordSalt(saltLength : int) -> str:
-    return ''.join([randomThing for randomThing in range(saltLength)])
-
-
-def generatePasswordHash(password : str, passwordSalt : str) -> str:
-    return password

@@ -13,10 +13,6 @@ def getSqlTableFields(
         Returns a list of Field objects representing the fields in the table.
         Forces all fields to be NOT NULL
     '''
-    columnsInfo, primaryKeyColumns = conn.getTableStructure(accessTableName)
-    fields = []
-    
-    for columnName, columnDetails in columnsInfo.items():
-        fields.append(Field(columnName, columnDetails))
-    
-    return fields
+    columnsInfo = conn.getTableStructure(accessTableName)
+
+    return columnsInfo

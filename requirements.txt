@@ -1,7 +1,5 @@
 isocodes==2024.2.2
-markdown-it-py==3.0.0
-mdurl==0.1.2
-Pygments==2.18.0
+Pebble==5.1.0
 pyodbc==5.2.0
+python_bcrypt
 rich==13.9.4
-pebble==5.1.0

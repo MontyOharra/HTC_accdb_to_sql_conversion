@@ -137,6 +137,7 @@ def runConversion(
             errorLogQueue.put(("accessConversion", "Keyboard interrupt during Access tables conversion creation process."))
         finally:
             accessConversionLogQueue.put("STOP")
-            errorLogQueue.put("STOP")
             accessConversionProgressLogger.join()
-            errorLogger.join()  
+            
+    errorLogQueue.put("STOP")
+    errorLogger.join()  

@@ -204,6 +204,7 @@ def convertAccessTables(
                     accessConversionData, errorLogMessages = future.result()
                     logQueue.put(('UPDATE', accessConversionData))
                     for errorLogMessage in errorLogMessages:
+                        print(errorLogMessage)
                         errorQueue.put(("accessTableConversion", errorLogMessage))
                 except KeyboardInterrupt:
                     for f in futures:

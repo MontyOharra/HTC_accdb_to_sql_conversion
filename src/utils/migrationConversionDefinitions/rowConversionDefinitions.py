@@ -19,7 +19,9 @@ def getRowConversionFunction(
         Partial function is needed for multiprocessing compatible use.
     '''
     try:
-        columnNames = list(accessConn.getTableStructure(accessTableName)[0].keys())
+        columnNames = [field.fieldName for field in accessConn.getTableStructure(accessTableName)]
+        if accessTableName == 'HTC000_G090_T010 Staff':
+            return partial(migrateUserRow, columnNames=columnNames)
         return partial(migrateAccessRow, columnNames=columnNames, accessTableName=accessTableName)
     except Exception as err:
         raise err

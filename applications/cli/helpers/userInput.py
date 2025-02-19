@@ -133,7 +133,7 @@ def getMaxConversionThreads(useMaxConversionThreads : bool = False) -> int:
         err = "Unable to determine the number of CPUs on this machine. Please check your CPU setup and try again."
         raise Exception(err)
     if not useMaxConversionThreads:
-        maxConversionThreads = Prompt.ask("[blue]How many threads would you like to use for conversion? Please enter 'max' to use all avaiable threads[/blue]")
+        maxConversionThreads = Prompt.ask("[blue]How many threads would you like to use for conversion? Please enter 'max' to use all available threads[/blue]")
         if maxConversionThreads == 'max':
             maxConversionThreads = 8 or cpuCount - 1
         else:

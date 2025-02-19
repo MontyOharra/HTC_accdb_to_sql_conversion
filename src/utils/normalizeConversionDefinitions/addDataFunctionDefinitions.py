@@ -1,13 +1,13 @@
 from .helpers import *
 
-from typing import List, Dict, Tuple
+from typing import Any
 
 def addAciDataChangeHistory(
     conn : SqlServerConn,
-    aciDataId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    aciDataId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -18,31 +18,30 @@ def addAciDataChangeHistory(
     }
     
     
-    conn.sqlInsertRow('aci_data_change_history', data)
-    conn.commit()
+    conn.insertRow('aci_data_change_history', data)
 
-    return conn.sqlGetLastIdCreated('aci_data_change_history')
+    return conn.getLastIdCreated('aci_data_change_history')
   
 def addAciData(
     conn : SqlServerConn,
-    aciDataId : int,
-    cityId : int,
-    postalCodeId : int,
-    airportCode : int,
-    carrier : str,
-    area : str,
-    rateMin : float,
-    rate100 : float,
-    rate1000 : float,
-    rate2000 : float,
-    rate5000 : float,
-    dateCreated : str,
-    createdBy : int,
-    branchId : int,
-    isActive : bool,
+    aciDataId : int | None,
+    cityId : int | None,
+    postalCodeId : int | None,
+    airportCode : int | None,
+    carrier : str | None,
+    area : str | None,
+    rateMin : float | None,
+    rate100 : float | None,
+    rate1000 : float | None,
+    rate2000 : float | None,
+    rate5000 : float | None,
+    dateCreated : str | None,
+    createdBy : int | None,
+    branchId : int | None,
+    isActive : bool | None,
 ) -> int:
     
-    aciDataRow = conn.sqlGetInfo(
+    aciDataRow = conn.select(
         'aci_data',
         'id',
         whereDetails={
@@ -80,20 +79,19 @@ def addAciData(
         'branch_id' : branchId,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('aci_data', data, insertId=aciDataId)
-    conn.commit()
+    conn.insertRow('aci_data', data, insertId=aciDataId)
 
-    return conn.sqlGetLastIdCreated('aci_data')
+    return conn.getLastIdCreated('aci_data')
   
 def addAddress(
     conn : SqlServerConn,
-    addressLine1 : str,
-    addressLine2 : str,
-    cityName : str,
-    postalCode : str,
-    regionDetails : Dict[str, any],
-    countryDetails : Dict[str, any]
-):
+    addressLine1 : str | None,
+    addressLine2 : str | None | None,
+    cityName : str | None,
+    postalCode : str | None,
+    regionDetails : dict[str, Any],
+    countryDetails : dict[str, Any]
+) -> int | None:
 
     if not addressLine1 or not cityName or not postalCode or not regionDetails or not countryDetails:
         return None
@@ -111,7 +109,7 @@ def addAddress(
             addressLine2 = None
         
     
-    addressRow = conn.sqlGetInfo(
+    addressRow = conn.select(
         'address',
         'id',
         whereDetails={
@@ -131,17 +129,16 @@ def addAddress(
         'postal_code_id' : postalCodeId
     }
     
-    conn.sqlInsertRow('address', addressData)
-    conn.commit()
+    conn.insertRow('address', addressData)
     
-    return conn.sqlGetLastIdCreated('address')
+    return conn.getLastIdCreated('address')
   
 def addAgentChangeHistory(
     conn : SqlServerConn,
-    agentId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    agentId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -150,24 +147,23 @@ def addAgentChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('agent_change_history', data)
-    conn.commit()
+    conn.insertRow('agent_change_history', data)
 
-    return conn.sqlGetLastIdCreated('agent_change_history')
+    return conn.getLastIdCreated('agent_change_history')
 
 def addAgent(
     conn : SqlServerConn,
-    customerId : int,
-    emailAddress : str,
-    firstName : str,
-    lastName : str,
-    phoneId : int,
-    mobilePhoneId : int,
-    faxId : int,
-    isSetToAutoNotifyEmail : bool,
-    isActive : bool,
+    customerId : int | None,
+    emailAddress : str | None,
+    firstName : str | None,
+    lastName : str | None,
+    phoneId : int | None,
+    mobilePhoneId : int | None,
+    faxId : int | None,
+    isSetToAutoNotifyEmail : bool | None,
+    isActive : bool | None,
 ) -> int:
-    agentRow = conn.sqlGetInfo(
+    agentRow = conn.select(
         'agent',
         'id',
         whereDetails={
@@ -196,20 +192,19 @@ def addAgent(
         'is_set_to_auto_notify_email' : isSetToAutoNotifyEmail,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('agent', data)
-    conn.commit()
+    conn.insertRow('agent', data)
 
-    return conn.sqlGetLastIdCreated('agent')
+    return conn.getLastIdCreated('agent')
   
 def addAgentCertificationTest(
     conn : SqlServerConn,
-    agentId : int,
-    certificationTestId : int,
-    dateTested : str,
-    testScore : int,
-    isActive : bool,
+    agentId : int | None,
+    certificationTestId : int | None,
+    dateTested : str | None,
+    testScore : int | None,
+    isActive : bool | None,
 ) -> int:
-    agentCertificationTestRow = conn.sqlGetInfo(
+    agentCertificationTestRow = conn.select(
         'agent_certification_test',
         'id',
         whereDetails={
@@ -229,17 +224,16 @@ def addAgentCertificationTest(
         'test_score' : testScore,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('agent_certification_test', data)
-    conn.commit()
+    conn.insertRow('agent_certification_test', data)
 
-    return conn.sqlGetLastIdCreated('agent_certification_test')  
+    return conn.getLastIdCreated('agent_certification_test')  
   
 def addArchiveErrorLog(
     conn : SqlServerConn,
-    orderId : int,
-    archiveDate : str,
-    userId : int,
-    details : int,
+    orderId : int | None,
+    archiveDate : str | None,
+    userId : int | None,
+    details : int | None,
 ) -> int:
 
     data = {
@@ -248,55 +242,54 @@ def addArchiveErrorLog(
         'user_id' : userId,
         'details' : details,
     }
-    conn.sqlInsertRow('archive_error_log', data)
-    conn.commit()
+    conn.insertRow('archive_error_log', data)
 
-    return conn.sqlGetLastIdCreated('archive_error_log')
+    return conn.getLastIdCreated('archive_error_log')
 
 def addArchiveHistory(
     conn : SqlServerConn,
-    dateArchived : str,
-    openOrders : int,
-    openOrderAssessorials : int,
-    openOrderDimensions : int,
-    openOrderDrivers : int,
-    openOrderAttachments : int,
-    invoicedOrders : int,
-    invoicedOrderAssessorials : int,
-    invoicedOrderDimensions : int,
-    invoicedOrderDrivers : int,
-    invoicedOrderAttachments : int,
-    remainingOrders : int,
-    remainingOrderAssessorials : int,
-    remainingOrderDimensions : int,
-    remainingOrderDrivers : int,
-    remainingOrderAttachments : int,
-    dockOrders : int,
-    dockOrderAssessorials : int,
-    dockOrderDimensions : int,
-    dockOrderDrivers : int,
-    dockOrderAttachments : int,
-    serviceOrders : int,
-    serviceOrderAssessorials : int,
-    serviceOrderDimensions : int,
-    serviceOrderDrivers : int,
-    serviceOrderAttachments : int,
-    activeOrderHistory : int,
-    activeOrderHawbs : int,
-    archivedOrders : int,
-    archivedOrderAssessorials : int,
-    archivedOrderDimensions : int,
-    archivedOrderDrivers : int,
-    archivedOrderAttachments : int,
-    archivedOrderHistory : int,
-    archivedOrderHawbs : int,
-    removedOrders : int,
-    removedOrderAssessorials : int,
-    removedOrderDimensions : int,
-    removedOrderDrivers : int,
-    removedOrderAttachments : int,
-    removedOrderHistory : int,
-    removedOrderHawbs : int,
+    dateArchived : str | None,
+    openOrders : int | None,
+    openOrderAssessorials : int | None,
+    openOrderDimensions : int | None,
+    openOrderDrivers : int | None,
+    openOrderAttachments : int | None,
+    invoicedOrders : int | None,
+    invoicedOrderAssessorials : int | None,
+    invoicedOrderDimensions : int | None,
+    invoicedOrderDrivers : int | None,
+    invoicedOrderAttachments : int | None,
+    remainingOrders : int | None,
+    remainingOrderAssessorials : int | None,
+    remainingOrderDimensions : int | None,
+    remainingOrderDrivers : int | None,
+    remainingOrderAttachments : int | None,
+    dockOrders : int | None,
+    dockOrderAssessorials : int | None,
+    dockOrderDimensions : int | None,
+    dockOrderDrivers : int | None,
+    dockOrderAttachments : int | None,
+    serviceOrders : int | None,
+    serviceOrderAssessorials : int | None,
+    serviceOrderDimensions : int | None,
+    serviceOrderDrivers : int | None,
+    serviceOrderAttachments : int | None,
+    activeOrderHistory : int | None,
+    activeOrderHawbs : int | None,
+    archivedOrders : int | None,
+    archivedOrderAssessorials : int | None,
+    archivedOrderDimensions : int | None,
+    archivedOrderDrivers : int | None,
+    archivedOrderAttachments : int | None,
+    archivedOrderHistory : int | None,
+    archivedOrderHawbs : int | None,
+    removedOrders : int | None,
+    removedOrderAssessorials : int | None,
+    removedOrderDimensions : int | None,
+    removedOrderDrivers : int | None,
+    removedOrderAttachments : int | None,
+    removedOrderHistory : int | None,
+    removedOrderHawbs : int | None,
 ) -> int:
     data = {
         'date_archived' : dateArchived,
@@ -342,17 +335,16 @@ def addArchiveHistory(
         'removed_order_history' : removedOrderHistory,
         'removed_order_hawbs' : removedOrderHawbs,
     }
-    conn.sqlInsertRow('archive_history', data)
-    conn.commit()
+    conn.insertRow('archive_history', data)
 
-    return conn.sqlGetLastIdCreated('archive_history')
+    return conn.getLastIdCreated('archive_history')
   
 def addAssessorialChangeHistory(
     conn : SqlServerConn,
-    assessorialId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    assessorialId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -361,26 +353,25 @@ def addAssessorialChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('assessorial_change_history', data)
-    conn.commit()
+    conn.insertRow('assessorial_change_history', data)
 
-    return conn.sqlGetLastIdCreated('assessorial_change_history')
+    return conn.getLastIdCreated('assessorial_change_history')
   
 def addAssessorial(
     conn : SqlServerConn,
-    assessorialId : int,
-    branchId : int,
-    assessorialName : str,
-    minCharge : float,
-    basisType : float,
-    basisPortion : float,
-    basisRate : float,
-    userPrompt : str,
-    dateCreated : str,
-    notes : str,
-    isActive : bool,
+    assessorialId : int | None,
+    branchId : int | None,
+    assessorialName : str | None,
+    minCharge : float | None,
+    basisType : str,
+    basisPortion : float | None,
+    basisRate : float | None,
+    userPrompt : str | None,
+    dateCreated : str | None,
+    notes : str | None,
+    isActive : bool | None,
 ) -> int:
-    assessorialRow = conn.sqlGetInfo(
+    assessorialRow = conn.select(
         'assessorial',
         'id',
         whereDetails={
@@ -410,17 +401,16 @@ def addAssessorial(
         'notes' : notes,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('assessorial', data, insertId=assessorialId)
-    conn.commit()
+    conn.insertRow('assessorial', data, insertId=assessorialId)
 
-    return conn.sqlGetLastIdCreated('assessorial')
+    return conn.getLastIdCreated('assessorial')
   
 def addBranchChangeHistory(
     conn : SqlServerConn,
-    branchId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    branchId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -429,33 +419,32 @@ def addBranchChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('branch_change_history', data)
-    conn.commit()
+    conn.insertRow('branch_change_history', data)
 
-    return conn.sqlGetLastIdCreated('branch_change_history')
+    return conn.getLastIdCreated('branch_change_history')
   
 def addBranch(
     conn : SqlServerConn,
-    branchId : int,
-    branchName : str,
-    companyId : int,
-    addressId : int,
-    airportCode : str,
-    email : str,
-    phoneId : int,
-    faxId : int,
-    cartageAgentType : str,
-    fuelServiceCharge : float,
-    transferRate : float,
-    internationalAirDimDivisor : int,
-    domesticAirDimDivisor : int,
-    truckDimDivisor : int,
-    aciLow : str,
-    aciHigh : str,
-    notes : str,
-    isActive : bool,
+    branchId : int | None,
+    branchName : str | None,
+    companyId : int | None,
+    addressId : int | None,
+    airportCode : str | None,
+    email : str | None,
+    phoneId : int | None,
+    faxId : int | None,
+    cartageAgentType : str | None,
+    fuelServiceCharge : float | None,
+    transferRate : float | None,
+    internationalAirDimDivisor : int | None,
+    domesticAirDimDivisor : int | None,
+    truckDimDivisor : int | None,
+    aciLow : str | None,
+    aciHigh : str | None,
+    notes : str | None,
+    isActive : bool | None,
 ) -> int:
-    branchRow = conn.sqlGetInfo(
+    branchRow = conn.select(
       'branch',
       'id',
       whereDetails={
@@ -491,7 +480,7 @@ def addBranch(
         'cartage_agent_type' : cartageAgentType,
         'fuel_service_charge' : fuelServiceCharge,
         'transfer_rate' : transferRate,
-        'international_air_dim_divisor' : internationalAirDimDivisor,
+        'international_air_dim_divisor' : int | NoneernationalAirDimDivisor,
         'domestic_air_dim_divisor' : domesticAirDimDivisor,
         'truck_dim_divisor' : truckDimDivisor,
         'aci_low' : aciLow,
@@ -499,19 +488,18 @@ def addBranch(
         'notes' : notes,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('branch', data, insertId=branchId)
-    conn.commit()
+    conn.insertRow('branch', data, insertId=branchId)
 
-    return conn.sqlGetLastIdCreated('branch')
+    return conn.getLastIdCreated('branch')
 
 def addCertificationTest(
     conn : SqlServerConn,
-    certificationTestId : id,
-    certificationName : str,
-    certificationTestTrainerId : int,
-    isActive : bool,
+    certificationTestId : int | None,
+    certificationName : str | None,
+    certificationTestTrainerId : int | None,
+    isActive : bool | None,
 ) -> int:
-    certificationTestRow = conn.sqlGetInfo(
+    certificationTestRow = conn.select(
         'certification_test',
         'id',
         whereDetails={
@@ -528,19 +516,18 @@ def addCertificationTest(
         'certification_test_trainer_id': certificationTestTrainerId,
         'is_active': isActive,
     }
-    conn.sqlInsertRow('certification_test', data, insertId=certificationTestId)
-    conn.commit()
+    conn.insertRow('certification_test', data, insertId=certificationTestId)
 
-    return conn.sqlGetLastIdCreated('certification_test')
+    return conn.getLastIdCreated('certification_test')
   
 def addCertificationTestChangeHistory(
     conn : SqlServerConn,
-    certificationTestId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    certificationTestId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
-    certificationTestChangeHistoryRow = conn.sqlGetInfo(
+    certificationTestChangeHistoryRow = conn.select(
         'certification_test_change_history',
         'id',
         whereDetails={
@@ -558,17 +545,16 @@ def addCertificationTestChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('certification_test_change_history', data)
-    conn.commit()
+    conn.insertRow('certification_test_change_history', data)
 
-    return conn.sqlGetLastIdCreated('certification_test_change_history')  
+    return conn.getLastIdCreated('certification_test_change_history')  
 
 def addCertificationTestTrainer(
     conn : SqlServerConn,
-    trainerName : str,
-    isActive : bool,
+    trainerName : str | None,
+    isActive : bool | None,
 ) -> int:
-    certificationTestTrainerRow = conn.sqlGetInfo(
+    certificationTestTrainerRow = conn.select(
         'certification_test_trainer',
         'id',
         whereDetails={
@@ -583,19 +569,18 @@ def addCertificationTestTrainer(
         'trainer_name' : trainerName,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('certification_test_trainer', data)
-    conn.commit()
+    conn.insertRow('certification_test_trainer', data)
 
-    return conn.sqlGetLastIdCreated('certification_test_trainer')
+    return conn.getLastIdCreated('certification_test_trainer')
   
 def addCertificationTestTrainerChangeHistory(
     conn : SqlServerConn,
-    certificationTestTrainerId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    certificationTestTrainerId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
-    certificationTestTrainerChangeHistoryRow = conn.sqlGetInfo(
+    certificationTestTrainerChangeHistoryRow = conn.select(
         'certification_test_trainer_change_history',
         'id',
         whereDetails={
@@ -614,51 +599,30 @@ def addCertificationTestTrainerChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('certification_test_trainer_change_history', data)
-    conn.commit()
+    conn.insertRow('certification_test_trainer_change_history', data)
 
-    return conn.sqlGetLastIdCreated('certification_test_trainer_change_history')
-
-def addCityPostalCode(
-    conn : SqlServerConn,
-    cityId : int,
-    postalCodeId : int,
-    lat : float,
-    long : float,
-) -> int:
-    data = {
-        'city_id' : cityId,
-        'postal_code_id' : postalCodeId,
-        'lat' : lat,
-        'long' : long,
-    }
-    conn.sqlInsertRow('city_postal_code', data)
-    conn.commit()
-
-    return conn.sqlGetLastIdCreated('city_postal_code')
-  
+    return conn.getLastIdCreated('certification_test_trainer_change_history')
 
 def addCityRegion(
     conn : SqlServerConn,
-    cityId : int,
-    regionId : int,
+    cityId : int | None,
+    regionId : int | None,
 ) -> int:
     data = {
         'city_id' : cityId,
         'region_id' : regionId,
     }
-    conn.sqlInsertRow('city_region', data)
-    conn.commit()
+    conn.insertRow('city_region', data)
 
-    return conn.sqlGetLastIdCreated('city_region')
+    return conn.getLastIdCreated('city_region')
   
 def addCityPostalCode(
     conn : SqlServerConn,
-    cityName : str,
-    postalCode : str,
-    regionDetails : Dict[str, str],
-    countryDetails : Dict[str, str]
-) -> Tuple[int] :
+    cityName : str | None,
+    postalCode : str | None,
+    regionDetails : dict[str, str],
+    countryDetails : dict[str, str]
+) -> tuple[int | None, int | None] :
     
     if not cityName or not postalCode or not regionDetails or not countryDetails:
         return (None, None)
@@ -671,28 +635,30 @@ def addCityPostalCode(
     if regionId == None:
         return (None, None)
     
-    cityRow = conn.sqlGetInfo('city INNER JOIN city_region ON [city].[id] = [city_region].[city_id]', '[city].[id] AS selected_city_id', f"[city].[city_name] = '{cityName}' AND [city_region].[region_id] = '{regionId}'")
-    postalCodeRow = conn.sqlGetInfo('postal_code INNER JOIN postal_code_region ON [postal_code].id = [postal_code_region].[postal_code_id]', '[postal_code].[id] AS selected_postal_code_id', f"[postal_code].[postal_code] = '{postalCode}' AND [postal_code_region].[region_id] = '{regionId}'")
+    cityRow = conn.select(
+      '[city] INNER JOIN [city_region] ON [city].[id] = [city_region].[city_id]', 
+      '[city].[id] AS selected_city_id', 
+      f"[city].[city_name] = '{cityName}' AND [city_region].[region_id] = '{regionId}'"
+    )
+    postalCodeRow = conn.select('postal_code INNER JOIN postal_code_region ON [postal_code].id = [postal_code_region].[postal_code_id]', '[postal_code].[id] AS selected_postal_code_id', f"[postal_code].[postal_code] = '{postalCode}' AND [postal_code_region].[region_id] = '{regionId}'")
     if cityRow:
         cityId = cityRow[0].selected_city_id
     else:
         cityData = {
             'city_name' : cityName
         }
-        conn.sqlInsertRow('city', cityData)
-        conn.commit()
+        conn.insertRow('city', cityData)
         
-        cityId = conn.sqlGetLastIdCreated('city')
+        cityId = conn.getLastIdCreated('city')
     if postalCodeRow:
         postalCodeId = postalCodeRow[0].selected_postal_code_id
     else:
         postalCodeData = {
             'postal_code' : postalCode
         }
-        conn.sqlInsertRow('postal_code', postalCodeData)
-        conn.commit()
+        conn.insertRow('postal_code', postalCodeData)
         
-        postalCodeId = conn.sqlGetLastIdCreated('postal_code')
+        postalCodeId = conn.getLastIdCreated('postal_code')
         
     if cityRow and postalCodeRow:
         return (cityId, postalCodeId)
@@ -701,15 +667,13 @@ def addCityPostalCode(
         'city_id' : cityId,
         'region_id' : regionId
     }
-    conn.sqlInsertRow('city_region', cityRegionData)
-    conn.commit()
+    conn.insertRow('city_region', cityRegionData)
         
     postalCodeRegionData = {
         'postal_code_id' : postalCodeId,
         'region_id' : regionId
     }
-    conn.sqlInsertRow('postal_code_region', postalCodeRegionData)
-    conn.commit()
+    conn.insertRow('postal_code_region', postalCodeRegionData)
     
     cityPostalCodeData = {
         'city_id' : cityId,
@@ -717,17 +681,16 @@ def addCityPostalCode(
         'lat' : getCityLat(cityName=cityName, postalCode=postalCode),
         'lng' : getCityLat(cityName=cityName, postalCode=postalCode)
     }
-    conn.sqlInsertRow('city_postal_code', cityPostalCodeData)
-    conn.commit()
+    conn.insertRow('city_postal_code', cityPostalCodeData)
     
     return (cityId, postalCodeId)
   
 def addCompanyChangeHistory(
     conn : SqlServerConn,
-    companyId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    companyId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -736,28 +699,27 @@ def addCompanyChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('company_change_history', data)
-    conn.commit()
+    conn.insertRow('company_change_history', data)
 
-    return conn.sqlGetLastIdCreated('company_change_history')
+    return conn.getLastIdCreated('company_change_history')
   
 def addCompany(
     conn : SqlServerConn,
-    companyId : int,
-    companyName : str,
-    addressId : int,
-    phoneId : int,
-    airportCode : str,
-    faxId : int,
-    cartageAgentType : str,
-    employerIdentificationNo : str,
-    email : str,
-    scac : str,
-    website : str,
-    notes : str,
-    logoPath : str,
-    isTsaCompliant : bool,
-    isActive : bool,
+    companyId : int | None,
+    companyName : str | None,
+    addressId : int | None,
+    phoneId : int | None,
+    airportCode : str | None,
+    faxId : int | None,
+    cartageAgentType : str | None,
+    employerIdentificationNo : str | None,
+    email : str | None,
+    scac : str | None,
+    website : str | None,
+    notes : str | None,
+    logoPath : str | None,
+    isTsaCompliant : bool | None,
+    isActive : bool | None,
 ) -> int:
     data = {
         'company_name' : companyName,
@@ -775,22 +737,21 @@ def addCompany(
         'is_tsa_compliant' : isTsaCompliant,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('company', data, insertId=companyId)
-    conn.commit()
+    conn.insertRow('company', data, insertId=companyId)
 
-    return conn.sqlGetLastIdCreated('company')
+    return conn.getLastIdCreated('company')
   
 def addCountry(
     conn : SqlServerConn,
-    countryDetails : Dict[str, str]
-) -> int:    
+    countryDetails : dict[str, str]
+) -> int | None:    
     if not countryDetails:
         return None
     if 'countryName' in countryDetails:
         countryName = countryDetails['countryName'].lower().strip()
         if not countryName:
             return None
-        countryRow = conn.sqlGetInfo('country', 'id', f"[country_name] = '{countryName}'")
+        countryRow = conn.select('country', 'id', f"[country_name] = '{countryName}'")
         if countryRow:
             return countryRow[0].id
         data = {
@@ -802,7 +763,7 @@ def addCountry(
         isoCode2 = countryDetails['isoCode2'].lower().strip()
         if not isoCode2:
             return None
-        countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_2] = '{isoCode2}'")
+        countryRow = conn.select('country', 'id', f"[iso_code_2] = '{isoCode2}'")
         if countryRow:
             return countryRow[0].id
         data = {
@@ -814,7 +775,7 @@ def addCountry(
         isoCode3 = countryDetails['isoCode3'].lower().strip()
         if not isoCode3:
             return None
-        countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_3] = '{isoCode3}'")
+        countryRow = conn.select('country', 'id', f"[iso_code_3] = '{isoCode3}'")
         if countryRow:
             return countryRow[0].id
         data = {
@@ -823,7 +784,7 @@ def addCountry(
             'country_name': countryGet(alpha_3=isoCode3)[0]['name'].lower()
         }
     elif 'default' in countryDetails:
-        countryRow = conn.sqlGetInfo('country', 'id', f"[iso_code_2] = 'us'")
+        countryRow = conn.select('country', 'id', f"[iso_code_2] = 'us'")
         if countryRow:
             return countryRow[0].id
         data = {
@@ -832,17 +793,16 @@ def addCountry(
             'country_name': 'united states'
         }
         
-    conn.sqlInsertRow('country', data)
-    conn.commit()
+    conn.insertRow('country', data)
     
-    return conn.sqlGetLastIdCreated('country')
+    return conn.getLastIdCreated('country')
   
 def addCustomerChangeHistory(
     conn : SqlServerConn,
-    customerId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    customerId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -851,17 +811,16 @@ def addCustomerChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('customer_change_history', data)
-    conn.commit()
+    conn.insertRow('customer_change_history', data)
 
-    return conn.sqlGetLastIdCreated('customer_change_history')
+    return conn.getLastIdCreated('customer_change_history')
   
 def addCustomerDefaultAssessorial(
     conn : SqlServerConn,
-    customerId : int,
-    assessorialId : int,
+    customerId : int | None,
+    assessorialId : int | None,
 ) -> int:
-    customerDefaultAssessorialRow = conn.sqlGetInfo(
+    customerDefaultAssessorialRow = conn.select(
         'customer_default_assessorial',
         'id',
         whereDetails={
@@ -876,27 +835,26 @@ def addCustomerDefaultAssessorial(
         'customer_id' : customerId,
         'assessorial_id' : assessorialId,
     }
-    conn.sqlInsertRow('customer_default_assessorial', data)
-    conn.commit()
+    conn.insertRow('customer_default_assessorial', data)
 
-    return conn.sqlGetLastIdCreated('customer_default_assessorial')
+    return conn.getLastIdCreated('customer_default_assessorial')
 
 def addCustomer(
     conn : SqlServerConn,
-    customerId : int,
-    branchId : int,
-    customerName : str,
-    addressId : int,
-    phoneId : int,
-    defaultRateId : int,
-    fuelServiceCharge : float,
-    qbCustomerRefId : str,
-    qbCustomerRefName : str,
-    isQbInvoiceOmitted : bool,
-    isActive : bool,
-    notes : bool,
+    customerId : int | None,
+    branchId : int | None,
+    customerName : str | None,
+    addressId : int | None,
+    phoneId : int | None,
+    defaultRateId : int | None,
+    fuelServiceCharge : float | None,
+    qbCustomerRefId : str | None,
+    qbCustomerRefName : str | None,
+    isQbInvoiceOmitted : bool | None,
+    isActive : bool | None,
+    notes : bool | None,
 ) -> int:
-    customerRow = conn.sqlGetInfo(
+    customerRow = conn.select(
         'customer',
         'id',
         whereDetails={
@@ -929,19 +887,18 @@ def addCustomer(
         'is_active' : isActive,
         'notes' : notes,
     }
-    conn.sqlInsertRow('customer', data, insertId=customerId)
-    conn.commit()
+    conn.insertRow('customer', data, insertId=customerId)
 
-    return conn.sqlGetLastIdCreated('customer')
+    return conn.getLastIdCreated('customer')
   
 def addFax(
     conn : SqlServerConn,
-    countryCode : str,
-    areaCode : str,
-    faxNumber : str,
-    faxExtension : str,
+    countryCode : str | None,
+    areaCode : str | None,
+    faxNumber : str | None,
+    faxExtension : str | None,
 ) -> int:        
-    faxRow = conn.sqlGetInfo('fax', 'id',
+    faxRow = conn.select('fax', 'id',
         whereDetails={
             'country_code' : countryCode,
             'area_code' : areaCode,
@@ -957,17 +914,16 @@ def addFax(
         'fax_number' : faxNumber,
         'fax_extension' : faxExtension,
     }
-    conn.sqlInsertRow('fax', data)
-    conn.commit()
+    conn.insertRow('fax', data)
 
-    return conn.sqlGetLastIdCreated('fax')
+    return conn.getLastIdCreated('fax')
   
 def addHoliday(
     conn : SqlServerConn,
-    holidayName : str,
-    holidayDate : str,
+    holidayName : str | None,
+    holidayDate : str | None,
 ) -> int:
-    holidayRow = conn.sqlGetInfo(
+    holidayRow = conn.select(
         'holiday',
         'id',
         whereDetails={
@@ -982,17 +938,16 @@ def addHoliday(
         'holiday_name': holidayName,
         'holiday_date': holidayDate,
     }
-    conn.sqlInsertRow('holiday', data)
-    conn.commit()
+    conn.insertRow('holiday', data)
 
-    return conn.sqlGetLastIdCreated('holiday')
+    return conn.getLastIdCreated('holiday')
 
 def addLocationChangeHistory(
     conn : SqlServerConn,
-    locationId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    locationId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -1001,17 +956,16 @@ def addLocationChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('location_change_history', data)
-    conn.commit()
+    conn.insertRow('location_change_history', data)
 
-    return conn.sqlGetLastIdCreated('location_change_history')
+    return conn.getLastIdCreated('location_change_history')
   
 def addLocationDefaultAssessorial(
     conn : SqlServerConn,
-    locationId : int,
-    assessorialId : int,
+    locationId : int | None,
+    assessorialId : int | None,
 ) -> int:
-    locationDefaultAssessorialRow = conn.sqlGetInfo(
+    locationDefaultAssessorialRow = conn.select(
         'location_default_assessorial',
         'id',
         whereDetails={
@@ -1026,29 +980,28 @@ def addLocationDefaultAssessorial(
         'location_id' : locationId,
         'assessorial_id' : assessorialId,
     }
-    conn.sqlInsertRow('location_default_assessorial', data)
-    conn.commit()
+    conn.insertRow('location_default_assessorial', data)
 
-    return conn.sqlGetLastIdCreated('location_default_assessorial')
+    return conn.getLastIdCreated('location_default_assessorial')
   
 def addLocation(
     conn : SqlServerConn,
-    branchId : int,
-    companyName : str,
-    locationName : str,
-    addressId : int,
-    aciId : int,
-    contactFirstName : str,
-    contactLastName : str,
-    contactEmail : str,
-    contactPhoneId : int,
-    isCarrier : bool,
-    isLocal : bool,
-    isInternational : bool,
-    defaultWaitTime : int,
-    isActive : bool,
+    branchId : int | None,
+    companyName : str | None,
+    locationName : str | None,
+    addressId : int | None,
+    aciId : int | None,
+    contactFirstName : str | None,
+    contactLastName : str | None,
+    contactEmail : str | None,
+    contactPhoneId : int | None,
+    isCarrier : bool | None,
+    isLocal : bool | None,
+    isInternational : bool | None,
+    defaultWaitTime : int | None,
+    isActive : bool | None,
 ) -> int:
-    locationRow = conn.sqlGetInfo(
+    locationRow = conn.select(
         'location',
         'id',
         whereDetails={
@@ -1087,20 +1040,19 @@ def addLocation(
         'default_wait_time' : defaultWaitTime,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('location', data)
-    conn.commit()
+    conn.insertRow('location', data)
 
-    return conn.sqlGetLastIdCreated('location')
+    return conn.getLastIdCreated('location')
   
 def addOrderAssessorial(
     conn : SqlServerConn,
-    orderId : int,
-    assessorialId : int,
-    parentType : str,
-    basisCount : float,
-    totalCharge : float,
+    orderId : int | None,
+    assessorialId : int | None,
+    parentType : str | None,
+    basisCount : float | None,
+    totalCharge : float | None,
 ) -> int:
-    orderAssessorialRow = conn.sqlGetInfo(
+    orderAssessorialRow = conn.select(
         'order_assessorial',
         'id',
         whereDetails={
@@ -1121,18 +1073,17 @@ def addOrderAssessorial(
         'basis_count' : basisCount,
         'total_charge' : totalCharge,
     }
-    conn.sqlInsertRow('order_assessorial', data)
-    conn.commit()
+    conn.insertRow('order_assessorial', data)
 
-    return conn.sqlGetLastIdCreated('order_assessorial')
+    return conn.getLastIdCreated('order_assessorial')
   
 def addOrderAttachment(
     conn : SqlServerConn,
-    orderId : int,
-    attachmentPath : str,
-    fileSize : float,
+    orderId : int | None,
+    attachmentPath : str | None,
+    fileSize : float | None,
 ) -> int:
-    orderAttachmentRow = conn.sqlGetInfo(
+    orderAttachmentRow = conn.select(
         'order_attachment',
         'id',
         whereDetails={
@@ -1148,17 +1099,16 @@ def addOrderAttachment(
         'attachment_path' : attachmentPath,
         'file_size' : fileSize,
     }
-    conn.sqlInsertRow('order_attachment', data)
-    conn.commit()
+    conn.insertRow('order_attachment', data)
 
-    return conn.sqlGetLastIdCreated('order_attachment')
+    return conn.getLastIdCreated('order_attachment')
   
 def addOrderChangeHistory(
     conn : SqlServerConn,
-    orderId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    orderId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
     data = {
         'order_id' : orderId,
@@ -1166,23 +1116,22 @@ def addOrderChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('order_change_history', data)
-    conn.commit()
+    conn.insertRow('order_change_history', data)
 
-    return conn.sqlGetLastIdCreated('order_change_history')
+    return conn.getLastIdCreated('order_change_history')
   
 def addOrderDim(
     conn : SqlServerConn,
-    orderId : int,
-    unitType : str,
-    unitQuantity : int,
-    unitWeight : int,
-    dimHeight : int,
-    dimWidth : int,
-    dimLength : int,
-    dimWeight : float,
+    orderId : int | None,
+    unitType : str | None,
+    unitQuantity : int | None,
+    unitWeight : int | None,
+    dimHeight : int | None,
+    dimWidth : int | None,
+    dimLength : int | None,
+    dimWeight : float | None,
 ) -> int:
-    orderDimRow = conn.sqlGetInfo(
+    orderDimRow = conn.select(
         'order_dim',
         'id',
         whereDetails={
@@ -1209,19 +1158,18 @@ def addOrderDim(
         'dim_length' : dimLength,
         'dim_weight' : dimWeight,
     }
-    conn.sqlInsertRow('order_dim', data)
-    conn.commit()
+    conn.insertRow('order_dim', data)
 
-    return conn.sqlGetLastIdCreated('order_dim')
+    return conn.getLastIdCreated('order_dim')
   
 def addOrderDriver(
     conn : SqlServerConn,
-    orderId : int,
-    driverUserId : int,
-    orderLeg : str,
-    driverRole : str,
+    orderId : int | None,
+    driverUserId : int | None,
+    orderLeg : str | None,
+    driverRole : str | None,
 ) -> int:
-    orderDriverRow = conn.sqlGetInfo(
+    orderDriverRow = conn.select(
         'order_driver',
         'id',
         whereDetails={
@@ -1239,17 +1187,16 @@ def addOrderDriver(
         'order_leg' : orderLeg,
         'driver_role' : driverRole,
     }
-    conn.sqlInsertRow('order_driver', data)
-    conn.commit()
+    conn.insertRow('order_driver', data)
 
-    return conn.sqlGetLastIdCreated('order_driver')
+    return conn.getLastIdCreated('order_driver')
 
 def addOrderStatusChangeHistory(
     conn : SqlServerConn,
-    orderStatusId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    orderStatusId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -1258,22 +1205,21 @@ def addOrderStatusChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('order_status_change_history', data)
-    conn.commit()
+    conn.insertRow('order_status_change_history', data)
 
-    return conn.sqlGetLastIdCreated('order_status_change_history')
+    return conn.getLastIdCreated('order_status_change_history')
   
 def addOrderStatus(
     conn : SqlServerConn,
-    orderStatusId : int,
-    sequenceNumber : int,
-    orderStatusName : str,
-    isOnManifest : bool,
-    isSetToAutoNotify : bool,
-    isActive : bool,
-    branchId : int,
+    orderStatusId : int | None,
+    sequenceNumber : int | None,
+    orderStatusName : str | None,
+    isOnManifest : bool | None,
+    isSetToAutoNotify : bool | None,
+    isActive : bool | None,
+    branchId : int | None,
 ) -> int:
-    orderStatusRow = conn.sqlGetInfo(
+    orderStatusRow = conn.select(
         'order_status',
         'id',
         whereDetails={
@@ -1294,17 +1240,16 @@ def addOrderStatus(
         'is_active' : isActive,
         'branch_id' : branchId,
     }
-    conn.sqlInsertRow('order_status', data, insertId=orderStatusId)
-    conn.commit()
+    conn.insertRow('order_status', data, insertId=orderStatusId)
 
-    return conn.sqlGetLastIdCreated('order_status')
+    return conn.getLastIdCreated('order_status')
   
 def addOrderType(
     conn : SqlServerConn,
-    orderTypeId : int,
-    orderTypeName : str,
+    orderTypeId : int | None,
+    orderTypeName : str | None,
 ) -> int:
-    orderTypeRow = conn.sqlGetInfo(
+    orderTypeRow = conn.select(
         'order_type',
         'id',
         whereDetails={
@@ -1317,49 +1262,48 @@ def addOrderType(
     data = {
         'order_type_name' : orderTypeName,
     }
-    conn.sqlInsertRow('order_type', data, insertId=orderTypeId)
-    conn.commit()
+    conn.insertRow('order_type', data, insertId=orderTypeId)
 
-    return conn.sqlGetLastIdCreated('order_type')
+    return conn.getLastIdCreated('order_type')
 
 def addOrder(
     conn : SqlServerConn,
-    orderId : int,
-    branchId : int,
-    orderTypeId : int,
-    customerId : int,
-    agentId : int,
-    rateId : int,
-    hawb : str,
-    mawb : str,
-    orderNotes : str,
-    puTimeStart : str,
-    puTimeEnd : str,
-    delTimeStart : str,
-    delTimeEnd : str,
-    puLocationId : int,
-    puNotes : str,
-    delLocationId : int,
-    delNotes : str,
-    driverName : str,
-    podSignee : str,
-    podTimeSigned : str,
-    podNotes : str,
-    statusId : int,
-    ratingWeightCharges : float,
-    ratingFuelCharges : float,
-    ratingServiceCharges : float,
-    ratingTotalCharges : float,
-    ratingTotalExpenses : float,
-    ratingStorageCharges : float,
-    ratingAdjustments : float,
-    ratingNotes : float,
-    quickbooksCustomerListId : str,
-    quickbooksCustomerName : str,
-    quickbooksInvoiceReferenceNumber : str,
-    quickbooksLineSequenceNumber : str,
-    isAutoAssessorials : bool,
-    isWeightChargeCalculated : bool,
+    orderId : int | None,
+    branchId : int | None,
+    orderTypeId : int | None,
+    customerId : int | None,
+    agentId : int | None,
+    rateId : int | None,
+    hawb : str | None,
+    mawb : str | None,
+    orderNotes : str | None,
+    puTimeStart : str | None,
+    puTimeEnd : str | None,
+    delTimeStart : str | None,
+    delTimeEnd : str | None,
+    puLocationId : int | None,
+    puNotes : str | None,
+    delLocationId : int | None,
+    delNotes : str | None,
+    driverName : str | None,
+    podSignee : str | None,
+    podTimeSigned : str | None,
+    podNotes : str | None,
+    statusId : int | None,
+    ratingWeightCharges : float | None,
+    ratingFuelCharges : float | None,
+    ratingServiceCharges : float | None,
+    ratingTotalCharges : float | None,
+    ratingTotalExpenses : float | None,
+    ratingStorageCharges : float | None,
+    ratingAdjustments : float | None,
+    ratingNotes : float | None,
+    quickbooksCustomerListId : str | None,
+    quickbooksCustomerName : str | None,
+    quickbooksInvoiceReferenceNumber : str | None,
+    quickbooksLineSequenceNumber : str | None,
+    isAutoAssessorials : bool | None,
+    isWeightChargeCalculated : bool | None,
 ) -> int:
 
     data = {
@@ -1399,45 +1343,44 @@ def addOrder(
         'is_auto_assessorials' : isAutoAssessorials,
         'is_weight_charge_calculated' : isWeightChargeCalculated,
     }
-    conn.sqlInsertRow('order', data, insertId=orderId)
-    conn.commit()
+    conn.insertRow('order', data, insertId=orderId)
 
-    return conn.sqlGetLastIdCreated('order')
+    return conn.getLastIdCreated('order')
   
 def addOvernightMaintenanceHistory(
     conn : SqlServerConn,
-    dateOvernightMaintenance : str,
-    userId : int,
-    openOrdersIn : int,
-    openOrderAssessorialsIn : int,
-    openOrderDimensionsIn : int,
-    openOrderDriversIn : int,
-    openOrderAttachmentsIn : int,
-    invoicedOrdersIn : int,
-    invoicedOrderAssessorialsIn : int,
-    invoicedOrderDimensionsIn : int,
-    invoicedOrderDriversIn : int,
-    invoicedOrderAttachmentsIn : int,
-    remainingOrdersIn : int,
-    remainingOrderAssessorialsIn : int,
-    remainingOrderDimensionsIn : int,
-    remainingOrderDriversIn : int,
-    remainingOrderAttachmentsIn : int,
-    openOrdersOut : int,
-    openOrderAssessorialsOut : int,
-    openOrderDimensionsOut : int,
-    openOrderDriversOut : int,
-    openOrderAttachmentsOut : int,
-    invoicedOrdersOut : int,
-    invoicedOrderAssessorialsOut : int,
-    invoicedOrderDimensionsOut : int,
-    invoicedOrderDriversOut : int,
-    invoicedOrderAttachmentsOut : int,
-    remainingOrdersOut : int,
-    remainingOrderAssessorialsOut : int,
-    remainingOrderDimensionsOut : int,
-    remainingOrderDriversOut : int,
-    remainingOrderAttachmentsOut : int,
+    dateOvernightMaintenance : str | None,
+    userId : int | None,
+    openOrdersIn : int | None,
+    openOrderAssessorialsIn : int | None,
+    openOrderDimensionsIn : int | None,
+    openOrderDriversIn : int | None,
+    openOrderAttachmentsIn : int | None,
+    invoicedOrdersIn : int | None,
+    invoicedOrderAssessorialsIn : int | None,
+    invoicedOrderDimensionsIn : int | None,
+    invoicedOrderDriversIn : int | None,
+    invoicedOrderAttachmentsIn : int | None,
+    remainingOrdersIn : int | None,
+    remainingOrderAssessorialsIn : int | None,
+    remainingOrderDimensionsIn : int | None,
+    remainingOrderDriversIn : int | None,
+    remainingOrderAttachmentsIn : int | None,
+    openOrdersOut : int | None,
+    openOrderAssessorialsOut : int | None,
+    openOrderDimensionsOut : int | None,
+    openOrderDriversOut : int | None,
+    openOrderAttachmentsOut : int | None,
+    invoicedOrdersOut : int | None,
+    invoicedOrderAssessorialsOut : int | None,
+    invoicedOrderDimensionsOut : int | None,
+    invoicedOrderDriversOut : int | None,
+    invoicedOrderAttachmentsOut : int | None,
+    remainingOrdersOut : int | None,
+    remainingOrderAssessorialsOut : int | None,
+    remainingOrderDimensionsOut : int | None,
+    remainingOrderDriversOut : int | None,
+    remainingOrderAttachmentsOut : int | None,
 ) -> int:
 
     data = {
@@ -1474,22 +1417,21 @@ def addOvernightMaintenanceHistory(
         'remaining_order_drivers_out' : remainingOrderDriversOut,
         'remaining_order_attachments_out' : remainingOrderAttachmentsOut,
     }
-    conn.sqlInsertRow('overnight_maintenance_history', data)
-    conn.commit()
+    conn.insertRow('overnight_maintenance_history', data)
 
-    return conn.sqlGetLastIdCreated('overnight_maintenance_history')
+    return conn.getLastIdCreated('overnight_maintenance_history')
   
 def addPhone(
     conn : SqlServerConn,
-    countryCode : str,
-    areaCode : str,
-    phoneNumber : str,
-    phoneExtension : str,
-) -> int:
+    countryCode : str | None,
+    areaCode : str | None,
+    phoneNumber : str | None,
+    phoneExtension : str | None,
+) -> int | None:
     if areaCode == '' or phoneNumber == '':
         return None
     
-    phoneRow = conn.sqlGetInfo('phone', 'id',
+    phoneRow = conn.select('phone', 'id',
         whereDetails={
             'country_code' : countryCode,
             'area_code' : areaCode,
@@ -1505,17 +1447,16 @@ def addPhone(
         'phone_number' : phoneNumber,
         'phone_extension' : phoneExtension,
     }
-    conn.sqlInsertRow('phone', data)
-    conn.commit()
+    conn.insertRow('phone', data)
 
-    return conn.sqlGetLastIdCreated('phone')
+    return conn.getLastIdCreated('phone')
   
 def addPositionChangeHistory(
     conn : SqlServerConn,
-    positionId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    positionId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -1524,20 +1465,19 @@ def addPositionChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('position_change_history', data)
-    conn.commit()
+    conn.insertRow('position_change_history', data)
 
-    return conn.sqlGetLastIdCreated('position_change_history')
+    return conn.getLastIdCreated('position_change_history')
   
 def addPosition(
     conn : SqlServerConn,
-    positionId : int,
-    positionName : str,
-    securityLevel : int,
-    isActive : bool,
-    branchId : int,
+    positionId : int | None,
+    positionName : str | None,
+    securityLevel : int | None,
+    isActive : bool | None,
+    branchId : int | None,
 ) -> int:
-    positionRow = conn.sqlGetInfo(
+    positionRow = conn.select(
         'position',
         'id',
         whereDetails={
@@ -1555,37 +1495,35 @@ def addPosition(
         'is_active' : isActive,
         'branch_id' : branchId,
     }
-    conn.sqlInsertRow('position', data, insertId=positionId)
-    conn.commit()
+    conn.insertRow('position', data, insertId=positionId)
 
-    return conn.sqlGetLastIdCreated('position')
+    return conn.getLastIdCreated('position')
   
 def addPostalCodeRegion(
     conn : SqlServerConn,
-    postalCodeId : int,
-    regionId : int,
+    postalCodeId : int | None,
+    regionId : int | None,
 ) -> int:
     data = {
         'postal_code_id' : postalCodeId,
         'region_id' : regionId,
     }
-    conn.sqlInsertRow('postal_code_region', data)
-    conn.commit()
+    conn.insertRow('postal_code_region', data)
 
-    return conn.sqlGetLastIdCreated('postal_code_region')
+    return conn.getLastIdCreated('postal_code_region')
 
 def addRateArea(
     conn : SqlServerConn,
-    rateId : int,
-    area : str,
-    rateMin : float,
-    rate100 : float,
-    rate1000 : float,
-    rate2000 : float,
-    rate5000 : float,
-    rateMax : float,
+    rateId : int | None,
+    area : str | None,
+    rateMin : float | None,
+    rate100 : float | None,
+    rate1000 : float | None,
+    rate2000 : float | None,
+    rate5000 : float | None,
+    rateMax : float | None,
 ) -> int:
-    rateAreaRow = conn.sqlGetInfo(
+    rateAreaRow = conn.select(
         'rate_area',
         'id',
         whereDetails={
@@ -1612,17 +1550,16 @@ def addRateArea(
         'rate_5000' : rate5000,
         'rate_max' : rateMax,
     }
-    conn.sqlInsertRow('rate_area', data)
-    conn.commit()
+    conn.insertRow('rate_area', data)
 
-    return conn.sqlGetLastIdCreated('rate_area')
+    return conn.getLastIdCreated('rate_area')
   
 def addRateChangeHistory(
     conn : SqlServerConn,
-    rateId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    rateId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -1631,22 +1568,21 @@ def addRateChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('rate_change_history', data)
-    conn.commit()
+    conn.insertRow('rate_change_history', data)
 
-    return conn.sqlGetLastIdCreated('rate_change_history')
+    return conn.getLastIdCreated('rate_change_history')
   
 def addRate(
     conn : SqlServerConn,
-    rateId : int,
-    rateName : str,
-    branchId : int,
-    isDefault : bool,
-    isActive : bool,
-    dateAdded : str,
-    addedByUserId : int,
+    rateId : int | None,
+    rateName : str | None,
+    branchId : int | None,
+    isDefault : bool | None,
+    isActive : bool | None,
+    dateAdded : str | None,
+    addedByUserId : int | None,
 ) -> int:
-    rateRow = conn.sqlGetInfo(
+    rateRow = conn.select(
         'rate',
         'id',
         whereDetails={
@@ -1669,21 +1605,22 @@ def addRate(
         'date_added' : dateAdded,
         'added_by_user_id' : addedByUserId,
     }
-    conn.sqlInsertRow('rate', data, insertId=rateId)
-    conn.commit()
+    conn.insertRow('rate', data, insertId=rateId)
 
-    return conn.sqlGetLastIdCreated('rate')
+    return conn.getLastIdCreated('rate')
   
 def addRegion(
     conn : SqlServerConn,
-    regionDetails : Dict[str, str],
-    countryDetails : Dict[str, str]
-) -> int : 
+    regionDetails : dict[str, str],
+    countryDetails : dict[str, str]
+) -> int | None: 
     if not regionDetails or not countryDetails:
         return None
     
     countryId = addCountry(conn, countryDetails=countryDetails)
-    countryIsoCode = conn.sqlGetInfo('country', 'iso_code_2', f"[id] = '{countryId}'")[0].iso_code_2
+    countrySelectInfo = conn.select('country', 'iso_code_2', f"[id] = '{countryId}'")
+    if not countrySelectInfo == None:
+        countryIsoCode = countrySelectInfo[0].iso_code_2
     
     
     if 'regionName' in regionDetails:      
@@ -1691,7 +1628,7 @@ def addRegion(
         
         if not regionName:
           return None
-        regionRow = conn.sqlGetInfo('region', 'id', f"[region_name] = '{regionName}' AND [country_id] = {countryId}")
+        regionRow = conn.select('region', 'id', f"[region_name] = '{regionName}' AND [country_id] = {countryId}")
         if regionRow:
             return regionRow[0].id
         
@@ -1701,14 +1638,14 @@ def addRegion(
                 break
         data = {
             'region_name' : regionName,
-            'iso_code' : correctRegion[3:].lower(),
+            'iso_code' : correctRegion['name'][3:].lower(),
             'country_id' : countryId
         } 
     elif 'isoCode' in regionDetails:
         isoCode = regionDetails['isoCode'].lower().strip()
         if not isoCode:
             return None
-        regionRow = conn.sqlGetInfo('region', 'id', f"[iso_code] = '{isoCode}' AND [country_id] = '{countryId}'")
+        regionRow = conn.select('region', 'id', f"[iso_code] = '{isoCode}' AND [country_id] = '{countryId}'")
         if regionRow:
             return regionRow[0].id
         data = {
@@ -1717,17 +1654,16 @@ def addRegion(
             'country_id' : countryId
         }
         
-    conn.sqlInsertRow('region', data)    
-    conn.commit()
+    conn.insertRow('region', data)    
     
-    return conn.sqlGetLastIdCreated('region')
+    return conn.getLastIdCreated('region')
   
 def addSpecialChangeHistory(
     conn : SqlServerConn,
-    specialId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    specialId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -1736,22 +1672,21 @@ def addSpecialChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('special_change_history', data)
-    conn.commit()
+    conn.insertRow('special_change_history', data)
 
-    return conn.sqlGetLastIdCreated('special_change_history')
+    return conn.getLastIdCreated('special_change_history')
   
 def addSpecial(
     conn : SqlServerConn,
-    oldId : int,
-    branchId : int,
-    weekday : int,
-    startTime : int,
-    endTime : int,
-    area : str,
-    isActive : bool,
+    oldId : int | None,
+    branchId : int | None,
+    weekday : int | None,
+    startTime : int | None,
+    endTime : int | None,
+    area : str | None,
+    isActive : bool | None,
 ) -> int:
-    specialRow = conn.sqlGetInfo(
+    specialRow = conn.select(
         'special',
         'id',
         whereDetails={
@@ -1776,18 +1711,17 @@ def addSpecial(
         'area' : area,
         'is_active' : isActive,
     }
-    conn.sqlInsertRow('special', data)
-    conn.commit()
+    conn.insertRow('special', data)
 
-    return conn.sqlGetLastIdCreated('special')
+    return conn.getLastIdCreated('special')
   
 
 def addUserChangeHistory(
     conn : SqlServerConn,
-    userChangedId : int,
-    userId : int,
-    dateChanged : str,
-    changes : str,
+    userChangedId : int | None,
+    userId : int | None,
+    dateChanged : str | None,
+    changes : str | None,
 ) -> int:
 
     data = {
@@ -1796,40 +1730,39 @@ def addUserChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    conn.sqlInsertRow('user_change_history', data)
-    conn.commit()
+    conn.insertRow('user_change_history', data)
 
-    return conn.sqlGetLastIdCreated('user_change_history')
+    return conn.getLastIdCreated('user_change_history')
   
 def addUser(
     conn : SqlServerConn,
-    userId : int,
-    username : str,
-    email : str,
-    passwordHash : str,
-    passwordSalt : str,
-    namePrefix : str,
-    firstName : str,
-    lastName : str,
-    nameSuffix : str,
-    addressId : int,
-    branchId : int,
-    commissionRate : float,
-    dateHired : str,
-    dateTerminated : str,
-    phoneMainId : int,
-    phoneHomeId : int,
-    phoneMobileId : int,
-    positionId : int,
-    tsaNumber : str,
-    tsaType : str,
-    tsaTaken : str,
-    isActive : bool,
-    isDefaultDocOwner : bool,
-    isSecurityCoordinator : bool,
-    isTsaTrainer : bool,
+    userId : int | None,
+    username : str | None,
+    email : str | None,
+    passwordHash : str | None,
+    passwordSalt : str | None,
+    namePrefix : str | None,
+    firstName : str | None,
+    lastName : str | None,
+    nameSuffix : str | None,
+    addressId : int | None,
+    branchId : int | None,
+    commissionRate : float | None,
+    dateHired : str | None,
+    dateTerminated : str | None,
+    phoneMainId : int | None,
+    phoneHomeId : int | None,
+    phoneMobileId : int | None,
+    positionId : int | None,
+    tsaNumber : str | None,
+    tsaType : str | None,
+    tsaTaken : str | None,
+    isActive : bool | None,
+    isDefaultDocOwner : bool | None,
+    isSecurityCoordinator : bool | None,
+    isTsaTrainer : bool | None,
 ) -> int:
-    userRow = conn.sqlGetInfo(
+    userRow = conn.select(
         'user',
         'id',
         whereDetails    ={
@@ -1887,8 +1820,7 @@ def addUser(
         'is_security_coordinator' : isSecurityCoordinator,
         'is_tsa_trainer' : isTsaTrainer,
     }
-    conn.sqlInsertRow('user', data, insertId=userId)
-    conn.commit()
+    conn.insertRow('user', data, insertId=userId)
 
-    return conn.sqlGetLastIdCreated('user')
+    return conn.getLastIdCreated('user')
   
