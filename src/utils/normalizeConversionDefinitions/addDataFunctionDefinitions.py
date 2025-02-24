@@ -1,6 +1,6 @@
 from .helpers import *
 
-from typing import Any
+from typing import Any, Optional
 
 def addAciDataChangeHistory(
     conn : SqlServerConn,
@@ -16,7 +16,6 @@ def addAciDataChangeHistory(
         'date_changed' : dateChanged,
         'changes' : changes,
     }
-    
     
     conn.insertRow('aci_data_change_history', data)
 
@@ -480,7 +479,7 @@ def addBranch(
         'cartage_agent_type' : cartageAgentType,
         'fuel_service_charge' : fuelServiceCharge,
         'transfer_rate' : transferRate,
-        'international_air_dim_divisor' : int | NoneernationalAirDimDivisor,
+        'international_air_dim_divisor' : int | internationalAirDimDivisor,
         'domestic_air_dim_divisor' : domesticAirDimDivisor,
         'truck_dim_divisor' : truckDimDivisor,
         'aci_low' : aciLow,
@@ -920,8 +919,8 @@ def addFax(
   
 def addHoliday(
     conn : SqlServerConn,
-    holidayName : str | None,
-    holidayDate : str | None,
+    holidayName : str,
+    holidayDate : str,
 ) -> int:
     holidayRow = conn.select(
         'holiday',
@@ -986,6 +985,7 @@ def addLocationDefaultAssessorial(
   
 def addLocation(
     conn : SqlServerConn,
+    locationId : int | None,
     branchId : int | None,
     companyName : str | None,
     locationName : str | None,
@@ -1040,7 +1040,7 @@ def addLocation(
         'default_wait_time' : defaultWaitTime,
         'is_active' : isActive,
     }
-    conn.insertRow('location', data)
+    conn.insertRow('location', data, insertId=locationId)
 
     return conn.getLastIdCreated('location')
   

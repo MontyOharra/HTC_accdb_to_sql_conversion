@@ -1232,8 +1232,9 @@ def convert_HTC300_G060_T010_Addresses(
         contactFirstName=row.FavFirstName,
         contactLastName=row.FavLastName,
         contactEmail=row.FavEMail,
-        phoneId=phoneId,
+        contactPhoneId=phoneId,
         isCarrier=row.FavCarrierYN,
+        isLocal=row.FavLocalYN,
         isInternational=row.FavInternational,
         defaultWaitTime=row.FavWaitTimeDefault,
         isActive=row.FavActive

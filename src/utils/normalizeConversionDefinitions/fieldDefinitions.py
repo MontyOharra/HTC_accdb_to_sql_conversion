@@ -1,12 +1,12 @@
 from typing import List
-from src.types.types import Field
+from src.types import Field
 
 aciDataChangeHistoryFields: List[Field] = [
-    Field(fieldName="id", fieldDetails="INTEGER PRIMARY KEY NOT NULL IDENTITY(1, 1)"),
-    Field(fieldName="aci_data_id", fieldDetails="INTEGER NOT NULL"),
-    Field(fieldName="user_id", fieldDetails="INTEGER"),
-    Field(fieldName="date_changed", fieldDetails="DATETIME2 NOT NULL"),
-    Field(fieldName="changes", fieldDetails="NTEXT NOT NULL"),
+    Field(fieldName="id", fieldDetails="INTEGER NOT NULL IDENTITY(1, 1)", isPrimaryKey=True),
+    Field(fieldName="aci_data_id", fieldDetails="INTEGER NOT NULL", isPrimaryKey=False),
+    Field(fieldName="user_id", fieldDetails="INTEGER", isPrimaryKey=False),
+    Field(fieldName="date_changed", fieldDetails="DATETIME2 NOT NULL", isPrimaryKey=False),
+    Field(fieldName="changes", fieldDetails="NTEXT NOT NULL", isPrimaryKey=False),
 ]
 
 aciDataFields: List[Field] = [
