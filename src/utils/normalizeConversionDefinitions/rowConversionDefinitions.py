@@ -12,7 +12,7 @@ def convert_HTC000_G010_T010_Company_Info(
     sqlConnFactory: Callable[[], SqlServerConn],
     row: PyODBCRow
 ) -> None:
-    sqlConn = sqlConnFactory()
+    conn = sqlConnFactory()
     phoneId = addPhone(
         conn,
         countryCode='1',
@@ -41,19 +41,19 @@ def convert_HTC000_G010_T010_Company_Info(
     addCompany(
         conn,
         companyId=row.CoID,
-        companyName=row.CoName,
+        companyName=row.CoName.lower(),
         isActive=row.CoActive,
-        scac=row.CoSCAC,
+        scac=row.CoSCAC.lower(),
         employerIdentificationNo=row.CoTaxID,
-        website=row.CoWebPage,
+        website=row.CoWebPage.lower(),
         isTsaCompliant=row.CoTSACompliant,
-        airportCode=row.CoAirportCode,
-        cartageAgentType=row.CoCartageAgentType,
-        logoPath=row.CoLogo,
+        airportCode=row.CoAirportCode.lower(),
+        cartageAgentType=row.CoCartageAgentType.lower(),
+        logoPath=row.CoLogo.lower(),
         addressId=addressId,
         phoneId=phoneId,
         faxId=faxId,
-        email=row.CoOfcrEmail,
+        email=row.CoOfcrEmail.lower(),
         notes=row.CoNotes
     )
 
@@ -64,7 +64,7 @@ def convert_HTC000_G025_T010_Positions(
     addPosition(
         conn,
         positionId=row.Posn_ID,
-        positionName=row.Posn_Title,
+        positionName=row.Posn_Title.lower(),
         securityLevel=row.Posn_SecurityLevel,
         isActive=row.Posn_Status,
         branchId=row.Posn_BrID
@@ -97,12 +97,12 @@ def convert_HTC000_G090_T010_Staff(
     )
     addressId = addAddress(
         conn,
-        row.Staff_Home_Street1,
-        row.Staff_Home_Street2,
-        row.Staff_Home_City,
-        correctPostalCode(row.Staff_Home_Zip),
-        {'isoCode': row.Staff_Home_StAbbr},
-        {'isoCode3': row.Staff_Home_Country}
+        row.Staff_Home_Street1.lower(),
+        row.Staff_Home_Street2.lower(),
+        row.Staff_Home_City.lower(),
+        correctPostalCode(row.Staff_Home_Zip).lower(),
+        {'isoCode': row.Staff_Home_StAbbr.lower()},
+        {'isoCode3': row.Staff_Home_Country.lower()}
     )
     
     if row.Staff_Password.strip() == '':
