@@ -3,6 +3,12 @@ from .indexDefinitions import *
 from .foreignKeyDefinitions import *
 from .rowConversionDefinitions import *
 
+from src.classes.AccessConn import AccessConn
+from src.classes.SqlServerConn import SqlServerConn
+
+from src.types import Field, Index, ForeignKey
+from collections.abc import Callable
+
 sqlTableDefinitions = {
     "aci_data": (aciDataFields, aciDataIndexes, aciDataForeignKeys),
     "aci_data_change_history": (aciDataChangeHistoryFields, aciDataChangeHistoryIndexes, aciDataChangeHistoryForeignKeys),
@@ -120,3 +126,13 @@ accessConversionDefinitions = {
     #"HTC300_G090_T030 Staff Chg History": convert_HTC300_G090_T030_Staff_Chg_History,
     #"HTC400_G900_T010 Archive Event Log": convert_HTC400_G900_T010_Archive_Event_Log,
 }
+
+def getNormalizationDefinitions(
+) -> tuple[
+        dict[str, tuple[list[Field], list[Index], list[ForeignKey]]], 
+        dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], None]] 
+      ]:
+    return (
+        sqlTableDefinitions,
+        accessConversionDefinitions
+    )

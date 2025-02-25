@@ -4,6 +4,7 @@ init:
 	rm -rf env venv
 	python -m venv env
 	source env/Scripts/activate && \
+	pip install wheel && \
 	pip install -r requirements.txt && \
 	deactivate
 

@@ -91,8 +91,8 @@ def runConversion(
                 sqlCreationLogQueue.put(("ERROR", "SQL tables creation process has been stopped."))
                 errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
         except Exception as e:
-            sqlCreationLogQueue.put(("ERROR", f"Critical Error: {e}\n     {traceback.format_exc()}"))
-            errorLogQueue.put(("sqlCreation", f"Critical Error: {e}\n     {traceback.format_exc()}"))
+            sqlCreationLogQueue.put(("ERROR", f"Critical Error: suck my balls{e}\n     {traceback.format_exc()}"))
+            errorLogQueue.put(("sqlCreation", f"Critical Error: suck my nuts{e}\n     {traceback.format_exc()}"))
         except KeyboardInterrupt:
             sqlCreationLogQueue.put(("ERROR", f"Keyboard interrupt during SQL tables creation process."))
             errorLogQueue.put(("sqlCreation", "Keyboard interrupt during SQL tables creation process."))
