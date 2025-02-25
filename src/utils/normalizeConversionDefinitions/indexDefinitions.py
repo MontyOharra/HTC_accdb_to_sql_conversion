@@ -2,24 +2,7 @@ from typing import List
 from src.types import Index
 
 aciDataChangeHistoryIndexes: List[Index] = [
-    Index(
-        indexName="IX_aciDataChangeHistory_aciDataId",
-        indexFields=["aciDataId"],
-        indexType="nonclustered",
-        isUnique=False
-    ),
-    Index(
-        indexName="IX_aciDataChangeHistory_userId", 
-        indexFields=["userId"],
-        indexType="nonclustered",
-        isUnique=False
-    ),
-    Index(
-        indexName="IX_aciDataChangeHistory_changeDate",
-        indexFields=["changeDate"], 
-        indexType="nonclustered",
-        isUnique=False
-    )
+
 ]
 
 aciDataIndexes: List[Index] = [

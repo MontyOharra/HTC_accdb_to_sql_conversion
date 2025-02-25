@@ -54,7 +54,7 @@ def createSqlTable(
         except Exception as err:
             # If there is an error, set creation status to "Failure" and add the error to the error log
             creationStatus = "Failure"
-            errorLogMessages.append(("sqlTableCreation", tableName, err))
+            errorLogMessages.append(("sqlCreation", tableName, err))
         try:
             # Add indexes
             for index in tableIndexes:
@@ -63,7 +63,7 @@ def createSqlTable(
         except Exception as err:
             # If there is an error, set indexes status to "Failure" and add the error to the error log
             indexesStatus = "Failure"
-            errorLogMessages.append(("sqlTableCreation", tableName, err))
+            errorLogMessages.append(("sqlCreation", tableName, err))
             
         # Create a SqlCreationDetails object with the creation and indexes status
         sqlCreationDetails : SqlCreationDetails = SqlCreationDetails(creationStatus, indexesStatus)
@@ -120,7 +120,7 @@ def createSqlTables(
                     logQueue.put(('UPDATE', sqlCreationData))
                     for errorLogMessage in errorLogMessages:
                         # Send any errors to the error queue
-                        errorQueue.put(('sqlTableCreation', errorLogMessage))
+                        errorQueue.put(('sqlCreation', errorLogMessage))
                 except KeyboardInterrupt:
                     # Cancel all futures if the process is interrupted
                     for f in futures:
@@ -128,7 +128,7 @@ def createSqlTables(
                     raise
                 except Exception as err:
                     # If any other error occurs, send it to the error queue
-                    errorQueue.put(("sqlTableCreation", err))   
+                    errorQueue.put(("sqlCreation", err))   
             # Return True to indicate that the process has completed
             return True
     except KeyboardInterrupt:
@@ -204,14 +204,13 @@ def convertAccessTables(
                     accessConversionData, errorLogMessages = future.result()
                     logQueue.put(('UPDATE', accessConversionData))
                     for errorLogMessage in errorLogMessages:
-                        print(errorLogMessage)
-                        errorQueue.put(("accessTableConversion", errorLogMessage))
+                        errorQueue.put(("accessConversion", errorLogMessage))
                 except KeyboardInterrupt:
                     for f in futures:
                         f.cancel()
                     raise
                 except Exception as err:
-                    errorQueue.put(("sqlTableCreation", err)) 
+                    errorQueue.put(("sqlCreation", err)) 
             return True
     except KeyboardInterrupt:
         for f in futures:

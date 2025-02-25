@@ -17,3 +17,6 @@ cli:
 	source env/Scripts/activate && \
 	python -u -m applications.cli.main && \
 	deactivate
+
+clear-logs:
+	rm -rf logs/*
