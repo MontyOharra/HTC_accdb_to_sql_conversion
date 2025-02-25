@@ -1,16 +1,26 @@
-from concurrent.futures import as_completed
+from concurrent.futures import as_completed, Future
 from pebble import ProcessPool
 from queue import Queue
 
 from src.classes.SqlServerConn import SqlServerConn
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, TypeVar
 from src.types import Field, Index, ForeignKey, SqlCreationDetails
 
 from .helpers import generateAccessDbNameCache
 
 from rich.console import Console
+
+T = TypeVar("T")
+
+def schedule_typed(
+    executor: Any,  # Replace with your executor's type if available.
+    func: Callable[..., T],
+    *args: Any,
+    **kwargs: Any
+) -> Future[T]:
+    return executor.schedule(func, args=args, kwargs=kwargs)
 
 def getRows(
     accessConnFactory : Callable,
@@ -44,7 +54,7 @@ def createSqlTable(
     # Mark table in progress
     creationStatus = "In Progress"
     indexesStatus = "In Progress"
-    errorLogMessages = []
+    errorLogMessages : list[tuple[str, str, Exception]] = []
     try:
         sqlConn = sqlConnFactory()
         try:
@@ -102,13 +112,13 @@ def createSqlTables(
             # Loops through each table in sqlTableDefinitions
             # Schedules a function to create the table
             futures = [
-                executor.schedule(
-                    createSqlTable, args=[
-                      sqlConnFactory,
-                      tableName,
-                      fields,
-                      indexes
-                    ]
+                schedule_typed(
+                    executor,
+                    createSqlTable,
+                    sqlConnFactory,
+                    tableName,
+                    fields,
+                    indexes
                 )
               for tableName, (fields, indexes, fks) in sqlTableDefinitions.items()
             ]
