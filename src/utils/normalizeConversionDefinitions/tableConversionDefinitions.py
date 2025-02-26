@@ -67,17 +67,17 @@ sqlTableDefinitions = {
 
 accessConversionDefinitions = {
     "HTC000_G010_T010 Company Info": convert_HTC000_G010_T010_Company_Info,
-    "HTC000_G025_T010 Positions": convert_HTC000_G025_T010_Positions,
-    "HTC000_G090_T010 Staff": convert_HTC000_G090_T010_Staff,
+    #"HTC000_G025_T010 Positions": convert_HTC000_G025_T010_Positions,
+    #"HTC000_G090_T010 Staff": convert_HTC000_G090_T010_Staff,
     # "HTC010_G000_T000 OrderType Values": convert_HTC010_G000_T000_OrderType_Values,
     # "HTC010_G000_T000 US Zip Codes": convert_HTC010_G000_T000_US_Zip_Codes,
     # "HTC010_G100_T010 CertificationTestCatalog": convert_HTC010_G100_T010_Certification_Test_Catalog,
-    "HTC300_G000_T000 Archive Update History": convert_HTC300_G000_T000_Archive_Update_History,
-    "HTC300_G000_T000 Holidays": convert_HTC300_G000_T000_Holidays,
-    "HTC300_G000_T000 Over Night Update History": convert_HTC300_G000_T000_Over_Night_Update_History,
-    "HTC300_G000_T020 Branch Info": convert_HTC300_G000_T020_Branch_Info,
-    "HTC300_G000_T030 Co Info Chg History": convert_HTC300_G000_T030_Co_Info_Chg_History,
-    "HTC300_G000_T040 Branch Info Chg History": convert_HTC300_G000_T040_Branch_Info_Chg_History,
+    #"HTC300_G000_T000 Archive Update History": convert_HTC300_G000_T000_Archive_Update_History,
+    #"HTC300_G000_T000 Holidays": convert_HTC300_G000_T000_Holidays,
+    #"HTC300_G000_T000 Over Night Update History": convert_HTC300_G000_T000_Over_Night_Update_History,
+    #"HTC300_G000_T020 Branch Info": convert_HTC300_G000_T020_Branch_Info,
+    #"HTC300_G000_T030 Co Info Chg History": convert_HTC300_G000_T030_Co_Info_Chg_History,
+    #"HTC300_G000_T040 Branch Info Chg History": convert_HTC300_G000_T040_Branch_Info_Chg_History,
     #"HTC300_G010_T010 DFW_ACI_Data": convert_HTC300_G010_T010_DFW_ACI_Data,
     #"HTC300_G010_T030 ACI Update History": convert_HTC300_G010_T030_ACI_Update_History,
     #"HTC300_G020_T010 Status Values": convert_HTC300_G020_T010_Status_Values,
@@ -130,7 +130,7 @@ accessConversionDefinitions = {
 def getNormalizationDefinitions(
 ) -> tuple[
         dict[str, tuple[list[Field], list[Index], list[ForeignKey]]], 
-        dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], None]] 
+        dict[str, Callable[[Callable[[], SqlServerConn], PyODBCRow], None]] 
       ]:
     return (
         sqlTableDefinitions,

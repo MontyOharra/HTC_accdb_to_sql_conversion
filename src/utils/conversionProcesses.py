@@ -1,6 +1,7 @@
 from concurrent.futures import as_completed, Future
 from pebble import ProcessPool
 from queue import Queue
+import traceback
 
 from src.classes.SqlServerConn import SqlServerConn
 
@@ -40,7 +41,7 @@ def createSqlTable(
     tableName : str, 
     tableFields : list[Field], 
     tableIndexes : list[Index],
-) -> tuple[tuple[str, SqlCreationDetails], list[tuple[str, str, Exception]]]:
+) -> tuple[tuple[str, SqlCreationDetails], list[tuple[str, str]]]:
     """
         sqlConnFactory - A function that returns a SQL Server connection.
         tableName - Name of the table to create.
@@ -54,7 +55,7 @@ def createSqlTable(
     # Mark table in progress
     creationStatus = "In Progress"
     indexesStatus = "In Progress"
-    errorLogMessages : list[tuple[str, str, Exception]] = []
+    errorLogMessages : list[tuple[str, str]] = []
     try:
         sqlConn = sqlConnFactory()
         try:
@@ -64,7 +65,7 @@ def createSqlTable(
         except Exception as err:
             # If there is an error, set creation status to "Failure" and add the error to the error log
             creationStatus = "Failure"
-            errorLogMessages.append(("sqlCreation", tableName, err))
+            errorLogMessages.append((tableName, str(err) + traceback.format_exc()))
         try:
             # Add indexes
             for index in tableIndexes:
@@ -73,7 +74,7 @@ def createSqlTable(
         except Exception as err:
             # If there is an error, set indexes status to "Failure" and add the error to the error log
             indexesStatus = "Failure"
-            errorLogMessages.append(("sqlCreation", tableName, err))
+            errorLogMessages.append((tableName, str(err) + traceback.format_exc()))
             
         # Create a SqlCreationDetails object with the creation and indexes status
         sqlCreationDetails : SqlCreationDetails = SqlCreationDetails(creationStatus, indexesStatus)
@@ -157,7 +158,10 @@ def convertAccessRows(
                               [Callable[[], SqlServerConn], tuple[Any]], 
                               None
                             ]
-) -> tuple[tuple[str, dict[str, int]], list[Exception]]:
+) -> tuple[
+    tuple[str, dict[str, int]], 
+    list[tuple[str, str]]
+]:
     rowsConverted = 0
     rowErrors = 0
     errorLogMessages = []
@@ -169,7 +173,7 @@ def convertAccessRows(
             except Exception as err:
                 rowErrors += 1
                 rowsConverted += 1
-                errorLogMessages.append(err)
+                errorLogMessages.append((tableName, str(err) + traceback.format_exc()))
                 
         accessConversionDetails = {'rowsConverted' : rowsConverted, 'rowErrors' : rowErrors}   
         accessConversionData = (tableName, accessConversionDetails)          
@@ -220,7 +224,7 @@ def convertAccessTables(
                         f.cancel()
                     raise
                 except Exception as err:
-                    errorQueue.put(("sqlCreation", err)) 
+                    errorQueue.put(("accessConversion", err)) 
             return True
     except KeyboardInterrupt:
         for f in futures:

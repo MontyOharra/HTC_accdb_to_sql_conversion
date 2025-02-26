@@ -3,14 +3,12 @@ from typing import Any, Optional, Callable
 
 
 def addAciDataChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     aciDataId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-    conn = connFactory()
-
     data = {
         "aci_data_id": aciDataId,
         "user_id": userId,
@@ -24,7 +22,7 @@ def addAciDataChangeHistory(
 
 
 def addAciData(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     aciDataId: int | None,
     cityId: int | None,
     postalCodeId: int | None,
@@ -41,8 +39,6 @@ def addAciData(
     branchId: int | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
-
     aciDataRow = conn.select(
         "aci_data",
         "id",
@@ -87,7 +83,7 @@ def addAciData(
 
 
 def addAddress(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     addressLine1: str | None,
     addressLine2: str | None | None,
     cityName: str | None,
@@ -95,8 +91,6 @@ def addAddress(
     regionDetails: dict[str, Any],
     countryDetails: dict[str, Any],
 ) -> int | None:
-
-    conn = connFactory()
 
     if (
         not addressLine1
@@ -108,7 +102,7 @@ def addAddress(
         return None
 
     cityId, postalCodeId = addCityPostalCode(
-        connFactory,
+        conn,
         cityName,
         postalCode,
         regionDetails=regionDetails,
@@ -151,14 +145,12 @@ def addAddress(
 
 
 def addAgentChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     agentId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "agent_id": agentId,
@@ -172,7 +164,7 @@ def addAgentChangeHistory(
 
 
 def addAgent(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     customerId: int | None,
     emailAddress: str | None,
     firstName: str | None,
@@ -183,7 +175,6 @@ def addAgent(
     isSetToAutoNotifyEmail: bool | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     agentRow = conn.select(
         "agent",
         "id",
@@ -219,14 +210,13 @@ def addAgent(
 
 
 def addAgentCertificationTest(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     agentId: int | None,
     certificationTestId: int | None,
     dateTested: str | None,
     testScore: int | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     agentCertificationTestRow = conn.select(
         "agent_certification_test",
         "id",
@@ -253,14 +243,12 @@ def addAgentCertificationTest(
 
 
 def addArchiveErrorLog(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderId: int | None,
     archiveDate: str | None,
     userId: int | None,
     details: int | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "order_id": orderId,
@@ -274,7 +262,7 @@ def addArchiveErrorLog(
 
 
 def addArchiveHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     dateArchived: str | None,
     openOrders: int | None,
     openOrderAssessorials: int | None,
@@ -318,7 +306,6 @@ def addArchiveHistory(
     removedOrderHistory: int | None,
     removedOrderHawbs: int | None,
 ) -> int:
-    conn = connFactory()
     data = {
         "date_archived": dateArchived,
         "open_orders": openOrders,
@@ -369,14 +356,12 @@ def addArchiveHistory(
 
 
 def addAssessorialChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     assessorialId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "assessorial_id": assessorialId,
@@ -390,7 +375,7 @@ def addAssessorialChangeHistory(
 
 
 def addAssessorial(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     assessorialId: int | None,
     branchId: int | None,
     assessorialName: str | None,
@@ -403,7 +388,6 @@ def addAssessorial(
     notes: str | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     assessorialRow = conn.select(
         "assessorial",
         "id",
@@ -440,14 +424,12 @@ def addAssessorial(
 
 
 def addBranchChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     branchId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "branch_id": branchId,
@@ -461,7 +443,7 @@ def addBranchChangeHistory(
 
 
 def addBranch(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     branchId: int | None,
     branchName: str | None,
     companyId: int | None,
@@ -481,7 +463,6 @@ def addBranch(
     notes: str | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     branchRow = conn.select(
         "branch",
         "id",
@@ -532,13 +513,12 @@ def addBranch(
 
 
 def addCertificationTest(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     certificationTestId: int | None,
     certificationName: str | None,
     certificationTestTrainerId: int | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     certificationTestRow = conn.select(
         "certification_test",
         "id",
@@ -562,13 +542,12 @@ def addCertificationTest(
 
 
 def addCertificationTestChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     certificationTestId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-    conn = connFactory()
     certificationTestChangeHistoryRow = conn.select(
         "certification_test_change_history",
         "id",
@@ -593,11 +572,10 @@ def addCertificationTestChangeHistory(
 
 
 def addCertificationTestTrainer(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     trainerName: str | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     certificationTestTrainerRow = conn.select(
         "certification_test_trainer",
         "id",
@@ -616,13 +594,12 @@ def addCertificationTestTrainer(
 
 
 def addCertificationTestTrainerChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     certificationTestTrainerId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-    conn = connFactory()
     certificationTestTrainerChangeHistoryRow = conn.select(
         "certification_test_trainer_change_history",
         "id",
@@ -648,11 +625,10 @@ def addCertificationTestTrainerChangeHistory(
 
 
 def addCityRegion(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     cityId: int | None,
     regionId: int | None,
 ) -> int:
-    conn = connFactory()
     data = {
         "city_id": cityId,
         "region_id": regionId,
@@ -663,14 +639,12 @@ def addCityRegion(
 
 
 def addCityPostalCode(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     cityName: str | None,
     postalCode: str | None,
     regionDetails: dict[str, str],
     countryDetails: dict[str, str],
 ) -> tuple[int | None, int | None]:
-
-    conn = connFactory()
 
     if not cityName or not postalCode or not regionDetails or not countryDetails:
         return (None, None)
@@ -678,7 +652,7 @@ def addCityPostalCode(
     cityName = cityName.lower()
     postalCode = postalCode.lower()
 
-    regionId = addRegion(connFactory, regionDetails, countryDetails)
+    regionId = addRegion(conn, regionDetails, countryDetails)
 
     if regionId == None:
         return (None, None)
@@ -729,14 +703,12 @@ def addCityPostalCode(
 
 
 def addCompanyChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     companyId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "company_id": companyId,
@@ -750,7 +722,7 @@ def addCompanyChangeHistory(
 
 
 def addCompany(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     companyId: int | None,
     companyName: str | None,
     addressId: int | None,
@@ -767,7 +739,6 @@ def addCompany(
     isTsaCompliant: bool | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     data = {
         "company_name": companyName,
         "address_id": addressId,
@@ -790,9 +761,8 @@ def addCompany(
 
 
 def addCountry(
-    connFactory: Callable[[], SqlServerConn], countryDetails: dict[str, str]
+    conn: SqlServerConn, countryDetails: dict[str, str]
 ) -> int | None:
-    conn = connFactory()
     if not countryDetails:
         return None
     if "countryName" in countryDetails:
@@ -847,14 +817,12 @@ def addCountry(
 
 
 def addCustomerChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     customerId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "customer_id": customerId,
@@ -868,11 +836,10 @@ def addCustomerChangeHistory(
 
 
 def addCustomerDefaultAssessorial(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     customerId: int | None,
     assessorialId: int | None,
 ) -> int:
-    conn = connFactory()
     customerDefaultAssessorialRow = conn.select(
         "customer_default_assessorial",
         "id",
@@ -891,7 +858,7 @@ def addCustomerDefaultAssessorial(
 
 
 def addCustomer(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     customerId: int | None,
     branchId: int | None,
     customerName: str | None,
@@ -905,7 +872,6 @@ def addCustomer(
     isActive: bool | None,
     notes: bool | None,
 ) -> int:
-    conn = connFactory()
     customerRow = conn.select(
         "customer",
         "id",
@@ -945,13 +911,12 @@ def addCustomer(
 
 
 def addFax(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     countryCode: str | None,
     areaCode: str | None,
     faxNumber: str | None,
     faxExtension: str | None,
 ) -> int | None:
-    conn = connFactory()
     if areaCode == "" or faxNumber == "":
         return None
 
@@ -979,11 +944,10 @@ def addFax(
 
 
 def addHoliday(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     holidayName: str,
     holidayDate: str,
 ) -> int:
-    conn = connFactory()
     holidayRow = conn.select(
         "holiday",
         "id",
@@ -1005,14 +969,12 @@ def addHoliday(
 
 
 def addLocationChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     locationId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "location_id": locationId,
@@ -1026,11 +988,10 @@ def addLocationChangeHistory(
 
 
 def addLocationDefaultAssessorial(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     locationId: int | None,
     assessorialId: int | None,
 ) -> int:
-    conn = connFactory()
     locationDefaultAssessorialRow = conn.select(
         "location_default_assessorial",
         "id",
@@ -1049,7 +1010,7 @@ def addLocationDefaultAssessorial(
 
 
 def addLocation(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     locationId: int | None,
     branchId: int | None,
     companyName: str | None,
@@ -1066,7 +1027,6 @@ def addLocation(
     defaultWaitTime: int | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     locationRow = conn.select(
         "location",
         "id",
@@ -1112,14 +1072,13 @@ def addLocation(
 
 
 def addOrderAssessorial(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderId: int | None,
     assessorialId: int | None,
     parentType: str | None,
     basisCount: float | None,
     totalCharge: float | None,
 ) -> int:
-    conn = connFactory()
     orderAssessorialRow = conn.select(
         "order_assessorial",
         "id",
@@ -1147,12 +1106,11 @@ def addOrderAssessorial(
 
 
 def addOrderAttachment(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderId: int | None,
     attachmentPath: str | None,
     fileSize: float | None,
 ) -> int:
-    conn = connFactory()
     orderAttachmentRow = conn.select(
         "order_attachment",
         "id",
@@ -1175,13 +1133,12 @@ def addOrderAttachment(
 
 
 def addOrderChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-    conn = connFactory()
     data = {
         "order_id": orderId,
         "user_id": userId,
@@ -1194,7 +1151,7 @@ def addOrderChangeHistory(
 
 
 def addOrderDim(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderId: int | None,
     unitType: str | None,
     unitQuantity: int | None,
@@ -1204,7 +1161,6 @@ def addOrderDim(
     dimLength: int | None,
     dimWeight: float | None,
 ) -> int:
-    conn = connFactory()
     orderDimRow = conn.select(
         "order_dim",
         "id",
@@ -1238,13 +1194,12 @@ def addOrderDim(
 
 
 def addOrderDriver(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderId: int | None,
     driverUserId: int | None,
     orderLeg: str | None,
     driverRole: str | None,
 ) -> int:
-    conn = connFactory()
     orderDriverRow = conn.select(
         "order_driver",
         "id",
@@ -1269,14 +1224,12 @@ def addOrderDriver(
 
 
 def addOrderStatusChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderStatusId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "order_status_id": orderStatusId,
@@ -1290,7 +1243,7 @@ def addOrderStatusChangeHistory(
 
 
 def addOrderStatus(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderStatusId: int | None,
     sequenceNumber: int | None,
     orderStatusName: str | None,
@@ -1299,7 +1252,6 @@ def addOrderStatus(
     isActive: bool | None,
     branchId: int | None,
 ) -> int:
-    conn = connFactory()
     orderStatusRow = conn.select(
         "order_status",
         "id",
@@ -1327,11 +1279,10 @@ def addOrderStatus(
 
 
 def addOrderType(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderTypeId: int | None,
     orderTypeName: str | None,
 ) -> int:
-    conn = connFactory()
     orderTypeRow = conn.select(
         "order_type", "id", whereDetails={"order_type_name": orderTypeName}
     )
@@ -1347,7 +1298,7 @@ def addOrderType(
 
 
 def addOrder(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     orderId: int | None,
     branchId: int | None,
     orderTypeId: int | None,
@@ -1385,8 +1336,6 @@ def addOrder(
     isAutoAssessorials: bool | None,
     isWeightChargeCalculated: bool | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "branch_id": branchId,
@@ -1431,7 +1380,7 @@ def addOrder(
 
 
 def addOvernightMaintenanceHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     dateOvernightMaintenance: str | None,
     userId: int | None,
     openOrdersIn: int | None,
@@ -1465,8 +1414,6 @@ def addOvernightMaintenanceHistory(
     remainingOrderDriversOut: int | None,
     remainingOrderAttachmentsOut: int | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "date_overnight_maintenance": dateOvernightMaintenance,
@@ -1508,13 +1455,12 @@ def addOvernightMaintenanceHistory(
 
 
 def addPhone(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     countryCode: str | None,
     areaCode: str | None,
     phoneNumber: str | None,
     phoneExtension: str | None,
 ) -> int | None:
-    conn = connFactory()
     if areaCode == "" or phoneNumber == "":
         return None
 
@@ -1542,14 +1488,12 @@ def addPhone(
 
 
 def addPositionChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     positionId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "position_id": positionId,
@@ -1563,14 +1507,13 @@ def addPositionChangeHistory(
 
 
 def addPosition(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     positionId: int | None,
     positionName: str | None,
     securityLevel: int | None,
     isActive: bool | None,
     branchId: int | None,
 ) -> int:
-    conn = connFactory()
     positionRow = conn.select(
         "position",
         "id",
@@ -1595,11 +1538,10 @@ def addPosition(
 
 
 def addPostalCodeRegion(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     postalCodeId: int | None,
     regionId: int | None,
 ) -> int:
-    conn = connFactory()
     data = {
         "postal_code_id": postalCodeId,
         "region_id": regionId,
@@ -1610,7 +1552,7 @@ def addPostalCodeRegion(
 
 
 def addRateArea(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     rateId: int | None,
     area: str | None,
     rateMin: float | None,
@@ -1620,7 +1562,6 @@ def addRateArea(
     rate5000: float | None,
     rateMax: float | None,
 ) -> int:
-    conn = connFactory()
     rateAreaRow = conn.select(
         "rate_area",
         "id",
@@ -1654,14 +1595,12 @@ def addRateArea(
 
 
 def addRateChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     rateId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "rate_id": rateId,
@@ -1675,7 +1614,7 @@ def addRateChangeHistory(
 
 
 def addRate(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     rateId: int | None,
     rateName: str | None,
     branchId: int | None,
@@ -1684,7 +1623,6 @@ def addRate(
     dateAdded: str | None,
     addedByUserId: int | None,
 ) -> int:
-    conn = connFactory()
     rateRow = conn.select(
         "rate",
         "id",
@@ -1714,15 +1652,14 @@ def addRate(
 
 
 def addRegion(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     regionDetails: dict[str, str],
     countryDetails: dict[str, str],
 ) -> int | None:
-    conn = connFactory()
     if not regionDetails or not countryDetails:
         return None
 
-    countryId = addCountry(connFactory, countryDetails=countryDetails)
+    countryId = addCountry(conn, countryDetails=countryDetails)
     countrySelectInfo = conn.select("country", "iso_code_2", f"[id] = '{countryId}'")
     if not countrySelectInfo == None:
         countryIsoCode = countrySelectInfo[0].iso_code_2
@@ -1772,14 +1709,12 @@ def addRegion(
 
 
 def addSpecialChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     specialId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "special_id": specialId,
@@ -1793,7 +1728,7 @@ def addSpecialChangeHistory(
 
 
 def addSpecial(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     oldId: int | None,
     branchId: int | None,
     weekday: int | None,
@@ -1802,7 +1737,6 @@ def addSpecial(
     area: str | None,
     isActive: bool | None,
 ) -> int:
-    conn = connFactory()
     specialRow = conn.select(
         "special",
         "id",
@@ -1834,14 +1768,12 @@ def addSpecial(
 
 
 def addUserChangeHistory(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     userChangedId: int | None,
     userId: int | None,
     dateChanged: str | None,
     changes: str | None,
 ) -> int:
-
-    conn = connFactory()
 
     data = {
         "user_changed_id": userChangedId,
@@ -1855,7 +1787,7 @@ def addUserChangeHistory(
 
 
 def addUser(
-    connFactory: Callable[[], SqlServerConn],
+    conn: SqlServerConn,
     userId: int | None,
     username: str | None,
     email: str | None,
@@ -1882,7 +1814,6 @@ def addUser(
     isSecurityCoordinator: bool | None,
     isTsaTrainer: bool | None,
 ) -> int:
-    conn = connFactory()
     userRow = conn.select(
         "user",
         "id",

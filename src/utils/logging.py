@@ -61,8 +61,16 @@ class ErrorCountColumn(ProgressColumn):
         return Text(f"Errors: {errors}", style=style)
 
 
+class JsonEncoder(json.JSONEncoder):
+    def encode(self, obj: Any) -> str:
+        if isinstance(obj, str):
+            # Replace escaped newlines with actual newlines
+            return super().encode(obj.replace("\\n", "\n"))
+        return super().encode(obj)
+
+
 def createLogFile(htcConversionLogPath: str) -> None:
-    with open(htcConversionLogPath, "w") as logFile:
+    with open(htcConversionLogPath, "w", encoding="utf-8") as logFile:
         json.dump(
             {
                 "sqlCreation": {},
@@ -70,6 +78,8 @@ def createLogFile(htcConversionLogPath: str) -> None:
                 "errors": {"sqlCreation": [], "accessConversion": [], "other": []},
             },
             logFile,
+            indent=2,
+            cls=JsonEncoder,
         )
 
 
@@ -169,9 +179,17 @@ def logErrors(errorLogQueue: Queue, logPath: str):
             break
 
         # Expecting a tuple: (process, exception).
-        if isinstance(message, tuple) and len(message) == 3:
-            process, tableName, exception = message
-            errors[process].append((tableName, str(exception)))
+        if isinstance(message, tuple) and len(message) == 2:
+            process, errorDetail = message
+            if isinstance(errorDetail, tuple) and len(errorDetail) == 2:
+                tableName, exception = errorDetail
+                errors[process].append((tableName, exception))
+                console.print(f"[red]Error: {tableName}: {exception}[/red]")
+            elif isinstance(errorDetail, str):
+                errors[process].append(("Process Error", errorDetail))
+                console.print(f"[red]Error: {errorDetail}[/red]")
+            else:
+                console.print(f"[red]Invalid error detail: {errorDetail}[/red]")
         else:
             console.print(f"[red]Invalid message: {message}[/red]")
 
@@ -199,7 +217,7 @@ def writeSqlCreationLog(
             },
             htcConversionLogFile,
             indent=4,
-            ensure_ascii=False
+            ensure_ascii=False,
         )
 
 
@@ -280,29 +298,18 @@ def logSqlCreationProgress(
 
 
 def writeAccessConversionLog(
-    logPath: str, newAccessConversionData: dict[str, AccessConversionDetails]
+    htcConversionLogPath: str,
+    tableConversionData: dict[str, AccessConversionDetails],
 ) -> None:
-    with open(logPath, "r") as f:
-        data = json.load(f)
-
-    accessConversionData = data["accessConversion"]
-
-    for tableName, accessConversionDetails in newAccessConversionData.items():
-        # Update old values with new values if they are in the same table
-        accessConversionDict = asdict(accessConversionDetails)
-        accessConversionData[tableName] = accessConversionDict
-
-    with open(logPath, "w") as htcConversionLogFile:
-        json.dump(
-            {
-                "sqlCreation": data["sqlCreation"],
-                "accessConversion": accessConversionData,
-                "errors": data["errors"],
-            },
-            htcConversionLogFile,
-            indent=4,
-            ensure_ascii=False
-        )
+    with open(htcConversionLogPath, "r+", encoding="utf-8") as htcConversionLogFile:
+        data = json.load(htcConversionLogFile)
+        data["accessConversion"] = {
+            tableName: asdict(conversionDetails)
+            for tableName, conversionDetails in tableConversionData.items()
+        }
+        htcConversionLogFile.seek(0)
+        json.dump(data, htcConversionLogFile, indent=2, cls=JsonEncoder)
+        htcConversionLogFile.truncate()
 
 
 def logAccessConversionProgress(
