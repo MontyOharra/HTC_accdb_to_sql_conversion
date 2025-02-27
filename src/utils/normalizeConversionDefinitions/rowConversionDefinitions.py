@@ -9,10 +9,14 @@ class PyODBCRow(Protocol):
     def __getattr__(self, name: str) -> Any: ...
 
 
+def safeLower(value: Any) -> Any:
+    """Converts value to lowercase if it's a string, otherwise returns the original value"""
+    return value.lower() if isinstance(value, str) else value
+
+
 def convert_HTC000_G010_T010_Company_Info(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ) -> None:
-    print(row)
     sqlConn = sqlConnFactory()
     phoneId = addPhone(
         sqlConn,
@@ -42,19 +46,19 @@ def convert_HTC000_G010_T010_Company_Info(
     addCompany(
         sqlConn,
         companyId=row.CoID,
-        companyName=row.CoName.lower(),
+        companyName=safeLower(row.CoName),
         isActive=row.CoActive,
-        scac=row.CoSCAC.lower(),
+        scac=safeLower(row.CoSCAC),
         employerIdentificationNo=row.CoTaxID,
-        website=row.CoWebPage.lower(),
+        website=safeLower(row.CoWebPage),
         isTsaCompliant=row.CoTSACompliant,
-        airportCode=row.CoAirportCode.lower(),
-        cartageAgentType=row.CoCartageAgentType.lower(),
-        logoPath=row.CoLogo.lower(),
+        airportCode=safeLower(row.CoAirportCode),
+        cartageAgentType=row.CoCartageAgentType,
+        logoPath=safeLower(row.CoLogo),
         addressId=addressId,
         phoneId=phoneId,
         faxId=faxId,
-        email=row.CoOfcrEmail.lower(),
+        email=safeLower(row.CoOfcrEmail),
         notes=row.CoNotes,
     )
 
@@ -66,7 +70,7 @@ def convert_HTC000_G025_T010_Positions(
     addPosition(
         sqlConn,
         positionId=row.Posn_ID,
-        positionName=row.Posn_Title.lower(),
+        positionName=safeLower(row.Posn_Title),
         securityLevel=row.Posn_SecurityLevel,
         isActive=row.Posn_Status,
         branchId=row.Posn_BrID,
@@ -100,15 +104,18 @@ def convert_HTC000_G090_T010_Staff(
     )
     addressId = addAddress(
         sqlConn,
-        row.Staff_Home_Street1.lower(),
-        row.Staff_Home_Street2.lower(),
-        row.Staff_Home_City.lower(),
-        correctPostalCode(row.Staff_Home_Zip).lower(),
-        {"isoCode": row.Staff_Home_StAbbr.lower()},
-        {"isoCode3": row.Staff_Home_Country.lower()},
+        safeLower(row.Staff_Home_Street1),
+        safeLower(row.Staff_Home_Street2),
+        safeLower(row.Staff_Home_City),
+        safeLower(correctPostalCode(row.Staff_Home_Zip)),
+        {"isoCode": safeLower(row.Staff_Home_StAbbr)},
+        {"isoCode3": safeLower(row.Staff_Home_Country)},
     )
 
-    if row.Staff_Password.strip() == "":
+    if row.Staff_Password == None:
+        passwordHash = None
+        passwordSalt = None
+    elif row.Staff_Password.strip() == "":
         passwordHash = ""
         passwordSalt = ""
     else:
@@ -519,7 +526,7 @@ def convert_HTC300_G020_T030_Status_Update_History(
     addOrderStatusChangeHistory(
         sqlConn,
         dateChanged=row.STAT_UpdtDate,
-        orderStatusId=row.STAT_Seq,
+        orderStatusId=row.STAT_Seq if row.STAT_Seq else 0,
         userId=getUserIdFromUsername(sqlConn, row.STAT_UpdtLID),
         changes=(
             row.STAT_Changes.strip() if not row.STAT_Changes.strip() == "" else "N/A"
@@ -1233,7 +1240,7 @@ def convert_HTC300_G040_T030_Orders_Update_History(
         userId=getUserIdFromUsername(sqlConn, row.Orders_UpdtLID),
         dateChanged=row.Orders_UpdtDate,
         changes=(
-            row.Orders_Changes.strip()
+            safeLower(row.Orders_Changes.strip())
             if not row.Orders_Changes.strip() == ""
             else "N/A"
         ),
@@ -1244,12 +1251,12 @@ def convert_HTC300_G050_T010_Accessorials(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ) -> None:
     sqlConn = sqlConnFactory()
-    if row.AccType.lower() == "asrl":
-        if row.AccBasis.lower() == "lb":
+    if safeLower(row.AccType) == "asrl":
+        if safeLower(row.AccBasis) == "lb":
             basisType = "weight"
-        elif row.AccBasis.lower() == "fxd":
+        elif safeLower(row.AccBasis) == "fxd":
             basisType = "fixed"
-        elif row.AccBasis.lower() == "ask":
+        elif safeLower(row.AccBasis) == "ask":
             basisType = "prompt"
 
         addAssessorial(
@@ -1288,24 +1295,28 @@ def convert_HTC300_G050_T030_Accessorials_Update_History(
     sqlConn = sqlConnFactory()
     assessorialType = "asdsa"
 
-    if assessorialType.lower() == "asrl":
+    if safeLower(assessorialType) == "asrl":
         addAssessorialChangeHistory(
             sqlConn,
             assessorialId=row.Acc_AccID,
             userId=getUserIdFromUsername(sqlConn, row.Acc_UpdtLID),
             dateChanged=row.Acc_UpdtDate,
             changes=(
-                row.Acc_Changes.strip() if not row.Acc_Changes.strip() == "" else "N/A"
+                safeLower(row.Acc_Changes.strip())
+                if not row.Acc_Changes.strip() == ""
+                else "N/A"
             ),
         )
-    elif assessorialType.lower() == "spcl":
+    elif safeLower(assessorialType) == "spcl":
         addSpecialChangeHistory(
             sqlConn,
             specialId=row.Acc_AccID,
             userId=getUserIdFromUsername(sqlConn, row.Acc_UpdtLID),
             dateChanged=row.Acc_UpdtDate,
             changes=(
-                row.Acc_Changes.strip() if not row.Acc_Changes.strip() == "" else "N/A"
+                safeLower(row.Acc_Changes.strip())
+                if not row.Acc_Changes.strip() == ""
+                else "N/A"
             ),
         )
 

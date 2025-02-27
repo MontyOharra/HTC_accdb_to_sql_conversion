@@ -499,7 +499,7 @@ def addBranch(
         "cartage_agent_type": cartageAgentType,
         "fuel_service_charge": fuelServiceCharge,
         "transfer_rate": transferRate,
-        "international_air_dim_divisor": int | internationalAirDimDivisor,
+        "international_air_dim_divisor": internationalAirDimDivisor,
         "domestic_air_dim_divisor": domesticAirDimDivisor,
         "truck_dim_divisor": truckDimDivisor,
         "aci_low": aciLow,
@@ -660,7 +660,7 @@ def addCityPostalCode(
     cityRow = conn.select(
         "[city] INNER JOIN [city_region] ON [city].[id] = [city_region].[city_id]",
         "[city].[id] AS selected_city_id",
-        f"[city].[city_name] = '{cityName}' AND [city_region].[region_id] = '{regionId}'",
+        f"[city].[city_name] = '{cityName}' AND [city_region].[region_id] = {regionId}",
     )
     postalCodeRow = conn.select(
         "postal_code INNER JOIN postal_code_region ON [postal_code].id = [postal_code_region].[postal_code_id]",

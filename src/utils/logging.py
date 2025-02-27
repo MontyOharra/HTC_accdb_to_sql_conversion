@@ -184,10 +184,8 @@ def logErrors(errorLogQueue: Queue, logPath: str):
             if isinstance(errorDetail, tuple) and len(errorDetail) == 2:
                 tableName, exception = errorDetail
                 errors[process].append((tableName, exception))
-                console.print(f"[red]Error: {tableName}: {exception}[/red]")
             elif isinstance(errorDetail, str):
                 errors[process].append(("Process Error", errorDetail))
-                console.print(f"[red]Error: {errorDetail}[/red]")
             else:
                 console.print(f"[red]Invalid error detail: {errorDetail}[/red]")
         else:

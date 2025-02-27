@@ -20,3 +20,8 @@ cli:
 
 clear-logs:
 	rm -rf logs/*
+
+show-errors:
+	source env/Scripts/activate && \
+	python -m applications.cli.show_errors && \
+	deactivate

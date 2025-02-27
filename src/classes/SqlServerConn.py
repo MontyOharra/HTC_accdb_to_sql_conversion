@@ -213,7 +213,7 @@ class SqlServerConn:
             columnValues: list[Any] = [self.getFixedInsertValue(value, setNulls) if not isPasswordColumn else value for value in list(data.values())]
         
         if not insertId == None: # If insertId is provided, add it to the beginning of the field list
-            columnValues.insert(0, 'id')
+            columnNames.insert(0, 'id')
             columnValues.insert(0, insertId)
           
         columnNamesString: str = ', '.join(f'[{name}]' for name in columnNames)
@@ -255,6 +255,11 @@ class SqlServerConn:
             whereDetails - Can be a full where string, or dictionary of field names and values to filter by with equality.
         """
         # Create column selection string
+        tableNameClause : str
+        if 'INNER JOIN' in tableName:
+            tableNameClause = tableName
+        else:
+            tableNameClause = f"[{tableName}]"
         selectColumnsClause : str
         if isinstance(selectDetails, list): # Columns can be a single string, or a dictionary, with the key being the column name and value being its alias
             columns = []
@@ -296,7 +301,7 @@ class SqlServerConn:
         else:
           whereClause = ''
 
-        selectSql: str = f"SELECT {selectColumnsClause} FROM [{tableName}] {f'WHERE {whereClause}' if whereClause else ''}"
+        selectSql: str = f"SELECT {selectColumnsClause} FROM {tableNameClause} {f'WHERE {whereClause}' if whereClause else ''}"
         try:
           self.cursor.execute(selectSql)
           return self.cursor.fetchall()
