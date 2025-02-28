@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Any, Protocol
 
 ValidIndexType = Literal['clustered', 'nonclustered']
 
@@ -35,3 +35,6 @@ class AccessConversionDetails:
     totalRows: int
     rowsConverted: int
     errorCount: int
+    
+class PyODBCRow(Protocol):
+    def __getattr__(self, name: str) -> Any: ...

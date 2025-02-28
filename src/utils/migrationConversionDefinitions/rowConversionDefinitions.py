@@ -6,10 +6,12 @@ from collections.abc import Callable
 from functools import partial
 from typing import Any
 
+from src.types import PyODBCRow
+
 def getRowConversionFunction(
     accessConn : AccessConn, 
     accessTableName : str
-) -> Callable[[Callable[[], SqlServerConn], list[Any]], None]:
+) -> Callable[[Callable[[], SqlServerConn], PyODBCRow], None]:
     '''
         conn - Access connection object.
         accessTableName - Name of the table to get the conversion function for.

@@ -15,14 +15,18 @@ from ..helpers import generateAccessDbNameCache
 
 from src.classes.AccessConn import AccessConn
 
-from src.types import Field, Index, ForeignKey
+from src.types import Field, Index, ForeignKey, PyODBCRow
 from collections.abc import Callable
 
 def getMigrationDefinition(
     connFactories : dict[str, Callable[[], AccessConn]], 
     tableName : str, 
     accessDbNameCache : dict[str, str]
-) -> tuple[tuple[list[Field], list[Index], list[ForeignKey]], Callable[[Callable[[], SqlServerConn], list[Any]], None], str]:
+) -> tuple[
+        tuple[list[Field], list[Index], list[ForeignKey]], 
+        Callable[[Callable[[], SqlServerConn], PyODBCRow], None], 
+        str
+    ]:
     '''
         connFactories - Dictionary of connection factories for each database. The keys are the database names.
         tableName - Name of the table to get the definition for.
@@ -56,7 +60,7 @@ def getMigrationDefinitions(
     tablesToMigrate : list[str]
 ) -> tuple[
         dict[str, tuple[list[Field], list[Index], list[ForeignKey]]], 
-        dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], None]] 
+        dict[str, Callable[[Callable[[], SqlServerConn], PyODBCRow], None]] 
       ]:
     '''
         conversionThreads - Number of threads to use for conversion.

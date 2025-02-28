@@ -5,6 +5,8 @@ from src.utils.runConversion import runConversion
 from src.utils.migrationConversionDefinitions.tableConversionDefinitions import getMigrationDefinitions
 from src.utils.normalizeConversionDefinitions.tableConversionDefinitions import getNormalizationDefinitions
 
+from src.utils.normalizeConversionDefinitions.helpers import countryGet
+
 def main():
     try:
         connFactories = getDatabaseConnections(
@@ -33,7 +35,7 @@ if __name__ == "__main__":
     freeze_support()    
     
     try:
-      main()
+        main()
     except Exception as err:
         console.print(f"[red]Critical Error: {err}\n     {traceback.format_exc()}")
     finally:

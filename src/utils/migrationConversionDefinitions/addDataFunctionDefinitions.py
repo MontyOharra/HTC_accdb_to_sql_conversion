@@ -4,11 +4,12 @@ from src.classes.SqlServerConn import SqlServerConn
 from src.utils.helpers import generatePasswordHash, generatePasswordSalt
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Protocol
+from src.types import PyODBCRow
 
 def migrateAccessRow(
     sqlConnFactory : Callable[[], SqlServerConn], 
-    row : list[Any], 
+    row : PyODBCRow, 
     columnNames : list[str],
     accessTableName : str,
 ) -> None: 
@@ -21,7 +22,7 @@ def migrateAccessRow(
         Defines a process for converting a row from the Access table to the SQL table.
     '''
     sqlConn = sqlConnFactory()
-    data = {columnNames[i] : row[i] for i in range(len(columnNames))}
+    data = {columnNames[i] : getattr(row, columnNames[i]) for i in range(len(columnNames))}
     
     for columnName, columnValue in data.items():
         # If the column is null replace it with the null replacement value
@@ -34,11 +35,11 @@ def migrateAccessRow(
     
 def migrateUserRow(
     sqlConnFactory : Callable[[], SqlServerConn], 
-    row : list[Any], 
+    row : PyODBCRow, 
     columnNames : list[str]
 ) -> None:
     sqlConn = sqlConnFactory()
-    data = {columnNames[i] : row[i] for i in range(len(columnNames))}
+    data = {columnNames[i] : getattr(row, columnNames[i]) for i in range(len(columnNames))}
     
     for columnName, columnValue in data.items():
         # If the column is null replace it with the null replacement value

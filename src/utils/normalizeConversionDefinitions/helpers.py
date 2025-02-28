@@ -27,6 +27,7 @@ def countryGet(**kwargs : str) -> list[dict[str, str]]:
         ]
     except IndexError:
         return []
+    
       
 def getUserIdFromUsername(conn : SqlServerConn, username) -> int | None:
     if username == None:

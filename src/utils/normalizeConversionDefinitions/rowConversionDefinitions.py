@@ -1,12 +1,9 @@
 from typing import Any, Protocol, Callable
 from .addDataFunctionDefinitions import *
 from src.classes.SqlServerConn import SqlServerConn
+from src.types import PyODBCRow
 
 from src.utils.helpers import generatePasswordHash, generatePasswordSalt
-
-
-class PyODBCRow(Protocol):
-    def __getattr__(self, name: str) -> Any: ...
 
 
 def safeLower(value: Any) -> Any:
@@ -555,15 +552,15 @@ def convert_HTC300_G030_T010_Customers(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ) -> None:
     sqlConn = sqlConnFactory()
-    cusAddrLine1 = row.Cus_AddrLn1.strip().lower().replace("\xa0", " ")
-    cusAddrLine2 = row.Cus_AddrLn2.strip().lower().replace("\xa0", " ")
-    cusCity = row.Cus_City.strip().lower().replace("\xa0", " ").replace("'", "''")
-    cusZip = row.Cus_Zip.strip().lower().replace("\xa0", " ")
-    cusState = row.Cus_State.strip().lower().replace("\xa0", " ")
+    cusAddrLine1 = row.Cus_AddrLn1.replace("\xa0", " ").strip().lower()
+    cusAddrLine2 = row.Cus_AddrLn2.replace("\xa0", " ").strip().lower()
+    cusCity = row.Cus_City.replace("\xa0", " ").replace("'", "''").strip().lower()
+    cusZip = row.Cus_Zip.replace("\xa0", " ").strip().lower()
+    cusState = row.Cus_State.replace("\xa0", " ").strip().lower()
     if row.Cus_Country == None:
         cusCountry = ""
     else:
-        cusCountry = row.Cus_Country.strip().lower().replace("\xa0", " ")
+        cusCountry = row.Cus_Country.replace("\xa0", " ").strip().lower()
 
     if cusCity == "mississuaga":
         addressId = addAddress(
@@ -573,7 +570,7 @@ def convert_HTC300_G030_T010_Customers(
             cusCity,
             cusZip,
             {"isoCode": "ON"},
-            {"isoCode3": "CAN"},
+            {"isoCode2": "ca"},
         )
     else:
         if cusCountry == "":
@@ -585,7 +582,7 @@ def convert_HTC300_G030_T010_Customers(
                     cusCity,
                     cusZip,
                     {"isoCode": cusState},
-                    {"isoCode3": "CAN"},
+                    {"isoCode2": "ca"},
                 )
             else:
                 addressId = addAddress(
@@ -605,7 +602,7 @@ def convert_HTC300_G030_T010_Customers(
                 cusCity,
                 cusZip,
                 {"isoCode": cusState},
-                {"isoCode3": "CAN"},
+                {"isoCode2": "ca"},
             )
         else:
             addressId = addAddress(
@@ -1382,60 +1379,58 @@ def convert_HTC300_G060_T030_Addresses_Update_History(
 
 
 def convert_HTC300_G070_T010_Rates(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row: PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
+
 
 def convert_HTC300_G070_T030_Rates_Update_History(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row: PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
+
 
 def convert_HTC300_G080_T010_Agents(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row: PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
+
 
 def convert_HTC300_G080_T020_Agent_Certifications(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row : PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
+
 
 def convert_HTC300_G080_T030_Agents_Change_History(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row : PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
+
 
 def convert_HTC300_G090_T030_Staff_Chg_History(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row : PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
 
+
 def convert_HTC300_G100_T020_Certification_Trainers(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row : PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
 
 
 def convert_HTC300_G100_T021_Certifaction_Trainer_Change_History(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row : PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
 
 
 def convert_HTC300_G100_T030_CertificationTestCatalogChgHistory(
-    sqlConnFactory: Callable[[], SqlServerConn],
-    row: PyODBCRow
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
     pass
+
 
 def convert_HTC400_G040_T010A_Orders(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow

@@ -784,6 +784,7 @@ def addCountry(
         countryRow = conn.select("country", "id", f"[iso_code_2] = '{isoCode2}'")
         if countryRow:
             return countryRow[0].id
+        print(f'IsoCode2 : {isoCode2}')
         data = {
             "iso_code_2": isoCode2,
             "iso_code_3": countryGet(alpha_2=isoCode2)[0]["alpha_3"].lower(),
@@ -796,6 +797,7 @@ def addCountry(
         countryRow = conn.select("country", "id", f"[iso_code_3] = '{isoCode3}'")
         if countryRow:
             return countryRow[0].id
+        print(f'IsoCode3 : {isoCode3}')
         data = {
             "iso_code_2": countryGet(alpha_3=isoCode3)[0]["alpha_2"].lower(),
             "iso_code_3": isoCode3,

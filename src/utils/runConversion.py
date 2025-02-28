@@ -17,13 +17,13 @@ from src.classes.SqlServerConn import SqlServerConn
 
 from collections.abc import Callable
 from typing import Any
-from src.types import SqlCreationDetails, AccessConversionDetails, Field, Index, ForeignKey
+from src.types import SqlCreationDetails, AccessConversionDetails, Field, Index, ForeignKey, PyODBCRow
 
 def runConversion(
     connFactories : dict[str, Callable[[], AccessConn] | Callable[[], SqlServerConn]], 
     conversionThreads : int,
     sqlTableDefinitions : dict[str, tuple[list[Field], list[Index], list[ForeignKey]]],
-    accessConversionDefinitions : dict[str, Callable[[Callable[[], SqlServerConn], list[Any]], None]]
+    accessConversionDefinitions : dict[str, Callable[[Callable[[], SqlServerConn], PyODBCRow], None]]
 ) -> None:
     '''
         connFactories - Dictionary of connection factories for each database. The keys are the database names.
