@@ -1,6 +1,7 @@
 from concurrent.futures import as_completed, Future
 from pebble import ProcessPool
 from queue import Queue
+import traceback
 
 from src.classes.SqlServerConn import SqlServerConn
 
@@ -64,7 +65,7 @@ def createSqlTable(
         except Exception as err:
             # If there is an error, set creation status to "Failure" and add the error to the error log
             creationStatus = "Failure"
-            errorLogMessages.append((tableName, str(err)))
+            errorLogMessages.append((tableName, str(err) + traceback.format_exc()))
         try:
             # Add indexes
             for index in tableIndexes:
@@ -73,7 +74,7 @@ def createSqlTable(
         except Exception as err:
             # If there is an error, set indexes status to "Failure" and add the error to the error log
             indexesStatus = "Failure"
-            errorLogMessages.append((tableName, str(err)))
+            errorLogMessages.append((tableName, str(err) + traceback.format_exc()))
             
         # Create a SqlCreationDetails object with the creation and indexes status
         sqlCreationDetails : SqlCreationDetails = SqlCreationDetails(creationStatus, indexesStatus)
@@ -138,7 +139,7 @@ def createSqlTables(
                     raise
                 except Exception as err:
                     # If any other error occurs, send it to the error queue
-                    errorQueue.put(("sqlCreation", err))   
+                    errorQueue.put(("sqlCreation", str(err) + traceback.format_exc()))   
             # Return True to indicate that the process has completed
             return True
     except KeyboardInterrupt:
@@ -172,7 +173,7 @@ def convertAccessRows(
             except Exception as err:
                 rowErrors += 1
                 rowsConverted += 1
-                errorLogMessages.append((tableName, str(err)))
+                errorLogMessages.append((tableName, str(err) + traceback.format_exc()))
                 
         accessConversionDetails = {'rowsConverted' : rowsConverted, 'rowErrors' : rowErrors}   
         accessConversionData = (tableName, accessConversionDetails)          
@@ -223,7 +224,7 @@ def convertAccessTables(
                         f.cancel()
                     raise
                 except Exception as err:
-                    errorQueue.put(("accessConversion", err)) 
+                    errorQueue.put(("accessConversion", str(err) + traceback.format_exc())) 
             return True
     except KeyboardInterrupt:
         for f in futures:

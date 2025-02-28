@@ -25,10 +25,7 @@ def print_error_section(section_name: str, errors: list[Any]) -> None:
         return
 
     for err in errors:
-        if isinstance(err, (list, tuple)) and len(err) >= 2:
-            print(f"\nTable/Source: {err[0]}")
-            print(f"Error: {format_error_message(err[1])}")
-        elif isinstance(err, str):
+        if isinstance(err, str):
             print(f"\nError: {format_error_message(err)}")
         elif err:
             print(f"\nError: {format_error_message(str(err))}")

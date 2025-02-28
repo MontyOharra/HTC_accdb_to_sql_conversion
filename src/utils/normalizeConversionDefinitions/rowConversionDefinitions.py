@@ -396,17 +396,17 @@ def convert_HTC300_G000_T020_Branch_Info(
         branchId=row.BrID,
         branchName=row.BrName,
         companyId=row.BrCoID,
-        airportCode=row.BrAirportCode,
+        airportCode=safeLower(row.BrAirportCode),
         isActive=row.BrActive,
         cartageAgentType=row.BrCartageAgentType,
         fuelServiceCharge=row.BrFSC,
         transferRate=row.BrTrnsfrRate,
-        aciLow=row.BrLowACI,
-        aciHigh=row.BrHighACI,
+        aciLow=safeLower(row.BrLowACI),
+        aciHigh=safeLower(row.BrHighACI),
         addressId=addressId,
         phoneId=phoneId,
         faxId=faxId,
-        email=row.BrDispEmail,
+        email=safeLower(row.BrDispEmail),
         notes=row.BrNotes,
         internationalAirDimDivisor=row.BrDimFIntlAir,
         domesticAirDimDivisor=row.BrDimFNatlAir,
@@ -448,10 +448,10 @@ def convert_HTC300_G010_T010_DFW_ACI_Data(
     sqlConn = sqlConnFactory()
     cityId, postalCodeId = addCityPostalCode(
         sqlConn,
-        cityName=row.CITY_PLACE,
-        postalCode=row.ZIP_CODE,
-        regionDetails={"isoCode": row.STATE},
-        countryDetails={"countryName": row.Country},
+        cityName=safeLower(row.CITY_PLACE),
+        postalCode=safeLower(row.ZIP_CODE),
+        regionDetails={"isoCode": safeLower(row.STATE)},
+        countryDetails={"countryName": safeLower(row.Country)},
     )
 
     if not cityId or not postalCodeId:
@@ -472,7 +472,7 @@ def convert_HTC300_G010_T010_DFW_ACI_Data(
         postalCodeId=postalCodeId,
         airportCode=row.AIRP_CODE,
         carrier=row.CARRIER,
-        area=correctArea,
+        area=safeLower(correctArea),
         rateMin=row.RATE_MIN,
         rate100=row.RATE_100,
         rate1000=row.RATE_1000,
@@ -1351,7 +1351,7 @@ def convert_HTC300_G060_T010_Addresses(
     addLocation(
         sqlConn,
         locationId=row.FavID,
-        branchId=row.FavBRID,
+        branchId=row.FavBrID,
         companyName=row.FavCompany,
         locationName=row.FavLocnName,
         addressId=addressId,
@@ -1381,66 +1381,61 @@ def convert_HTC300_G060_T030_Addresses_Update_History(
     )
 
 
-def convert_HTC300_G070_T010_Rates(sqlConnFactory: Callable[[], SqlServerConn]):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G070_T010 Rates] Conversion.")
-
+def convert_HTC300_G070_T010_Rates(
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row: PyODBCRow
+):
+    pass
 
 def convert_HTC300_G070_T030_Rates_Update_History(
-    sqlConnFactory: Callable[[], SqlServerConn]
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row: PyODBCRow
 ):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G070_T030 Rates Update History] Conversion.")
+    pass
 
-
-def convert_HTC300_G080_T010_Agents(sqlConnFactory: Callable[[], SqlServerConn]):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G080_T010 Agents] Conversion.")
-
+def convert_HTC300_G080_T010_Agents(
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row: PyODBCRow
+):
+    pass
 
 def convert_HTC300_G080_T020_Agent_Certifications(
-    sqlConnFactory: Callable[[], SqlServerConn]
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row : PyODBCRow
 ):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G080_T020 Agent Certifications] Conversion.")
-
+    pass
 
 def convert_HTC300_G080_T030_Agents_Change_History(
-    sqlConnFactory: Callable[[], SqlServerConn]
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row : PyODBCRow
 ):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G080_T030 Agents Change History] Conversion.")
-
+    pass
 
 def convert_HTC300_G090_T030_Staff_Chg_History(
-    sqlConnFactory: Callable[[], SqlServerConn]
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row : PyODBCRow
 ):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G090_T030 Staff Chg History] Conversion.")
-
+    pass
 
 def convert_HTC300_G100_T020_Certification_Trainers(
-    sqlConnFactory: Callable[[], SqlServerConn]
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row : PyODBCRow
 ):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G100_T020 Certification Trainers] Conversion.")
+    pass
 
 
 def convert_HTC300_G100_T021_Certifaction_Trainer_Change_History(
-    sqlConnFactory: Callable[[], SqlServerConn]
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row : PyODBCRow
 ):
-    sqlConn = sqlConnFactory()
-    print(
-        "Completed [HTC300_G100_T021 Certifaction Trainer Change History] Conversion."
-    )
+    pass
 
 
 def convert_HTC300_G100_T030_CertificationTestCatalogChgHistory(
-    sqlConnFactory: Callable[[], SqlServerConn]
+    sqlConnFactory: Callable[[], SqlServerConn],
+    row: PyODBCRow
 ):
-    sqlConn = sqlConnFactory()
-    print("Completed [HTC300_G100_T030 CertificationTestCatalogChgHistory] Conversion.")
-
+    pass
 
 def convert_HTC400_G040_T010A_Orders(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow

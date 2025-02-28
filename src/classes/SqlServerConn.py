@@ -378,8 +378,6 @@ class SqlServerConn:
         # Create error message with SQL statement, error details, and detailed error message
         # Add indentation to custom errors.
         errorMessage += f'\n    SQL:\n        {info['sqlStatement']}'
-        errorMessage += '\n    Detailed Error Message:'
-        errorMessage += f'\n        {''.join([char if char != "\n" else '\n        ' for char in traceback.format_exc()])}'
         errorMessage += '\n'
         
         raise Exception(errorMessage)

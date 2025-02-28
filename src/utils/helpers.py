@@ -105,3 +105,6 @@ def generatePasswordHash(password: str, passwordSalt: str) -> str:
     # Combine password and salt, then hash
     salted_password = (password + passwordSalt).encode("utf-8")
     return hashlib.sha256(salted_password).hexdigest()
+
+def checkPassword(password: str, passwordSalt: str, passwordHash: str) -> bool:
+    return generatePasswordHash(password, passwordSalt) == passwordHash
