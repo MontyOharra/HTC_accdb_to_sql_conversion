@@ -1702,9 +1702,6 @@ def addRegion(
             regionName = 'united states'
         data = {
             'region_name': regionName,
-            '''"region_name": regionGet(code=f"{countryIsoCode}-{isoCode}".upper())[0][
-                "name"
-            ].lower(),'''
             "iso_code": isoCode,
             "country_id": countryId,
         }
