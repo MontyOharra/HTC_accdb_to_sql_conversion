@@ -569,7 +569,7 @@ def convert_HTC300_G030_T010_Customers(
             cusAddrLine2,
             cusCity,
             cusZip,
-            {"isoCode": "ON"},
+            {"isoCode": "on"},
             {"isoCode2": "ca"},
         )
     else:
@@ -629,7 +629,6 @@ def convert_HTC300_G030_T010_Customers(
         )
 
     defaultRateId = 1
-
     addCustomer(
         sqlConn,
         customerId=row.CustomerID,

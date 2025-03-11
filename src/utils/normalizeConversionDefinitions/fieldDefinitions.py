@@ -245,10 +245,10 @@ companyFields: List[Field] = [
 ]
     
 countryFields: List[Field] = [
-    Field(fieldName="id", fieldDetails="INTEGER NOT NULL IDENTITY(1, 1)", isPrimaryKey=True),
-    Field(fieldName="country_name", fieldDetails="NVARCHAR(63) UNIQUE NOT NULL", isPrimaryKey=False),
-    Field(fieldName="iso_code_2", fieldDetails="NVARCHAR(2) UNIQUE NOT NULL", isPrimaryKey=False),
-    Field(fieldName="iso_code_3", fieldDetails="NVARCHAR(3) UNIQUE NOT NULL", isPrimaryKey=False),
+    Field(fieldName="id", fieldDetails="INTEGER NOT NULL IDENTITY(1, 1)", isPrimaryKey=False),
+    Field(fieldName="country_name", fieldDetails="NVARCHAR(63) NOT NULL", isPrimaryKey=False),
+    Field(fieldName="iso_code_2", fieldDetails="NVARCHAR(2) NOT NULL", isPrimaryKey=False),
+    Field(fieldName="iso_code_3", fieldDetails="NVARCHAR(3) NOT NULL", isPrimaryKey=False),
 ]
 
 customerChangeHistoryFields: List[Field] = [

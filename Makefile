@@ -8,6 +8,11 @@ init:
 	pip install -r requirements.txt && \
 	deactivate
 
+testfile:
+	source env/Scripts/activate && \
+	python -u -m applications.test && \
+	deactivate
+
 cli-test:
 	source env/Scripts/activate && \
 	python -u -m applications.cli.test && \

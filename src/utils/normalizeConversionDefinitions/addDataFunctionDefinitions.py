@@ -775,7 +775,7 @@ def addCountry(
         data = {
             "iso_code_2": countryGet(name=countryName)[0]["alpha_2"].lower(),
             "iso_code_3": countryGet(name=countryName)[0]["alpha_3"].lower(),
-            "country_name": countryName,
+                "country_name": countryName,
         }
     elif "isoCode2" in countryDetails:
         isoCode2 = countryDetails["isoCode2"].lower().strip()
@@ -784,11 +784,10 @@ def addCountry(
         countryRow = conn.select("country", "id", f"[iso_code_2] = '{isoCode2}'")
         if countryRow:
             return countryRow[0].id
-        print(f'IsoCode2 : {isoCode2}')
         data = {
             "iso_code_2": isoCode2,
-            "iso_code_3": countryGet(alpha_2=isoCode2)[0]["alpha_3"].lower(),
-            "country_name": countryGet(alpha_2=isoCode2)[0]["name"].lower(),
+            "iso_code_3": countryGet(alpha_2=isoCode2.upper())[0]["alpha_3"].lower(),
+            "country_name": countryGet(alpha_2=isoCode2.upper())[0]["name"].lower(),
         }
     elif "isoCode3" in countryDetails:
         isoCode3 = countryDetails["isoCode3"].lower().strip()
@@ -797,11 +796,10 @@ def addCountry(
         countryRow = conn.select("country", "id", f"[iso_code_3] = '{isoCode3}'")
         if countryRow:
             return countryRow[0].id
-        print(f'IsoCode3 : {isoCode3}')
         data = {
-            "iso_code_2": countryGet(alpha_3=isoCode3)[0]["alpha_2"].lower(),
+            "iso_code_2": countryGet(alpha_3=isoCode3.upper())[0]["alpha_2"].lower(),
             "iso_code_3": isoCode3,
-            "country_name": countryGet(alpha_3=isoCode3)[0]["name"].lower(),
+            "country_name": countryGet(alpha_3=isoCode3.upper())[0]["name"].lower(),
         }
     elif "default" in countryDetails:
         countryRow = conn.select("country", "id", f"[iso_code_2] = 'us'")
@@ -1697,10 +1695,16 @@ def addRegion(
         )
         if regionRow:
             return regionRow[0].id
+        try:
+            regionName = regionGet(code=f"{countryIsoCode}-{isoCode}".upper())[0]["name"].lower()
+        except:
+            print(f"country: {countryIsoCode}, region: {isoCode}")
+            regionName = 'united states'
         data = {
-            "region_name": regionGet(code=f"{countryIsoCode}-{isoCode}".upper())[0][
+            'region_name': regionName,
+            '''"region_name": regionGet(code=f"{countryIsoCode}-{isoCode}".upper())[0][
                 "name"
-            ].lower(),
+            ].lower(),'''
             "iso_code": isoCode,
             "country_id": countryId,
         }

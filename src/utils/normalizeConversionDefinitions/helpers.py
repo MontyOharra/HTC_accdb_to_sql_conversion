@@ -28,6 +28,23 @@ def countryGet(**kwargs : str) -> list[dict[str, str]]:
     except IndexError:
         return []
     
+def printCountries() -> None:
+    for element in countries.data:
+        print(element)
+
+def printSubdivisions() -> None:
+    for element in subdivisions_countries.data:
+        print(element)
+
+def printFormattedAddress(
+    cusAddrLine1 : str,
+    cusAddrLine2 : str,
+    cusCity : str,
+    cusState : str,
+    cusCountry : str    
+) -> None:
+    print(f"Line 1:\n    {cusAddrLine1}\nLine 2:\n    {cusAddrLine2}\nCity:\n    {cusCity}\nState:\n    {cusState}\nCountry:\n    {cusCountry}\n\n")
+
       
 def getUserIdFromUsername(conn : SqlServerConn, username) -> int | None:
     if username == None:
