@@ -4,4 +4,4 @@ from isocodes import subdivisions_countries, countries
 
 
 if __name__ == '__main__':
-    printCountries()
+    print(countryGet(name='united states'))

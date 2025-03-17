@@ -2,9 +2,9 @@ import re
 
 from isocodes import subdivisions_countries, countries
 from collections import defaultdict
-
 from src.classes.SqlServerConn import SqlServerConn
-
+from datetime import datetime
+from geopy.geocoders import Nominatim
 
 def regionGet(**kwargs : str) -> list[dict[str, str]]: 
     try:
@@ -12,7 +12,7 @@ def regionGet(**kwargs : str) -> list[dict[str, str]]:
         return [
             element
             for element in subdivisions_countries.data
-            if key in element and kwargs[key] in element[key]
+            if key in element and kwargs[key].lower() == element[key].lower()
         ]
     except IndexError:
         return []
@@ -23,7 +23,7 @@ def countryGet(**kwargs : str) -> list[dict[str, str]]:
         return [
             element
             for element in countries.data
-            if key in element and kwargs[key] in element[key]
+            if key in element and kwargs[key].lower() == element[key].lower()
         ]
     except IndexError:
         return []
@@ -59,6 +59,42 @@ def getUserIdFromUsername(conn : SqlServerConn, username) -> int | None:
         return None
     
     return userRow[0].id
+
+def getRateIdFromRateName(
+    conn : SqlServerConn, 
+    rateName : str
+) -> int | None:
+    if rateName == None:
+        return None
+    if rateName.strip() == '':
+        return None
+    
+    rateName = rateName.strip()
+    rateRow = conn.select('rate', 'id', f"[rate_name] = '{rateName}'")
+    if not rateRow:
+        return None
+    
+    return rateRow[0].id
+  
+def getAddressLat(
+    addressLine1 : str, 
+    addressLine2 : str,
+    cityName : str, 
+    postalCode : str
+) -> float:
+    geolocator = Nominatim(user_agent="http://www.mapquestapi.com/search.html")
+    location = geolocator.geocode(f"{addressLine1} {addressLine2} {cityName} {postalCode}")
+    return location.latitude # type: ignore
+  
+def getAddressLng(
+    addressLine1 : str, 
+    addressLine2 : str,
+    cityName : str, 
+    postalCode : str
+) -> float:
+    geolocator = Nominatim(user_agent="http://www.mapquestapi.com/search.html")
+    location = geolocator.geocode(f"{addressLine1} {addressLine2} {cityName} {postalCode}")
+    return location.longitude # type: ignore
   
 def getCityLng(
     cityName: str,
@@ -72,7 +108,7 @@ def getCityLat(
 ) -> float :
     return 1
 
-def getPhonePlainNumber(phoneString):
+def getPhonePlainNumber(phoneString : str) -> str:
     if phoneString == None:
         return ''
     
@@ -84,7 +120,7 @@ def getPhonePlainNumber(phoneString):
   
 def isPhoneNumber(phoneString):
     return getPhonePlainNumber(phoneString) != ''
-from datetime import datetime
+
 
 def fixDate(date):
     if not date:

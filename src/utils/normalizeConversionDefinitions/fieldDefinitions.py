@@ -33,6 +33,8 @@ addressFields: List[Field] = [
     Field(fieldName="address_line_2", fieldDetails="NVARCHAR(63)", isPrimaryKey=False),
     Field(fieldName="city_id", fieldDetails="INTEGER NOT NULL", isPrimaryKey=False),
     Field(fieldName="postal_code_id", fieldDetails="INTEGER NOT NULL", isPrimaryKey=False),
+    Field(fieldName="lat", fieldDetails="FLOAT", isPrimaryKey=False),
+    Field(fieldName="lng", fieldDetails="FLOAT", isPrimaryKey=False),
 ]
 
 agentCertificationTestFields: List[Field] = [
@@ -216,6 +218,8 @@ cityRegionFields: List[Field] = [
 cityFields: List[Field] = [
     Field(fieldName="id", fieldDetails="INTEGER NOT NULL IDENTITY(1, 1)", isPrimaryKey=True),
     Field(fieldName="city_name", fieldDetails="NVARCHAR(63) NOT NULL", isPrimaryKey=False),
+    Field(fieldName="lat", fieldDetails="FLOAT", isPrimaryKey=False),
+    Field(fieldName="lng", fieldDetails="FLOAT", isPrimaryKey=False),
 ]
 
 companyChangeHistoryFields: List[Field] = [

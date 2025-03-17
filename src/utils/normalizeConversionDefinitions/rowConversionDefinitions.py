@@ -162,6 +162,10 @@ def convert_HTC010_G000_T000_US_Zip_Codes(
     sqlConn = sqlConnFactory()
     if row.ZipCodeType == "MILITARY":
         return
+    
+    city : str = safeLower(row.City)
+    postalCode : str = safeLower(row.Zipcode)
+    regionIsoCode : str = safeLower(row.State)
     if row.State in [
         "AB",
         "BC",
@@ -179,17 +183,17 @@ def convert_HTC010_G000_T000_US_Zip_Codes(
     ]:
         addCityPostalCode(
             sqlConn,
-            cityName=row.City,
-            postalCode=row.Zipcode,
-            regionDetails={"isoCode": row.State},
-            countryDetails={"countryName": "Canada"},
+            cityName=city,
+            postalCode=postalCode,
+            regionDetails={"isoCode": regionIsoCode},
+            countryDetails={"countryName": "canada"},
         )
     else:
         addCityPostalCode(
             sqlConn,
-            cityName=row.City,
-            postalCode=row.Zipcode,
-            regionDetails={"isoCode": row.State},
+            cityName=city,
+            postalCode=postalCode,
+            regionDetails={"isoCode": regionIsoCode},
             countryDetails={"default": ""},
         )
 
@@ -485,12 +489,7 @@ def convert_HTC300_G010_T030_ACI_Update_History(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ) -> None:
     sqlConn = sqlConnFactory()
-    userId = sqlConn.select("user", "id", f"[username] = '{row.ACI_UpdtLID}'")
-    if not userId:
-        userId = 0
-    else:
-        userId = userId[0].id
-
+    userId = getUserIdFromUsername(sqlConn, row.ACI_UpdtLID)
     addAciDataChangeHistory(
         sqlConn,
         aciDataId=row.ACI_LineNbr,
@@ -650,18 +649,17 @@ def convert_HTC300_G030_T030_Customer_Update_History(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ) -> None:
     sqlConn = sqlConnFactory()
-    if row.Cust_CoID == 1 and row.Cust_BrID == 1:
-        addCustomerChangeHistory(
-            sqlConn,
-            dateChanged=combineDateTime(row.Cust_UpdtDate, row.Cust_UpdtTime),
-            customerId=row.Cust_CustomerID,
-            userId=getUserIdFromUsername(sqlConn, row.Cust_UpdtLID),
-            changes=(
-                row.Cust_FldUpdts.strip()
-                if not row.Cust_FldUpdts.strip() == ""
-                else "N/A"
-            ),
-        )
+    addCustomerChangeHistory(
+        sqlConn,
+        dateChanged=combineDateTime(row.Cust_UpdtDate, row.Cust_UpdtTime),
+        customerId=row.Cust_CustomerID,
+        userId=getUserIdFromUsername(sqlConn, row.Cust_UpdtLID),
+        changes=(
+            row.Cust_FldUpdts.strip()
+            if not row.Cust_FldUpdts.strip() == ""
+            else "N/A"
+        ),
+    )
 
 
 def convert_HTC300_G040_T010A_Open_Orders(
@@ -671,11 +669,11 @@ def convert_HTC300_G040_T010A_Open_Orders(
     rateId = 1
     addOrder(
         sqlConn,
-        orderId=row.M_OrderNo,
-        branchId=row.M_BrID,
-        orderTypeId=row.M_OrderType,
-        customerId=row.M_CustomerID,
-        agentId=row.M_CustAgent if row.M_CustAgent else None,
+        orderId=row.M_OrderNo, #
+        branchId=row.M_BrID, #
+        orderTypeId=row.M_OrderType, #
+        customerId=row.M_CustomerID, #
+        agentId=row.M_CustAgent if row.M_CustAgent else None, #
         rateId=rateId,
         hawb=row.M_HAWB,
         mawb=row.M_MAWB,
@@ -1241,7 +1239,24 @@ def convert_HTC300_G040_T030_Orders_Update_History(
             else "N/A"
         ),
     )
-
+    
+def convert_HTC400_G040_T030_Orders_Update_History(
+    sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
+) -> None:
+    sqlConn = sqlConnFactory()
+    if not row.Orders_OrderNbr:
+        return
+    addOrderChangeHistory(
+        sqlConn,
+        orderId=row.Orders_OrderNbr,
+        userId=getUserIdFromUsername(sqlConn, row.Orders_UpdtLID),
+        dateChanged=row.Orders_UpdtDate,
+        changes=(
+            safeLower(row.Orders_Changes.strip())
+            if not row.Orders_Changes.strip() == ""
+            else "N/A"
+        ),
+    )
 
 def convert_HTC300_G050_T010_Accessorials(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
@@ -1321,15 +1336,54 @@ def convert_HTC300_G060_T010_Addresses(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ) -> None:
     sqlConn = sqlConnFactory()
-    addressId = addAddress(
-        sqlConn,
-        addressLine1=row.FavAddrLn1,
-        addressLine2=row.FavAddrLn2,
-        cityName=row.FavCity,
-        postalCode=row.FavZip,
-        regionDetails={"isoCode": row.FavState},
-        countryDetails={"isoCode3": row.FavCountry},
-    )
+    
+    addrLine1 = safeLower(row.FavAddrLn1).strip()
+    addrLine2 = safeLower(row.FavAddrLn2).strip()
+    cityName = safeLower(row.FavCity).strip()
+    postalCode = safeLower(row.FavZip).strip()
+    state = safeLower(row.FavState).strip()
+    country = safeLower(row.FavCountry).strip()
+    
+    if (len(country) == 2):
+        addressId = addAddress(
+            sqlConn,
+            addressLine1=addrLine1,
+            addressLine2=addrLine2,
+            cityName=cityName,
+            postalCode=postalCode,
+            regionDetails={"isoCode": state},
+            countryDetails={"isoCode2": country},
+        )
+    elif (len(country) == 3):
+        addressId = addAddress(
+            sqlConn,
+            addressLine1=addrLine1,
+            addressLine2=addrLine2,
+            cityName=cityName,
+            postalCode=postalCode,
+            regionDetails={"isoCode": state},
+            countryDetails={"isoCode3": country},
+        )
+    elif (len(country) == 0):
+        addressId = addAddress(
+            sqlConn,
+            addressLine1=addrLine1,
+            addressLine2=addrLine2, 
+            cityName=cityName,
+            postalCode=postalCode,
+            regionDetails={"isoCode": state},
+            countryDetails={"default": ""},
+        )
+    else:
+        addressId = addAddress(
+            sqlConn,
+            addressLine1=addrLine1,
+            addressLine2=addrLine2,
+            cityName=cityName,
+            postalCode=postalCode,
+            regionDetails={"isoCode": state},
+            countryDetails={"countryName": country},
+        )
 
     phoneId = addPhone(
         sqlConn,
@@ -1354,7 +1408,7 @@ def convert_HTC300_G060_T010_Addresses(
         aciId=row.FavACIID if row.FavACIID != 0 else None,
         contactFirstName=row.FavFirstName,
         contactLastName=row.FavLastName,
-        contactEmail=row.FavEMail,
+        contactEmail=safeLower(row.FavEMail),
         contactPhoneId=phoneId,
         isCarrier=row.FavCarrierYN,
         isLocal=row.FavLocalYN,
@@ -1380,13 +1434,41 @@ def convert_HTC300_G060_T030_Addresses_Update_History(
 def convert_HTC300_G070_T010_Rates(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
-    pass
+    sqlConn = sqlConnFactory()
+    rateId = addRate(
+        sqlConn,
+        rateName=row.Rate_Tariff,
+        branchId=row.Rate_BrID,
+        isDefault=row.Rate_DefaultValue,
+        isActive=row.Rate_Active,
+        dateAdded=row.Rate_Added,
+        addedByUserId=getUserIdFromUsername(sqlConn, row.Rate_AddedBy)
+    )
+    
+    addRateArea(
+        sqlConn,
+        rateId=rateId,
+        area=row.Rate_Area,
+        rateMin=row.RateMinimum,
+        rate100=row.W100,
+        rate1000=row.W1000,
+        rate2000=row.W2000,
+        rate5000=row.W5000,
+        rateMax=row.Rate_Cap
+    )
 
 
 def convert_HTC300_G070_T030_Rates_Update_History(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
-    pass
+    sqlConn = sqlConnFactory()
+    addRateChangeHistory(
+        sqlConn,
+        rateId=getRateIdFromRateName(sqlConn, row.Rates_Key),
+        userId=getUserIdFromUsername(sqlConn, row.Rates_UpdtLID),
+        dateChanged=row.Rates_UpdtDate,
+        changes=row.Rates_Changes.strip() if not row.Rates_Changes.strip() == "" else "N/A",
+    )
 
 
 def convert_HTC300_G080_T010_Agents(
@@ -1551,4 +1633,4 @@ def convert_HTC400_G900_T010_Archive_Event_Log(
     sqlConnFactory: Callable[[], SqlServerConn]
 ):
     sqlConn = sqlConnFactory()
-    print("Completed [HTC400_G900_T010 Archive Event Log] Conversion.")
+    

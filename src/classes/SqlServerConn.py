@@ -294,28 +294,87 @@ class SqlServerConn:
                         whereArgs.append(f"[{tableField}] = 0")
                 else: # In all unchecked cases, check equality with single quotations around value
                     whereArgs.append(f"[{tableField}] = '{fieldValue}'")
-                whereClause = ' AND '.join(whereArgs)
+            whereClause = ' AND '.join(whereArgs)
             
         elif type(whereDetails) == str:
-          whereClause = whereDetails
+            whereClause = whereDetails
         else:
-          whereClause = ''
+            whereClause = ''
 
         selectSql: str = f"SELECT {selectColumnsClause} FROM {tableNameClause} {f'WHERE {whereClause}' if whereClause else ''}"
         try:
-          self.cursor.execute(selectSql)
-          return self.cursor.fetchall()
+            self.cursor.execute(selectSql)
+            return self.cursor.fetchall()
         
         except Exception:
-          self.handleError(
-            action='select',
-            info={
-              'sqlStatement' : selectSql,
-              'tableName' : tableName,
-              'selectColumns' : selectDetails,
-              'whereDetails' : whereDetails
-            }
-          )
+            self.handleError(
+                action='select',
+                info={
+                    'sqlStatement' : selectSql,
+                    'tableName' : tableName,
+                    'selectColumns' : selectDetails,
+                    'whereDetails' : whereDetails
+                }
+            )
+          
+    def update(
+        self,
+        tableName : str,
+        updateDetails : dict[str, Any],
+        whereDetails : dict[str, Any]
+    ) -> None:
+        setClause : str = ''
+        setArgs = []
+        for tableField, fieldValue in updateDetails.items():
+            if fieldValue == None: # If value is None, check if NULL in SQL
+                setArgs.append(f"[{tableField}] = NULL")
+            elif type(fieldValue) == str: # If string type, double up any single quotations within the string for escaping
+                fieldValue = fieldValue.replace("'", "''")
+                setArgs.append(f"[{tableField}] = '{fieldValue}'")
+            elif type(fieldValue) == int or type(fieldValue) == float: # IF numeric type, do not include quotations
+                setArgs.append(f"[{tableField}] = {fieldValue}")
+            elif type(fieldValue) == bool: # If boolean type, convert to 1/0 instead of true/false
+                if fieldValue == True:
+                    setArgs.append(f"[{tableField}] = 1")
+                else:
+                    setArgs.append(f"[{tableField}] = 0")
+            else: # In all unchecked cases, check equality with single quotations around value
+                setArgs.append(f"[{tableField}] = '{fieldValue}'")
+            setClause = ', '.join(setArgs)
+            
+        whereClause : str = ''
+        whereArgs = []
+        for tableField, fieldValue in whereDetails.items():
+            if fieldValue == None: # If value is None, check if NULL in SQL
+                whereArgs.append(f"[{tableField}] IS NULL")
+            elif type(fieldValue) == str: # If string type, double up any single quotations within the string for escaping
+                fieldValue = fieldValue.replace("'", "''")
+                whereArgs.append(f"[{tableField}] LIKE '{fieldValue}'")
+            elif type(fieldValue) == int or type(fieldValue) == float: # IF numeric type, do not include quotations
+                whereArgs.append(f"[{tableField}] = {fieldValue}")
+            elif type(fieldValue) == bool: # If boolean type, convert to 1/0 instead of true/false
+                if fieldValue == True:
+                    whereArgs.append(f"[{tableField}] = 1")
+                else:
+                    whereArgs.append(f"[{tableField}] = 0")
+            else: # In all unchecked cases, check equality with single quotations around value
+                whereArgs.append(f"[{tableField}] = '{fieldValue}'")
+        whereClause = ' AND '.join(whereArgs)
+        
+        updateSql : str = f'UPDATE [{tableName}] SET {setClause} WHERE {whereClause}'
+        try:
+            self.cursor.execute(updateSql)
+        except Exception:
+            self.handleError(
+                action='update',
+                info={
+                    'sqlStatement' : updateSql,
+                    'tableName' : tableName,
+                    'updateDetails' : updateDetails,
+                    'whereDetails' : whereDetails
+                }
+            )
+    
     
     def getLastIdCreated(self, tableName : str) -> int:
         """
@@ -350,26 +409,30 @@ class SqlServerConn:
         if action == 'dropTable':
             errorMessage += f'Error dropping table [{info['tableName']}].\n'
         elif action == 'createTable':
-          errorMessage += f'Error creating table [{info['tableName']}].\n'
-        elif action == "addIndex":
-          errorMessage += f"Error adding index onto [{info['tableName']}].\n    Details:\n"
-          errorMessage += f"        Column Name: [{info['indexField']}], Index Type: '{info['indexType']}', Is Unique: {info['isUnique']}"
-        elif action == "addForeignKey":
-          errorMessage += f"Error adding foreign key to [{info['fromTableName']}].\n    Details:\n"
-          errorMessage += f'            From field: [{info['fromTableField']}], Target table: [{info['toTableName']}], Target table field: [{info['toTableField']}]'
+            errorMessage += f'Error creating table [{info['tableName']}].\n'
+        elif action == 'addIndex':
+            errorMessage += f"Error adding index onto [{info['tableName']}].\n    Details:\n"
+            errorMessage += f"        Column Name: [{info['indexField']}], Index Type: '{info['indexType']}', Is Unique: {info['isUnique']}"
+        elif action == 'addForeignKey':
+            errorMessage += f"Error adding foreign key to [{info['fromTableName']}].\n    Details:\n"
+            errorMessage += f'            From field: [{info['fromTableField']}], Target table: [{info['toTableName']}], Target table field: [{info['toTableField']}]'
         elif action == 'getColumnType':
-          errorMessage += f'Error getting column type from table: [{info['tableName']}], column: [{info['columnName']}].\n'
+            errorMessage += f'Error getting column type from table: [{info['tableName']}], column: [{info['columnName']}].\n'
         elif action == 'insertRow':
-          errorMessage += f'Error inserting row into [{info['tableName']}].\n    Details:\n'
-          for fieldName, fieldValue in info['data'].items():
-            errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
-        elif action == f"select":
-          errorMessage += f'Error selecting data from [{info['tableName']}].\n    Details:\n'
-          if (type(info['whereDetails']) == dict):  
-            for fieldName, fieldValue in info['whereDetails'].items():
-              errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
-          elif (type(info['whereDetails']) == str):
-            errorMessage += f'        Where Clause: [{info["whereDetails"]}]\n'
+            errorMessage += f'Error inserting row into [{info['tableName']}].\n    Details:\n'
+            for fieldName, fieldValue in info['data'].items():
+                errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
+        elif action == 'select':
+            errorMessage += f'Error selecting data from [{info['tableName']}].\n    Details:\n'
+            if (type(info['whereDetails']) == dict):  
+                for fieldName, fieldValue in info['whereDetails'].items():
+                    errorMessage += f'        Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]\n'
+            elif (type(info['whereDetails']) == str):
+                errorMessage += f'        Where Clause: [{info["whereDetails"]}]\n'
+        elif action == 'update':
+            errorMessage += f'Error updating data into [{info['tableName']}].\n    Details:\n'
+            for fieldName, fieldValue in info['updateDetails'].items():
+                errorMessage += f'       Name: [{fieldName}], Value: [{fieldValue}], Type: [{type(fieldValue)}]'
         elif action == 'getLastIdCreated':
           errorMessage += f'Error getting last id created in [{info['tableName']}].\n'
         else:

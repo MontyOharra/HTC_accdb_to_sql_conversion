@@ -761,10 +761,13 @@ def addCompany(
 
 
 def addCountry(
-    conn: SqlServerConn, countryDetails: dict[str, str]
+    conn: SqlServerConn, 
+    countryDetails: dict[str, str]
 ) -> int | None:
+    
     if not countryDetails:
         return None
+    
     if "countryName" in countryDetails:
         countryName = countryDetails["countryName"].lower().strip()
         if not countryName:
@@ -1615,7 +1618,6 @@ def addRateChangeHistory(
 
 def addRate(
     conn: SqlServerConn,
-    rateId: int | None,
     rateName: str | None,
     branchId: int | None,
     isDefault: bool | None,
@@ -1646,7 +1648,7 @@ def addRate(
         "date_added": dateAdded,
         "added_by_user_id": addedByUserId,
     }
-    conn.insertRow("rate", data, insertId=rateId)
+    conn.insertRow("rate", data)
 
     return conn.getLastIdCreated("rate")
 
