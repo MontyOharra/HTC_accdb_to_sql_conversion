@@ -173,11 +173,22 @@ sqlTableDefinitions = {
     "user": (userFields, userIndexes, userForeignKeys),
 }
 
-accessConversionDefinitions = {
+userAccessConversionDefinition = {
+    # "HTC000_G090_T010 Staff": convert_HTC000_G090_T010_Staff,
+}
+
+ratesAccessConversionDefinitions = {
+    ## "HTC300_G070_T010 Rates": convert_HTC300_G070_T010_Rates,
+    #       TODO: This table needs, upon startup, to create an id to rate name table
+    #             that can be used as a reference for all other tables referring to the rates
+    
+}
+
+finalAccessConversionDefinitions = {
     # "HTC000_G010_T010 Company Info": convert_HTC000_G010_T010_Company_Info,
     ## "HTC000_G025_T010 Positions": convert_HTC000_G025_T010_Positions,
     #       TODO: Figure out how to get the security levels translated into a role-based system instead 
-    # "HTC000_G090_T010 Staff": convert_HTC000_G090_T010_Staff,
+
     # "HTC010_G000_T000 OrderType Values": convert_HTC010_G000_T000_OrderType_Values,
     # "HTC010_G000_T000 US Zip Codes": convert_HTC010_G000_T000_US_Zip_Codes,
     ## "HTC010_G100_T010 CertificationTestCatalog": convert_HTC010_G100_T010_Certification_Test_Catalog,
@@ -238,18 +249,20 @@ accessConversionDefinitions = {
     ## "HTC300_G050_T030 Accessorials Update History": convert_HTC300_G050_T030_Accessorials_Update_History,
     ## "HTC300_G060_T010 Addresses": convert_HTC300_G060_T010_Addresses,
     ## "HTC300_G060_T030 Addresses Update History": convert_HTC300_G060_T030_Addresses_Update_History,
-    ## "HTC300_G070_T010 Rates": convert_HTC300_G070_T010_Rates,
-    #       TODO: This table needs, upon startup, to create an id to rate name table
-    #             that can be used as a reference for all other tables referring to the rates
     ## "HTC300_G070_T030 Rates Update History": convert_HTC300_G070_T030_Rates_Update_History,
     ## "HTC300_G080_T010 Agents": convert_HTC300_G080_T010_Agents,
-    ## "HTC300_G090_T030 Staff Chg History": convert_HTC300_G090_T030_Staff_Chg_History,
+     "HTC300_G090_T030 Staff Chg History": convert_HTC300_G090_T030_Staff_Chg_History,
     ## "HTC400_G900_T010 Archive Event Log": convert_HTC400_G900_T010_Archive_Event_Log,
 }
 
 
-def getNormalizationDefinitions() -> tuple[
-    dict[str, tuple[list[Field], list[Index], list[ForeignKey]]],
-    dict[str, Callable[[Callable[[], SqlServerConn], PyODBCRow], None]],
+def getNormalizationDefinitions() -> dict[ str,
+    dict[str, tuple[list[Field], list[Index], list[ForeignKey]]] |
+    dict[str, Callable[[Callable[[], SqlServerConn], PyODBCRow], None]]
 ]:
-    return (sqlTableDefinitions, accessConversionDefinitions)
+    return {
+        'sqlTableDefinitions' : sqlTableDefinitions,
+        'userAccessConversionDefinition' : userAccessConversionDefinition,
+        'ratesAccessConversionDefinition' : ratesAccessConversionDefinitions,
+        'finalAccessConversionDefinitions' : finalAccessConversionDefinitions
+    }

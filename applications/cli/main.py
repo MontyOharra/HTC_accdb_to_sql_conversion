@@ -18,7 +18,7 @@ def main():
         (sqlTableDefinitions, accessConversionDefinitions) = getMigrationDefinitions(conversionThreads, connFactories, tablesToMigrate)
         runConversion(connFactories, conversionThreads, sqlTableDefinitions, accessConversionDefinitions)
     elif conversionType == "normalize":
-        (sqlTableDefinitions, accessConversionDefinitions) = getNormalizationDefinitions()
+        (sqlTableDefinitions, userAccessConversionDefinitions, rataccessConversionDefinitions, accessConversionDefinitions) = getNormalizationDefinitions()
         runConversion(connFactories, conversionThreads, sqlTableDefinitions, accessConversionDefinitions)
     
 

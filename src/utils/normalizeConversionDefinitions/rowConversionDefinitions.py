@@ -1492,7 +1492,15 @@ def convert_HTC300_G080_T030_Agents_Change_History(
 def convert_HTC300_G090_T030_Staff_Chg_History(
     sqlConnFactory: Callable[[], SqlServerConn], row: PyODBCRow
 ):
-    pass
+    sqlConn = sqlConnFactory()
+    print(row.StaffChgBy)
+    addUserChangeHistory(
+        sqlConn,
+        userChangedId=row.StaffID,
+        userId=getUserIdFromUsername(sqlConn, row.StaffChgBy),
+        dateChanged=combineDateTime(row.StaffChgDate, row.StaffChgTime),
+        changes=row.StaffChgs
+    )
 
 
 def convert_HTC300_G100_T020_Certification_Trainers(
