@@ -30,3 +30,8 @@ show-errors:
 	source env/Scripts/activate && \
 	python -m applications.cli.show_errors && \
 	deactivate
+
+gui:
+	source env/Scripts/activate && \
+	python -m applications.gui.main && \
+	deactivate
